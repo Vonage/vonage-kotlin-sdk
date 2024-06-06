@@ -2,22 +2,12 @@ package org.example.com.vonage.client.kt
 
 import com.vonage.client.HttpConfig
 import com.vonage.client.VonageClient
-import com.vonage.client.messages.MessageRequest
-import com.vonage.client.verify2.Verify2Client
-import java.time.Instant
-import java.util.*
+import com.vonage.client.kt.Messages
 
 class Vonage constructor(init: VonageClient.Builder.() -> Unit) {
     private val vonageClient : VonageClient = VonageClient.builder().apply(init).build();
-    val verify: Verify2Client = vonageClient.verify2Client
-
-    fun sendMessage(request: MessageRequest) : UUID {
-        return vonageClient.messagesClient.sendMessage(request).messageUuid
-    }
-
-    fun simSwapDate(phoneNumber: String): Instant {
-        return vonageClient.simSwapClient.retrieveSimSwapDate(phoneNumber)
-    }
+    val verify = vonageClient.verify2Client
+    val messages = Messages(vonageClient.messagesClient)
 }
 
 fun VonageClient.Builder.authFromEnv() : VonageClient.Builder {
@@ -35,4 +25,10 @@ fun httpConfig(init: HttpConfig.Builder.() -> Unit): HttpConfig {
 
 private fun env(variable : String) : String {
     return System.getenv(variable)
+}
+
+fun main() {
+    val client = Vonage {
+        authFromEnv()
+    }
 }
