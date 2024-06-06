@@ -1,13 +1,18 @@
-package org.example.com.vonage.client.kt
+package com.vonage.client.kt
 
 import com.vonage.client.HttpConfig
 import com.vonage.client.VonageClient
-import com.vonage.client.kt.Messages
+import com.vonage.client.account.AccountClient
+import com.vonage.client.messages.MessagesClient
+import com.vonage.client.verify2.SmsWorkflow
+import com.vonage.client.verify2.Verify2Client
+import com.vonage.client.voice.VoiceClient
 
 class Vonage constructor(init: VonageClient.Builder.() -> Unit) {
     private val vonageClient : VonageClient = VonageClient.builder().apply(init).build();
-    val verify = vonageClient.verify2Client
     val messages = Messages(vonageClient.messagesClient)
+    val verify: Verify2Client = vonageClient.verify2Client
+
 }
 
 fun VonageClient.Builder.authFromEnv() : VonageClient.Builder {
@@ -23,12 +28,10 @@ fun httpConfig(init: HttpConfig.Builder.() -> Unit): HttpConfig {
     return HttpConfig.builder().apply(init).build()
 }
 
-private fun env(variable : String) : String {
+private fun env(variable: String) : String? {
     return System.getenv(variable)
 }
 
 fun main() {
-    val client = Vonage {
-        authFromEnv()
-    }
+    val client = Vonage { authFromEnv() }
 }

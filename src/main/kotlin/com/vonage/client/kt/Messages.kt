@@ -8,17 +8,17 @@ import com.vonage.client.messages.messenger.*
 import com.vonage.client.messages.viber.*
 import java.util.UUID
 
-class Messages (private val messagesClient: MessagesClient) {
-    fun send(message : MessageRequest) : UUID {
-        return messagesClient.sendMessage(message).messageUuid
+class Messages(private val client: MessagesClient) {
+    fun send(message: MessageRequest): UUID {
+        return client.sendMessage(message).messageUuid
     }
 }
 
-fun sms(init: SmsTextRequest.Builder.() -> Unit): SmsTextRequest {
+fun smsText(init: SmsTextRequest.Builder.() -> Unit): SmsTextRequest {
     return SmsTextRequest.builder().apply(init).build()
 }
 
-fun vcard(init: MmsVcardRequest.Builder.() -> Unit): MmsVcardRequest {
+fun mmsVcard(init: MmsVcardRequest.Builder.() -> Unit): MmsVcardRequest {
     return MmsVcardRequest.builder().apply(init).build()
 }
 
