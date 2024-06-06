@@ -32,8 +32,7 @@
   </developers>
 
   <scm>
-    <connection>scm:git@github.com:Vonage/vonage-kotlin-sdk</connection>
-    <developerConnection>${scm.connection}</developerConnection>
+    <developerConnection>${project.scm.connection}</developerConnection>
     <url>${project.url}</url>
   </scm>
   <issueManagement>
@@ -43,12 +42,14 @@
 
   <properties>
     <nexusUrl>https://oss.sonatype.org</nexusUrl>
+    <project.scm.connection>scm:git@github.com:Vonage/vonage-kotlin-sdk</project.scm.connection>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>8</java.version>
     <kotlin.version>2.0.0</kotlin.version>
     <kotlin.compiler.languageVersion>${kotlin.version}</kotlin.compiler.languageVersion>
-    <maven.compiler.release>${java.version}</maven.compiler.release>
+    <kotlin.compiler.apiVersion>${kotlin.version}</kotlin.compiler.apiVersion>
     <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
+    <maven.compiler.release>${java.version}</maven.compiler.release>
   </properties>
 
   <dependencies>
@@ -84,10 +85,46 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>3.6.3</version>
+                </requireMavenVersion>
+                <requireJavaVersion>
+                  <version>${java.version}</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>kotlin-maven-plugin</artifactId>
         <groupId>org.jetbrains.kotlin</groupId>
         <version>${kotlin.version}</version>
         <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.jetbrains.dokka</groupId>
+        <artifactId>dokka-maven-plugin</artifactId>
+        <version>1.9.20</version>
+        <executions>
+          <execution>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>dokka</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
@@ -96,23 +133,26 @@
           <execution>
             <id>attach-sources</id>
             <goals>
-              <goal>jar-no-fork</goal>
+              <goal>jar</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.7.0</version>
-        <configuration>
-          <linksource>true</linksource>
-        </configuration>
+        <version>3.6.2</version>
         <executions>
           <execution>
-            <id>attach-javadocs</id>
+            <id>dokka-jar</id>
+            <phase>package</phase>
             <goals>
               <goal>jar</goal>
             </goals>
+            <configuration>
+              <classifier>dokka</classifier>
+              <classesDirectory>${project.build.directory}/dokka</classesDirectory>
+              <skipIfEmpty>true</skipIfEmpty>
+            </configuration>
           </execution>
         </executions>
       </plugin>
