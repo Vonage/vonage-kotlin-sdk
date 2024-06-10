@@ -15,7 +15,7 @@ class Vonage constructor(init: VonageClient.Builder.() -> Unit) {
 
 }
 
-fun VonageClient.Builder.authFromEnv() : VonageClient.Builder {
+fun VonageClient.Builder.authFromEnv(): VonageClient.Builder {
     apiKey(env("VONAGE_API_KEY"))
     apiSecret(env("VONAGE_API_SECRET"))
     signatureSecret(env("VONAGE_SIGNATURE_SECRET"))
@@ -24,14 +24,10 @@ fun VonageClient.Builder.authFromEnv() : VonageClient.Builder {
     return this
 }
 
-fun httpConfig(init: HttpConfig.Builder.() -> Unit): HttpConfig {
-    return HttpConfig.builder().apply(init).build()
+fun VonageClient.Builder.httpConfig(init: HttpConfig.Builder.() -> Unit): VonageClient.Builder {
+    return this.httpConfig(HttpConfig.builder().apply(init).build())
 }
 
 private fun env(variable: String) : String? {
     return System.getenv(variable)
-}
-
-fun main() {
-    val client = Vonage { authFromEnv() }
 }
