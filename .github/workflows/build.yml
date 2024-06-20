@@ -9,9 +9,9 @@ permissions:
   actions: write
   checks: write
   contents: read
-  deployments: read
+  deployments: none
   issues: write
-  discussions: read
+  discussions: none
   packages: none
   pages: read
   pull-requests: write
@@ -25,15 +25,15 @@ jobs:
       fail-fast: false
       matrix:
         java: [8, 17, 22]
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v4
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'corretto'
           java-version: ${{ matrix.java }}
           cache: maven
       - name: Compile with Maven
-        run: mvn --batch-mode verify
+        run: mvn --batch-mode clean verify
