@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach
 abstract class AbstractTest {
     val port = 8081
     val wiremock: WireMockServer = WireMockServer(
-        options().port(port).notifier(ConsoleNotifier(true))
+        options().port(port).notifier(ConsoleNotifier(false))
     )
 
     val vonageClient = Vonage {
