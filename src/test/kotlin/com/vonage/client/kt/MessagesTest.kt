@@ -3,7 +3,9 @@ package com.vonage.client.kt
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.marcinziolo.kotlin.wiremock.*
 import com.vonage.client.messages.MessageRequest
+import com.vonage.client.messages.viber.Category
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -19,7 +21,10 @@ class MessagesTest : AbstractTest() {
     val text = "Hello, World!"
     val caption = "Additional text to accompany the media"
     val imageUrl = "https://example.com/image.jpg"
-    val captionMap = mutableMapOf("caption" to caption)
+    val audioUrl = "https://example.com/audio.mp3"
+    val videoUrl = "https://example.com/video.mp4"
+    val fileUrl = "https://example.com/file.pdf"
+    val captionMap = mapOf("caption" to caption)
 
     private fun mockResponse(expectedBodyParams: Map<String, Any>) {
         wiremock.post {
@@ -62,8 +67,18 @@ class MessagesTest : AbstractTest() {
     private fun imageBody(channel: String, additionalParams : Map<String, Any>? = null): Map<String, Any> =
         mediaBody(channel, "image", imageUrl, additionalParams)
 
+    private fun audioBody(channel: String, additionalParams : Map<String, Any>? = null): Map<String, Any> =
+        mediaBody(channel, "audio", audioUrl, additionalParams)
+
+    private fun videoBody(channel: String, additionalParams : Map<String, Any>? = null): Map<String, Any> =
+        mediaBody(channel, "video", videoUrl, additionalParams)
+
+    private fun fileBody(channel: String, additionalParams : Map<String, Any>? = null): Map<String, Any> =
+        mediaBody(channel, "file", fileUrl, additionalParams)
+
+
     @Test
-    fun `send SMS`() {
+    fun `send SMS text`() {
         testSend(textBody("sms"), smsText {
             from(fromNumber); to(toNumber); text(text)
         })
@@ -124,5 +139,109 @@ class MessagesTest : AbstractTest() {
         testSend(imageBody(messengerChannel), messengerImage {
             from(fromNumber); to(toNumber); url(imageUrl)
         })
+    }
+
+    @Test
+    fun `send MMS audio`() {
+        testSend(audioBody(mmsChannel, captionMap), mmsAudio {
+            from(fromNumber); to(toNumber); url(audioUrl); caption(caption)
+        })
+    }
+
+    @Test
+    fun `send WhatsApp audio`() {
+        testSend(audioBody(whatsappChannel), whatsappAudio {
+            from(fromNumber); to(toNumber); url(audioUrl)
+        })
+    }
+
+    @Test
+    fun `send Messenger audio`() {
+        testSend(audioBody(messengerChannel), messengerAudio {
+            from(fromNumber); to(toNumber); url(audioUrl)
+        })
+    }
+
+    @Test
+    fun `send MMS video`() {
+        testSend(videoBody(mmsChannel, captionMap), mmsVideo {
+            from(fromNumber); to(toNumber); url(videoUrl); caption(caption)
+        })
+    }
+
+    @Test
+    fun `send WhatsApp video`() {
+        testSend(videoBody(whatsappChannel, captionMap), whatsappVideo {
+            from(fromNumber); to(toNumber); url(videoUrl); caption(caption)
+        })
+    }
+
+    @Test
+    fun `send Viber video`() {
+        val duration = 23
+        val fileSize = 7
+        val ttl = 90
+        val thumbUrl = "https://example.com/file1.jpg"
+        testSend(videoBody(viberChannel,
+            captionMap + mapOf("thumb_url" to thumbUrl)) + mapOf(viberChannel to mapOf(
+                    "category" to "transaction",
+                    "duration" to duration,
+                    "file_size" to fileSize,
+                    "ttl" to ttl
+            )), viberVideo {
+                from(fromNumber); to(toNumber); url(videoUrl); caption(caption);
+                category(Category.TRANSACTION)
+                duration(duration); ttl(ttl); fileSize(fileSize); thumbUrl(thumbUrl)
+            }
+        )
+    }
+
+    @Test
+    fun `send Messenger video`() {
+        testSend(videoBody(messengerChannel), messengerVideo {
+            from(fromNumber); to(toNumber); url(videoUrl)
+        })
+    }
+
+    @Test
+    fun `send WhatsApp file`() {
+        val fileName = "Document.pdf"
+        testSend(fileBody(whatsappChannel, captionMap + mapOf("name" to fileName)), whatsappFile {
+            from(fromNumber); to(toNumber); url(fileUrl); caption(caption); name(fileName)
+        })
+    }
+
+    @Test
+    fun `send Viber file`() {
+        val fileName = "report.docx"
+        testSend(fileBody(viberChannel, mapOf("name" to fileName)), viberFile {
+            from(fromNumber); to(toNumber); url(fileUrl); name(fileName)
+        })
+    }
+
+    @Test
+    fun `send Messenger file`() {
+        testSend(fileBody(messengerChannel), messengerFile {
+            from(fromNumber); to(toNumber); url(fileUrl)
+        })
+    }
+
+    @Test
+    fun `send WhatsApp sticker`() {
+        val stickerType = "sticker"
+        val stickerUrl = "https://example.com/image.webp"
+        testSend(mediaBody(whatsappChannel, stickerType, stickerUrl), whatsappSticker {
+            from(fromNumber); to(toNumber); url(stickerUrl)
+        })
+
+        val stickerId = "aabb7a31-1d1f-4755-a574-2971d831cd5b"
+        assertEquals(UUID.fromString(stickerId), whatsappSticker {
+                from(fromNumber); to(toNumber); id(stickerId)
+            }.sticker.id
+        )
+
+        assertThrows<IllegalStateException> { whatsappSticker {
+            from(fromNumber); to(toNumber); id(stickerId); url(stickerUrl)
+        } }
     }
 }
