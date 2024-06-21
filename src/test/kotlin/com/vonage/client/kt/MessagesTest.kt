@@ -368,4 +368,49 @@ class MessagesTest : AbstractTest() {
             catalogId(catalogId); productRetailerId(productId)
         })
     }
+
+    @Test
+    fun `send WhatsApp multi product`() {
+        val headerText = "Recommended"
+        val bodyText = "Check out our cool range of products"
+        val footerText = "Sale now on! Hurry"
+        val catalogId = "12345"
+        val title1 = "Fruits"
+        val products1 = listOf("Apples", "Bananas", "Pears", "Grapes", "Satsumas")
+        val title2 = "Misc."
+        val product2 = UUID.randomUUID().toString()
+
+
+        val params = whatsappCustomBody(mapOf(
+            "type" to "interactive",
+            "interactive" to mapOf(
+                "type" to "product_list",
+                "header" to mapOf("type" to "text", "text" to headerText),
+                "body" to mapOf("text" to bodyText),
+                "footer" to mapOf("text" to footerText),
+                "action" to mapOf(
+                    "catalog_id" to catalogId,
+                    "sections" to listOf(
+                        mapOf(
+                            "title" to title1,
+                            "product_items" to products1.map { product ->
+                                mapOf("product_retailer_id" to product)
+                            }
+                        ),
+                        mapOf(
+                            "title" to title2,
+                            "product_items" to listOf(mapOf("product_retailer_id" to product2))
+                        )
+                    )
+                )
+            )
+        ))
+
+        testSend(params, whatsappMultiProduct {
+            from(fromNumber); to(toNumber); catalogId(catalogId)
+            headerText(headerText); bodyText(bodyText); footerText(footerText)
+            addProductsSection(title1, products1)
+            addProductsSection(title2, product2)
+        })
+    }
 }
