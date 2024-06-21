@@ -3,28 +3,31 @@ package com.vonage.client.kt
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.marcinziolo.kotlin.wiremock.*
 import com.vonage.client.messages.MessageRequest
+import com.vonage.client.messages.MessagesVersion
 import com.vonage.client.messages.viber.Category
+import com.vonage.client.messages.whatsapp.Locale
+import com.vonage.client.messages.whatsapp.Policy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.assertEquals
 
 class MessagesTest : AbstractTest() {
-    val messagesClient = vonageClient.messages
-    val messageUuid = UUID.fromString("aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab")
-    val mmsChannel = "mms"
-    val whatsappChannel = "whatsapp"
-    val viberChannel = "viber_service"
-    val messengerChannel = "messenger"
-    val fromNumber = "447700900001"
-    val toNumber = "447712345689"
-    val text = "Hello, World!"
-    val caption = "Additional text to accompany the media"
-    val imageUrl = "https://example.com/image.jpg"
-    val audioUrl = "https://example.com/audio.mp3"
-    val videoUrl = "https://example.com/video.mp4"
-    val fileUrl = "https://example.com/file.pdf"
-    val captionMap = mapOf("caption" to caption)
+    private val messagesClient = vonageClient.messages
+    private val messageUuid = UUID.fromString("aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab")
+    private val mmsChannel = "mms"
+    private val whatsappChannel = "whatsapp"
+    private val viberChannel = "viber_service"
+    private val messengerChannel = "messenger"
+    private val fromNumber = "447700900001"
+    private val toNumber = "447712345689"
+    private val text = "Hello, World!"
+    private val caption = "Additional text to accompany the media"
+    private val imageUrl = "https://example.com/image.jpg"
+    private val audioUrl = "https://example.com/audio.mp3"
+    private val videoUrl = "https://example.com/video.mp4"
+    private val fileUrl = "https://example.com/file.pdf"
+    private val captionMap = mapOf("caption" to caption)
 
     private fun mockResponse(expectedBodyParams: Map<String, Any>) {
         wiremock.post {
@@ -58,8 +61,8 @@ class MessagesTest : AbstractTest() {
             "channel" to channel
         )
 
-    private fun textBody(channel: String): Map<String, Any> =
-        baseBody("text", channel) + mapOf("text" to text)
+    private fun textBody(channel: String, additionalParams: Map<String, Any> = mapOf()): Map<String, Any> =
+        baseBody("text", channel) + mapOf("text" to text) + additionalParams
 
     private fun mediaBody(channel: String, messageType: String, url: String, additionalParams: Map<String, Any>? = null): Map<String, Any> =
         baseBody(messageType, channel) + mapOf(messageType to mapOf("url" to url) + (additionalParams ?: mapOf()))
@@ -76,11 +79,37 @@ class MessagesTest : AbstractTest() {
     private fun fileBody(channel: String, additionalParams : Map<String, Any>? = null): Map<String, Any> =
         mediaBody(channel, "file", fileUrl, additionalParams)
 
+    private fun whatsappCustomBody(params: Map<String, Any>): Map<String, Any> =
+        baseBody("custom", whatsappChannel) + mapOf("custom" to params)
 
     @Test
-    fun `send SMS text`() {
+    fun `send SMS text all parameters`() {
+        val clientRef = "My reference"
+        val webhookUrl = "https://example.com/status"
+        val ttl = 9000
+        val contentId = "1107457532145798767"
+        val entityId = "1101456324675322134"
+
+        testSend(textBody("sms", mapOf(
+            "client_ref" to clientRef,
+            "ttl" to ttl,
+            "webhook_url" to webhookUrl,
+            "webhook_version" to "v0.1",
+            "sms" to mapOf(
+                "content_id" to contentId,
+                "entity_id" to entityId
+            )
+        )), smsText {
+            from(fromNumber); to(toNumber); text(text); ttl(ttl);
+            clientRef(clientRef); contentId(contentId); entityId(entityId)
+            webhookUrl(webhookUrl); webhookVersion(MessagesVersion.V0_1)
+        })
+    }
+
+    @Test
+    fun `send SMS text required parameters`() {
         testSend(textBody("sms"), smsText {
-            from(fromNumber); to(toNumber); text(text)
+            from(fromNumber); to(toNumber); text(text);
         })
     }
 
@@ -190,8 +219,8 @@ class MessagesTest : AbstractTest() {
                     "ttl" to ttl
             )), viberVideo {
                 from(fromNumber); to(toNumber); url(videoUrl); caption(caption);
-                category(Category.TRANSACTION)
-                duration(duration); ttl(ttl); fileSize(fileSize); thumbUrl(thumbUrl)
+                category(Category.TRANSACTION); duration(duration); ttl(ttl);
+                fileSize(fileSize); thumbUrl(thumbUrl)
             }
         )
     }
@@ -243,5 +272,100 @@ class MessagesTest : AbstractTest() {
         assertThrows<IllegalStateException> { whatsappSticker {
             from(fromNumber); to(toNumber); id(stickerId); url(stickerUrl)
         } }
+    }
+
+    @Test
+    fun `send WhatsApp template`() {
+        val messageContext = UUID.randomUUID().toString()
+        val name = "9b6b4fcb_da19_4a26_8fe8_78074a91b584:verify"
+        val templateParams = listOf("Un", "Deux", "Trois")
+
+        val expectedBodyParams = baseBody("template", whatsappChannel) + mapOf(
+            "webhook_version" to "v1",
+            "context" to mapOf("message_uuid" to messageContext),
+            "whatsapp" to mapOf(
+                "policy" to "deterministic",
+                "locale" to "fa"
+            ),
+            "template" to mapOf(
+                "name" to name,
+                "parameters" to templateParams
+            )
+        )
+
+        val request = whatsappTemplate {
+            from(fromNumber); to(toNumber); webhookVersion(MessagesVersion.V1)
+            policy(Policy.DETERMINISTIC); locale(Locale.PERSIAN)
+            contextMessageId(messageContext); name(name); parameters(templateParams)
+        }
+
+        testSend(expectedBodyParams, request)
+    }
+
+    @Test
+    fun `send WhatsApp custom`() {
+        val customParams = mapOf(
+            "type" to "contacts",
+            "contacts" to listOf(
+                mapOf(
+                    "addresses" to listOf(mapOf(
+                        "city" to "Birmingham"
+                    ))
+                )
+            )
+        )
+
+        testSend(whatsappCustomBody(customParams), whatsappCustom {
+            from(fromNumber); to(toNumber); custom(customParams)
+        })
+    }
+
+    @Test
+    fun `send WhatsApp location`() {
+        val latitude = 51.5356396; val longitude = -0.1077174
+        val name = "Business Design Centre"
+        val address = "52 Upper St, London N1 0QH"
+
+        val params = whatsappCustomBody(mapOf(
+                "type" to "location",
+                "location" to mapOf(
+                    "lat" to latitude, "long" to longitude,
+                    "name" to name, "address" to address
+                )
+            )
+        )
+
+        testSend(params, whatsappLocation {
+            from(fromNumber); to(toNumber)
+            name(name); address(address)
+            latitude(latitude); longitude(longitude)
+        })
+    }
+
+    @Test
+    fun `send WhatsApp single product`() {
+        val bodyText = "Check this out:"
+        val footerText = "Hurry! While stocks last."
+        val catalogId = "Cat 1"
+        val productId = "prod_746"
+
+        val params = whatsappCustomBody(mapOf(
+            "type" to "interactive",
+            "interactive" to mapOf(
+                "type" to "product",
+                "body" to mapOf("text" to bodyText),
+                "footer" to mapOf("text" to footerText),
+                "action" to mapOf(
+                    "catalog_id" to catalogId,
+                    "product_retailer_id" to productId
+                )
+            )
+        ))
+
+        testSend(params, whatsappSingleProduct {
+            from(fromNumber); to(toNumber)
+            bodyText(bodyText); footerText(footerText)
+            catalogId(catalogId); productRetailerId(productId)
+        })
     }
 }

@@ -74,6 +74,10 @@ fun whatsappTemplate(init: WhatsappTemplateRequest.Builder.() -> Unit): Whatsapp
     return WhatsappTemplateRequest.builder().apply(init).build()
 }
 
+fun whatsappCustom(init: WhatsappCustomRequest.Builder.() -> Unit): WhatsappCustomRequest {
+    return WhatsappCustomRequest.builder().apply(init).build()
+}
+
 fun messengerText(init: MessengerTextRequest.Builder.() -> Unit): MessengerTextRequest {
     return MessengerTextRequest.builder().apply(init).build()
 }
