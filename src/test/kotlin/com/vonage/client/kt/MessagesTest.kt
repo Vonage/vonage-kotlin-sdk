@@ -2,6 +2,7 @@ package com.vonage.client.kt
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.marcinziolo.kotlin.wiremock.*
+import com.vonage.client.common.HttpMethod
 import com.vonage.client.messages.Channel
 import com.vonage.client.messages.MessageRequest
 import com.vonage.client.messages.MessageResponseException
@@ -36,16 +37,10 @@ class MessagesTest : AbstractTest() {
     private val captionMap = mapOf("caption" to caption)
 
     private fun baseMockRequest(expectedBodyParams: Map<String, Any>? = null) =
-        wiremock.post {
-            url equalTo "/v1/messages"
-            headers contains "User-Agent" like "vonage-java-sdk.*"
-            headers contains "Authorization" like "Bearer eyJ.+"
-            headers contains "Content-Type" equalTo "application/json"
-            headers contains "Accept" equalTo "application/json"
-            if (expectedBodyParams != null) {
-                body equalTo ObjectMapper().writeValueAsString(expectedBodyParams)
-            }
-        }
+        baseMockRequest(HttpMethod.POST, "/v1/messages",
+            ContentType.APPLICATION_JSON, ContentType.APPLICATION_JSON,
+            AuthType.JWT, expectedBodyParams
+        )
 
     private fun mock202Response(expectedBodyParams: Map<String, Any>) {
         baseMockRequest(expectedBodyParams) returns {
