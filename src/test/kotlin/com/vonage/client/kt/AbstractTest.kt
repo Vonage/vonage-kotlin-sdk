@@ -57,9 +57,9 @@ abstract class AbstractTest {
     protected fun baseMockRequest(
         httpMethod: HttpMethod,
         expectedUrl: String,
-        contentType: ContentType?,
-        accept: ContentType?,
-        authType: AuthType?,
+        contentType: ContentType? = null,
+        accept: ContentType? = null,
+        authType: AuthType? = null,
         expectedBodyParams: Map<String, Any>? = null) =
             wiremock.requestServerBuilderStep({
                 url equalTo expectedUrl
