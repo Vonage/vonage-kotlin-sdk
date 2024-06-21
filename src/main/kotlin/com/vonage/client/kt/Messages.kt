@@ -14,6 +14,10 @@ class Messages(private val client: MessagesClient) {
     }
 }
 
+fun parseInboundMessage(json: String) : InboundMessage {
+    return InboundMessage.fromJson(json)
+}
+
 fun smsText(init: SmsTextRequest.Builder.() -> Unit): SmsTextRequest {
     return SmsTextRequest.builder().apply(init).build()
 }

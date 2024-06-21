@@ -2,15 +2,21 @@ package com.vonage.client.kt
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.marcinziolo.kotlin.wiremock.*
+import com.vonage.client.messages.Channel
 import com.vonage.client.messages.MessageRequest
+import com.vonage.client.messages.MessageResponse
+import com.vonage.client.messages.MessageType
 import com.vonage.client.messages.MessagesVersion
 import com.vonage.client.messages.viber.Category
 import com.vonage.client.messages.whatsapp.Locale
 import com.vonage.client.messages.whatsapp.Policy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.net.URI
+import java.time.Instant
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class MessagesTest : AbstractTest() {
     private val messagesClient = vonageClient.messages
@@ -412,5 +418,41 @@ class MessagesTest : AbstractTest() {
             addProductsSection(title1, products1)
             addProductsSection(title2, product2)
         })
+    }
+
+    @Test
+    fun `parse inbound MMS image`() {
+        val timestampStr = "2020-01-29T14:08:30.201Z"
+        val networkCode = "54123"
+        val parsed = parseInboundMessage(
+            """
+                {
+                   "channel": "$mmsChannel",
+                   "message_uuid": "$messageUuid",
+                   "to": "$toNumber",
+                   "from": "$fromNumber",
+                   "timestamp": "$timestampStr",
+                   "origin": {
+                      "network_code": "$networkCode"
+                   },
+                   "message_type": "image",
+                   "image": {
+                      "url": "$imageUrl",
+                      "name": "image.jpg",
+                      "caption": "$caption"
+                   }
+                }
+            """
+        )
+        assertNotNull(parsed)
+        assertEquals(Channel.MMS, parsed.channel)
+        assertEquals(messageUuid, parsed.messageUuid)
+        assertEquals(toNumber, parsed.to)
+        assertEquals(fromNumber, parsed.from)
+        assertEquals(Instant.parse(timestampStr), parsed.timestamp)
+        assertEquals(networkCode, parsed.networkCode)
+        assertEquals(MessageType.IMAGE, parsed.messageType)
+        assertEquals(URI.create(imageUrl), parsed.imageUrl)
+        assertEquals(caption, parsed.imageCaption)
     }
 }
