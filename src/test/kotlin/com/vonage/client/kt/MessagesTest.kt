@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.marcinziolo.kotlin.wiremock.*
 import com.vonage.client.messages.Channel
 import com.vonage.client.messages.MessageRequest
-import com.vonage.client.messages.MessageResponse
+import com.vonage.client.messages.MessageResponseException
 import com.vonage.client.messages.MessageType
 import com.vonage.client.messages.MessagesVersion
 import com.vonage.client.messages.viber.Category
@@ -35,15 +35,20 @@ class MessagesTest : AbstractTest() {
     private val fileUrl = "https://example.com/file.pdf"
     private val captionMap = mapOf("caption" to caption)
 
-    private fun mockResponse(expectedBodyParams: Map<String, Any>) {
+    private fun baseMockRequest(expectedBodyParams: Map<String, Any>? = null) =
         wiremock.post {
             url equalTo "/v1/messages"
             headers contains "User-Agent" like "vonage-java-sdk.*"
             headers contains "Authorization" like "Bearer eyJ.+"
             headers contains "Content-Type" equalTo "application/json"
             headers contains "Accept" equalTo "application/json"
-            body equalTo ObjectMapper().writeValueAsString(expectedBodyParams)
-        } returns {
+            if (expectedBodyParams != null) {
+                body equalTo ObjectMapper().writeValueAsString(expectedBodyParams)
+            }
+        }
+
+    private fun mock202Response(expectedBodyParams: Map<String, Any>) {
+        baseMockRequest(expectedBodyParams) returns {
             header = "Content-Type" to "application/json"
             statusCode = 202
             body = """
@@ -55,7 +60,7 @@ class MessagesTest : AbstractTest() {
     }
 
     private fun testSend(expectedBodyParams: Map<String, Any>, req: MessageRequest) {
-        mockResponse(expectedBodyParams)
+        mock202Response(expectedBodyParams)
         assertEquals(messageUuid, messagesClient.send(req))
     }
 
@@ -70,7 +75,8 @@ class MessagesTest : AbstractTest() {
     private fun textBody(channel: String, additionalParams: Map<String, Any> = mapOf()): Map<String, Any> =
         baseBody("text", channel) + mapOf("text" to text) + additionalParams
 
-    private fun mediaBody(channel: String, messageType: String, url: String, additionalParams: Map<String, Any>? = null): Map<String, Any> =
+    private fun mediaBody(channel: String, messageType: String, url: String,
+                          additionalParams: Map<String, Any>? = null): Map<String, Any> =
         baseBody(messageType, channel) + mapOf(messageType to mapOf("url" to url) + (additionalParams ?: mapOf()))
 
     private fun imageBody(channel: String, additionalParams : Map<String, Any>? = null): Map<String, Any> =
@@ -87,6 +93,39 @@ class MessagesTest : AbstractTest() {
 
     private fun whatsappCustomBody(params: Map<String, Any>): Map<String, Any> =
         baseBody("custom", whatsappChannel) + mapOf("custom" to params)
+
+    @Test
+    fun `send message 402 response`() {
+        val errorType = "https://developer.nexmo.com/api-errors/#low-balance"
+        val title = "Low balance"
+        val detail = "This request could not be performed due to your account balance being low."
+        val instance = "bf0ca0bf927b3b52e3cb03217e1a1ddf"
+
+        baseMockRequest() returns {
+            header = "Content-Type" to "application/json"
+            statusCode = 402
+            body = """
+                {
+                   "type": "$errorType",
+                   "title": "$title",
+                   "detail": "$detail",
+                   "instance": "$instance"
+                }
+            """
+        }
+
+        val exception = assertThrows<MessageResponseException> {
+            messagesClient.send(smsText {
+                from(fromNumber); to(toNumber); text(text)
+            })
+        }
+
+        assertEquals(402, exception.statusCode)
+        assertEquals(URI.create(errorType), exception.type)
+        assertEquals(title, exception.title)
+        assertEquals(instance, exception.instance)
+        assertEquals(detail, exception.detail)
+    }
 
     @Test
     fun `send SMS text all parameters`() {
@@ -115,7 +154,7 @@ class MessagesTest : AbstractTest() {
     @Test
     fun `send SMS text required parameters`() {
         testSend(textBody("sms"), smsText {
-            from(fromNumber); to(toNumber); text(text);
+            from(fromNumber); to(toNumber); text(text)
         })
     }
 
