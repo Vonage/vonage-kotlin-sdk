@@ -12,6 +12,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
 import java.net.URI
+import java.util.*
 import kotlin.test.assertEquals
 
 abstract class AbstractTest {
@@ -21,6 +22,7 @@ abstract class AbstractTest {
     private val apiKeySecretEncoded = "YTFiMmMzZDQ6MTIzNDU2Nzg5MGFiY2RlZg=="
     protected val toNumber = "447712345689"
     protected val altNumber = "447700900001"
+    protected val testUuid = UUID.fromString("aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab")
 
     private val port = 8081
     val wiremock: WireMockServer = WireMockServer(
@@ -60,7 +62,7 @@ abstract class AbstractTest {
         JWT, API_KEY_SECRET_HEADER, API_KEY_SECRET_QUERY_PARAMS
     }
 
-    protected fun baseMockRequest(
+    protected fun mockRequest(
         httpMethod: HttpMethod,
         expectedUrl: String,
         contentType: ContentType? = null,
@@ -105,19 +107,17 @@ abstract class AbstractTest {
                                   expectedRequestParams: Map<String, Any>? = null,
                                   status: Int = 200,
                                   expectedResponseParams: Map<String, Any>? = null) =
-        mockJsonJwtPostRequest(expectedUrl, expectedRequestParams).mockJsonReturn(status, expectedResponseParams)
+
+        mockRequest(HttpMethod.POST, expectedUrl,
+            contentType = if (expectedRequestParams != null) ContentType.APPLICATION_JSON else null,
+            accept = if (expectedResponseParams != null) ContentType.APPLICATION_JSON else null,
+            AuthType.JWT, expectedRequestParams
+        ).mockReturn(status, expectedResponseParams)
 
     protected fun mockDelete(expectedUrl: String, authType: AuthType? = null): ReturnsStep =
-        baseMockRequest(HttpMethod.DELETE, expectedUrl, authType = authType).mockJsonReturn(204)
+        mockRequest(HttpMethod.DELETE, expectedUrl, authType = authType).mockReturn(204)
 
-    protected fun mockJsonJwtPostRequest(expectedUrl: String,
-                                         expectedBodyParams: Map<String, Any>? = null): BuildingStep =
-        baseMockRequest(HttpMethod.POST, expectedUrl,
-            ContentType.APPLICATION_JSON, ContentType.APPLICATION_JSON,
-            AuthType.JWT, expectedBodyParams
-        )
-
-    protected fun BuildingStep.mockJsonReturn(
+    protected fun BuildingStep.mockReturn(
             status: Int? = null, expectedBody: Map<String, Any>? = null): ReturnsStep =
         returns {
             statusCode = if
@@ -141,7 +141,7 @@ abstract class AbstractTest {
             url: String, requestMethod: HttpMethod, actualCall: () -> Unit, status: Int,
             errorType: String, title: String, detail: String, instance: String): E {
 
-        baseMockRequest(requestMethod, url).mockJsonReturn(status, mapOf(
+        mockRequest(requestMethod, url).mockReturn(status, mapOf(
             "type" to errorType, "title" to title,
             "detail" to detail, "instance" to instance
         ))

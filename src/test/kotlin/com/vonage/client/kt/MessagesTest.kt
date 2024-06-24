@@ -16,7 +16,7 @@ import kotlin.test.assertNotNull
 class MessagesTest : AbstractTest() {
     private val messagesClient = vonageClient.messages
     private val sendUrl = "/v1/messages"
-    private val messageUuid = UUID.fromString("aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab")
+    private val messageUuid = testUuid
     private val mmsChannel = "mms"
     private val whatsappChannel = "whatsapp"
     private val viberChannel = "viber_service"
@@ -371,7 +371,6 @@ class MessagesTest : AbstractTest() {
         val products1 = listOf("Apples", "Bananas", "Pears", "Grapes", "Satsumas")
         val title2 = "Misc."
         val product2 = UUID.randomUUID().toString()
-
 
         val params = whatsappCustomBody(mapOf(
             "type" to "interactive",

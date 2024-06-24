@@ -1,5 +1,6 @@
 package com.vonage.client.kt
 
+import com.vonage.client.common.HttpMethod
 import org.junit.jupiter.api.Test
 import java.net.URI
 import java.util.UUID
@@ -26,7 +27,7 @@ class VerifyTest : AbstractTest() {
         val appHash = "ABC123def45"
         val toEmail = "alice@example.com"
         val fromEmail = "bob@example.org"
-        val checkUrl = "https://api.nexmo.com/v2/verify/c11236f4-00bf-4b89-84ba-88b25df97315/silent-auth/redirect"
+        val checkUrl = "https://api.nexmo.com/v2/verify/$requestId/silent-auth/redirect"
         val redirectUrl = "https://acme-app.com/sa/redirect"
 
         mockJsonJwtPost(baseUrl,
@@ -97,5 +98,11 @@ class VerifyTest : AbstractTest() {
     fun `cancel verification`() {
         mockDelete("$baseUrl/$requestId")
         verifyClient.cancelVerification(requestId)
+    }
+
+    @Test
+    fun `next workflow`() {
+        mockJsonJwtPost("$baseUrl/$requestId/next-workflow")
+        verifyClient.nextWorkflow(requestId)
     }
 }
