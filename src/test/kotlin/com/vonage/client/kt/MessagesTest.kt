@@ -1,13 +1,8 @@
 package com.vonage.client.kt
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.marcinziolo.kotlin.wiremock.*
 import com.vonage.client.common.HttpMethod
-import com.vonage.client.messages.Channel
-import com.vonage.client.messages.MessageRequest
-import com.vonage.client.messages.MessageResponseException
-import com.vonage.client.messages.MessageType
-import com.vonage.client.messages.MessagesVersion
+import com.vonage.client.messages.*
 import com.vonage.client.messages.viber.Category
 import com.vonage.client.messages.whatsapp.Locale
 import com.vonage.client.messages.whatsapp.Policy

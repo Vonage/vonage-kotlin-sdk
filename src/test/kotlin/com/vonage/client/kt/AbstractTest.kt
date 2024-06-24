@@ -65,10 +65,12 @@ abstract class AbstractTest {
                 url equalTo expectedUrl
                 headers contains "User-Agent" like "vonage-java-sdk\\/.+ java\\/.+"
                 if (authType != null) {
-                    val headerContainsAuth = headers contains "Authorization"
+                    val authHeaderName = "Authorization"
                     when (authType) {
-                        AuthType.JWT -> headerContainsAuth like "Bearer eyJ0eXBlIjoiSldUIiwiYWxnIjoiUlMyNTYifQ(\\..+){2}"
-                        AuthType.API_KEY_SECRET_HEADER -> headerContainsAuth equalTo "Basic $apiKeySecretEncoded"
+                        AuthType.JWT -> headers contains authHeaderName like
+                                    "Bearer eyJ0eXBlIjoiSldUIiwiYWxnIjoiUlMyNTYifQ(\\..+){2}"
+                        AuthType.API_KEY_SECRET_HEADER ->
+                            headers contains authHeaderName equalTo "Basic $apiKeySecretEncoded"
                         AuthType.API_KEY_SECRET_QUERY_PARAMS -> {
                             headers contains "api_key" equalTo apiKey
                             headers contains "api_secret" equalTo apiSecret
