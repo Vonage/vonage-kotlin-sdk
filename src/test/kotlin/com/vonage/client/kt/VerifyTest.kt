@@ -105,4 +105,13 @@ class VerifyTest : AbstractTest() {
         mockJsonJwtPost("$baseUrl/$requestId/next-workflow")
         verifyClient.nextWorkflow(requestId)
     }
+
+    @Test
+    fun `check code`() {
+        val code = "1228864"
+        mockJsonJwtPost("$baseUrl/$requestId",
+             expectedRequestParams = mapOf("code" to code)
+        )
+        verifyClient.checkVerificationCode(requestId, code)
+    }
 }

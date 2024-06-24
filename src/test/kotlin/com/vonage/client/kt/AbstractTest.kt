@@ -126,7 +126,7 @@ abstract class AbstractTest {
 
             if (expectedBody != null) {
                 body = ObjectMapper().writeValueAsString(expectedBody)
-                header = "Content-Type" to "application/json"
+                header = "Content-Type" to ContentType.APPLICATION_JSON.mime
             }
         }
 
