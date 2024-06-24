@@ -6,17 +6,23 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import com.marcinziolo.kotlin.wiremock.*
+import com.vonage.client.VonageApiResponseException
 import com.vonage.client.common.HttpMethod
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.assertThrows
+import java.net.URI
+import kotlin.test.assertEquals
 
 abstract class AbstractTest {
-    val apiKey = "a1b2c3d4"
-    val applicationId = "00000000-0000-4000-8000-000000000000"
+    protected val apiKey = "a1b2c3d4"
+    protected val applicationId = "00000000-0000-4000-8000-000000000000"
     private val apiSecret = "1234567890abcdef"
     private val apiKeySecretEncoded = "YTFiMmMzZDQ6MTIzNDU2Nzg5MGFiY2RlZg=="
+    protected val toNumber = "447712345689"
+    protected val altNumber = "447700900001"
 
-    val port = 8081
+    private val port = 8081
     val wiremock: WireMockServer = WireMockServer(
         options().port(port).notifier(ConsoleNotifier(false))
     )
@@ -60,7 +66,7 @@ abstract class AbstractTest {
         contentType: ContentType? = null,
         accept: ContentType? = null,
         authType: AuthType? = null,
-        expectedBodyParams: Map<String, Any>? = null) =
+        expectedBodyParams: Map<String, Any>? = null): BuildingStep =
             wiremock.requestServerBuilderStep({
                 url equalTo expectedUrl
                 headers contains "User-Agent" like "vonage-java-sdk\\/.+ java\\/.+"
@@ -94,4 +100,76 @@ abstract class AbstractTest {
                     HttpMethod.DELETE -> WireMock::delete
                     else -> throw IllegalArgumentException("Unhandled HTTP method: $httpMethod")
             })
+
+    protected fun mockJsonJwtPostRequestResponse(expectedUrl: String,
+                                                 expectedRequestParams: Map<String, Any>? = null,
+                                                 status: Int = 200,
+                                                 expectedResponseParams: Map<String, Any>? = null) =
+        mockJsonJwtPostRequest(expectedUrl, expectedRequestParams)
+            .baseMockJsonReturn(status, expectedResponseParams)
+
+    protected fun mockJsonJwtPostRequest(expectedUrl: String,
+                                         expectedBodyParams: Map<String, Any>? = null) =
+        baseMockRequest(HttpMethod.POST, expectedUrl,
+            ContentType.APPLICATION_JSON, ContentType.APPLICATION_JSON,
+            AuthType.JWT, expectedBodyParams
+        )
+
+    protected fun BuildingStep.baseMockJsonReturn(
+            status: Int? = null, expectedBody: Map<String, Any>? = null): ReturnsStep =
+        returns {
+            statusCode = if
+                    (status == null && expectedBody == null) 204
+                    else status ?: 200
+
+            if (expectedBody != null) {
+                body = ObjectMapper().writeValueAsString(expectedBody)
+                header = "Content-Type" to "application/json"
+            }
+        }
+
+    protected inline fun <reified E: VonageApiResponseException> assertApiResponseException(
+            url: String, requestMethod: HttpMethod, actualCall: () -> Unit) {
+
+        assert402ApiResponseException<E>(url, requestMethod, actualCall)
+        assert429ApiResponseException<E>(url, requestMethod, actualCall)
+    }
+
+    protected inline fun <reified E: VonageApiResponseException> assertApiResponseException(
+            url: String, requestMethod: HttpMethod, actualCall: () -> Unit, status: Int,
+            errorType: String, title: String, detail: String, instance: String): E {
+
+        baseMockRequest(requestMethod, url).baseMockJsonReturn(status, mapOf(
+            "type" to errorType, "title" to title,
+            "detail" to detail, "instance" to instance
+        ))
+
+        val exception = assertThrows<E>(actualCall)
+
+        assertEquals(status, exception.statusCode)
+        assertEquals(URI.create(errorType), exception.type)
+        assertEquals(title, exception.title)
+        assertEquals(instance, exception.instance)
+        assertEquals(detail, exception.detail)
+        return exception
+    }
+
+    protected inline fun <reified E: VonageApiResponseException> assert402ApiResponseException(
+            url: String, requestMethod: HttpMethod, actualCall: () -> Unit): E =
+
+        assertApiResponseException(url, requestMethod, actualCall, 402,
+            "https://developer.nexmo.com/api-errors/#low-balance",
+            "Low balance",
+            "This request could not be performed due to your account balance being low.",
+            "bf0ca0bf927b3b52e3cb03217e1a1ddf"
+        )
+
+    protected inline fun <reified E: VonageApiResponseException> assert429ApiResponseException(
+            url: String, requestMethod: HttpMethod, actualCall: () -> Unit): E =
+        assertApiResponseException(url, requestMethod, actualCall, 429,
+            "https://www.developer.vonage.com/api-errors#throttled",
+            "Rate Limit Hit",
+            "Please wait, then retry your request",
+            "06032957-99ce-41ee-978b-9a390cd5a89b"
+        )
 }

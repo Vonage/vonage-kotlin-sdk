@@ -1,6 +1,5 @@
 package com.vonage.client.kt
 
-import com.marcinziolo.kotlin.wiremock.*
 import com.vonage.client.common.HttpMethod
 import com.vonage.client.messages.*
 import com.vonage.client.messages.viber.Category
@@ -16,13 +15,12 @@ import kotlin.test.assertNotNull
 
 class MessagesTest : AbstractTest() {
     private val messagesClient = vonageClient.messages
+    private val sendUrl = "/v1/messages"
     private val messageUuid = UUID.fromString("aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab")
     private val mmsChannel = "mms"
     private val whatsappChannel = "whatsapp"
     private val viberChannel = "viber_service"
     private val messengerChannel = "messenger"
-    private val fromNumber = "447700900001"
-    private val toNumber = "447712345689"
     private val text = "Hello, World!"
     private val caption = "Additional text to accompany the media"
     private val imageUrl = "https://example.com/image.jpg"
@@ -31,26 +29,9 @@ class MessagesTest : AbstractTest() {
     private val fileUrl = "https://example.com/file.pdf"
     private val captionMap = mapOf("caption" to caption)
 
-    private fun baseMockRequest(expectedBodyParams: Map<String, Any>? = null) =
-        baseMockRequest(HttpMethod.POST, "/v1/messages",
-            ContentType.APPLICATION_JSON, ContentType.APPLICATION_JSON,
-            AuthType.JWT, expectedBodyParams
-        )
-
-    private fun mock202Response(expectedBodyParams: Map<String, Any>) {
-        baseMockRequest(expectedBodyParams) returns {
-            header = "Content-Type" to "application/json"
-            statusCode = 202
-            body = """
-            {
-                "message_uuid": "$messageUuid"
-            }
-            """
-        }
-    }
 
     private fun testSend(expectedBodyParams: Map<String, Any>, req: MessageRequest) {
-        mock202Response(expectedBodyParams)
+        mockJsonJwtPostRequestResponse(sendUrl, expectedBodyParams, 202, mapOf("message_uuid" to messageUuid))
         assertEquals(messageUuid, messagesClient.send(req))
     }
 
@@ -58,7 +39,7 @@ class MessagesTest : AbstractTest() {
         mapOf(
             "message_type" to messageType,
             "to" to toNumber,
-            "from" to fromNumber,
+            "from" to altNumber,
             "channel" to channel
         )
 
@@ -85,36 +66,12 @@ class MessagesTest : AbstractTest() {
         baseBody("custom", whatsappChannel) + mapOf("custom" to params)
 
     @Test
-    fun `send message 402 response`() {
-        val errorType = "https://developer.nexmo.com/api-errors/#low-balance"
-        val title = "Low balance"
-        val detail = "This request could not be performed due to your account balance being low."
-        val instance = "bf0ca0bf927b3b52e3cb03217e1a1ddf"
-
-        baseMockRequest() returns {
-            header = "Content-Type" to "application/json"
-            statusCode = 402
-            body = """
-                {
-                   "type": "$errorType",
-                   "title": "$title",
-                   "detail": "$detail",
-                   "instance": "$instance"
-                }
-            """
-        }
-
-        val exception = assertThrows<MessageResponseException> {
+    fun `send message exception responses`() {
+        assertApiResponseException<MessageResponseException>(sendUrl, HttpMethod.POST) {
             messagesClient.send(smsText {
-                from(fromNumber); to(toNumber); text(text)
+                from(altNumber); to(toNumber); text(text)
             })
         }
-
-        assertEquals(402, exception.statusCode)
-        assertEquals(URI.create(errorType), exception.type)
-        assertEquals(title, exception.title)
-        assertEquals(instance, exception.instance)
-        assertEquals(detail, exception.detail)
     }
 
     @Test
@@ -135,7 +92,7 @@ class MessagesTest : AbstractTest() {
                 "entity_id" to entityId
             )
         )), smsText {
-            from(fromNumber); to(toNumber); text(text); ttl(ttl);
+            from(altNumber); to(toNumber); text(text); ttl(ttl);
             clientRef(clientRef); contentId(contentId); entityId(entityId)
             webhookUrl(webhookUrl); webhookVersion(MessagesVersion.V0_1)
         })
@@ -144,28 +101,28 @@ class MessagesTest : AbstractTest() {
     @Test
     fun `send SMS text required parameters`() {
         testSend(textBody("sms"), smsText {
-            from(fromNumber); to(toNumber); text(text)
+            from(altNumber); to(toNumber); text(text)
         })
     }
 
     @Test
     fun `send WhatsApp text`() {
         testSend(textBody(whatsappChannel), whatsappText {
-            from(fromNumber); to(toNumber); text(text)
+            from(altNumber); to(toNumber); text(text)
         })
     }
 
     @Test
     fun `send Viber text`() {
         testSend(textBody(viberChannel), viberText {
-            from(fromNumber); to(toNumber); text(text)
+            from(altNumber); to(toNumber); text(text)
         })
     }
 
     @Test
     fun `send Messenger text`() {
         testSend(textBody(messengerChannel), messengerText {
-            from(fromNumber); to(toNumber); text(text)
+            from(altNumber); to(toNumber); text(text)
         })
     }
 
@@ -173,70 +130,70 @@ class MessagesTest : AbstractTest() {
     fun `send MMS vCard`() {
         val vcardUrl = "https://example.com/conatact.vcf"
         testSend(mediaBody(mmsChannel, "vcard", vcardUrl, captionMap), mmsVcard {
-            from(fromNumber); to(toNumber); url(vcardUrl); caption(caption)
+            from(altNumber); to(toNumber); url(vcardUrl); caption(caption)
         })
     }
 
     @Test
     fun `send MMS image`() {
         testSend(imageBody(mmsChannel, captionMap), mmsImage {
-            from(fromNumber); to(toNumber); url(imageUrl); caption(caption)
+            from(altNumber); to(toNumber); url(imageUrl); caption(caption)
         })
     }
 
     @Test
     fun `send WhatsApp image`() {
         testSend(imageBody(whatsappChannel, captionMap), whatsappImage {
-            from(fromNumber); to(toNumber); url(imageUrl); caption(caption)
+            from(altNumber); to(toNumber); url(imageUrl); caption(caption)
         })
     }
 
     @Test
     fun `send Viber image`() {
         testSend(imageBody(viberChannel), viberImage {
-            from(fromNumber); to(toNumber); url(imageUrl)
+            from(altNumber); to(toNumber); url(imageUrl)
         })
     }
 
     @Test
     fun `send Messenger image`() {
         testSend(imageBody(messengerChannel), messengerImage {
-            from(fromNumber); to(toNumber); url(imageUrl)
+            from(altNumber); to(toNumber); url(imageUrl)
         })
     }
 
     @Test
     fun `send MMS audio`() {
         testSend(audioBody(mmsChannel, captionMap), mmsAudio {
-            from(fromNumber); to(toNumber); url(audioUrl); caption(caption)
+            from(altNumber); to(toNumber); url(audioUrl); caption(caption)
         })
     }
 
     @Test
     fun `send WhatsApp audio`() {
         testSend(audioBody(whatsappChannel), whatsappAudio {
-            from(fromNumber); to(toNumber); url(audioUrl)
+            from(altNumber); to(toNumber); url(audioUrl)
         })
     }
 
     @Test
     fun `send Messenger audio`() {
         testSend(audioBody(messengerChannel), messengerAudio {
-            from(fromNumber); to(toNumber); url(audioUrl)
+            from(altNumber); to(toNumber); url(audioUrl)
         })
     }
 
     @Test
     fun `send MMS video`() {
         testSend(videoBody(mmsChannel, captionMap), mmsVideo {
-            from(fromNumber); to(toNumber); url(videoUrl); caption(caption)
+            from(altNumber); to(toNumber); url(videoUrl); caption(caption)
         })
     }
 
     @Test
     fun `send WhatsApp video`() {
         testSend(videoBody(whatsappChannel, captionMap), whatsappVideo {
-            from(fromNumber); to(toNumber); url(videoUrl); caption(caption)
+            from(altNumber); to(toNumber); url(videoUrl); caption(caption)
         })
     }
 
@@ -253,7 +210,7 @@ class MessagesTest : AbstractTest() {
                     "file_size" to fileSize,
                     "ttl" to ttl
             )), viberVideo {
-                from(fromNumber); to(toNumber); url(videoUrl); caption(caption);
+                from(altNumber); to(toNumber); url(videoUrl); caption(caption);
                 category(Category.TRANSACTION); duration(duration); ttl(ttl);
                 fileSize(fileSize); thumbUrl(thumbUrl)
             }
@@ -263,7 +220,7 @@ class MessagesTest : AbstractTest() {
     @Test
     fun `send Messenger video`() {
         testSend(videoBody(messengerChannel), messengerVideo {
-            from(fromNumber); to(toNumber); url(videoUrl)
+            from(altNumber); to(toNumber); url(videoUrl)
         })
     }
 
@@ -271,7 +228,7 @@ class MessagesTest : AbstractTest() {
     fun `send WhatsApp file`() {
         val fileName = "Document.pdf"
         testSend(fileBody(whatsappChannel, captionMap + mapOf("name" to fileName)), whatsappFile {
-            from(fromNumber); to(toNumber); url(fileUrl); caption(caption); name(fileName)
+            from(altNumber); to(toNumber); url(fileUrl); caption(caption); name(fileName)
         })
     }
 
@@ -279,14 +236,14 @@ class MessagesTest : AbstractTest() {
     fun `send Viber file`() {
         val fileName = "report.docx"
         testSend(fileBody(viberChannel, mapOf("name" to fileName)), viberFile {
-            from(fromNumber); to(toNumber); url(fileUrl); name(fileName)
+            from(altNumber); to(toNumber); url(fileUrl); name(fileName)
         })
     }
 
     @Test
     fun `send Messenger file`() {
         testSend(fileBody(messengerChannel), messengerFile {
-            from(fromNumber); to(toNumber); url(fileUrl)
+            from(altNumber); to(toNumber); url(fileUrl)
         })
     }
 
@@ -295,17 +252,17 @@ class MessagesTest : AbstractTest() {
         val stickerType = "sticker"
         val stickerUrl = "https://example.com/image.webp"
         testSend(mediaBody(whatsappChannel, stickerType, stickerUrl), whatsappSticker {
-            from(fromNumber); to(toNumber); url(stickerUrl)
+            from(altNumber); to(toNumber); url(stickerUrl)
         })
 
         val stickerId = "aabb7a31-1d1f-4755-a574-2971d831cd5b"
         assertEquals(UUID.fromString(stickerId), whatsappSticker {
-                from(fromNumber); to(toNumber); id(stickerId)
+                from(altNumber); to(toNumber); id(stickerId)
             }.sticker.id
         )
 
         assertThrows<IllegalStateException> { whatsappSticker {
-            from(fromNumber); to(toNumber); id(stickerId); url(stickerUrl)
+            from(altNumber); to(toNumber); id(stickerId); url(stickerUrl)
         } }
     }
 
@@ -329,7 +286,7 @@ class MessagesTest : AbstractTest() {
         )
 
         val request = whatsappTemplate {
-            from(fromNumber); to(toNumber); webhookVersion(MessagesVersion.V1)
+            from(altNumber); to(toNumber); webhookVersion(MessagesVersion.V1)
             policy(Policy.DETERMINISTIC); locale(Locale.PERSIAN)
             contextMessageId(messageContext); name(name); parameters(templateParams)
         }
@@ -351,7 +308,7 @@ class MessagesTest : AbstractTest() {
         )
 
         testSend(whatsappCustomBody(customParams), whatsappCustom {
-            from(fromNumber); to(toNumber); custom(customParams)
+            from(altNumber); to(toNumber); custom(customParams)
         })
     }
 
@@ -371,7 +328,7 @@ class MessagesTest : AbstractTest() {
         )
 
         testSend(params, whatsappLocation {
-            from(fromNumber); to(toNumber)
+            from(altNumber); to(toNumber)
             name(name); address(address)
             latitude(latitude); longitude(longitude)
         })
@@ -398,7 +355,7 @@ class MessagesTest : AbstractTest() {
         ))
 
         testSend(params, whatsappSingleProduct {
-            from(fromNumber); to(toNumber)
+            from(altNumber); to(toNumber)
             bodyText(bodyText); footerText(footerText)
             catalogId(catalogId); productRetailerId(productId)
         })
@@ -442,7 +399,7 @@ class MessagesTest : AbstractTest() {
         ))
 
         testSend(params, whatsappMultiProduct {
-            from(fromNumber); to(toNumber); catalogId(catalogId)
+            from(altNumber); to(toNumber); catalogId(catalogId)
             headerText(headerText); bodyText(bodyText); footerText(footerText)
             addProductsSection(title1, products1)
             addProductsSection(title2, product2)
@@ -459,7 +416,7 @@ class MessagesTest : AbstractTest() {
                    "channel": "$mmsChannel",
                    "message_uuid": "$messageUuid",
                    "to": "$toNumber",
-                   "from": "$fromNumber",
+                   "from": "$altNumber",
                    "timestamp": "$timestampStr",
                    "origin": {
                       "network_code": "$networkCode"
@@ -477,7 +434,7 @@ class MessagesTest : AbstractTest() {
         assertEquals(Channel.MMS, parsed.channel)
         assertEquals(messageUuid, parsed.messageUuid)
         assertEquals(toNumber, parsed.to)
-        assertEquals(fromNumber, parsed.from)
+        assertEquals(altNumber, parsed.from)
         assertEquals(Instant.parse(timestampStr), parsed.timestamp)
         assertEquals(networkCode, parsed.networkCode)
         assertEquals(MessageType.IMAGE, parsed.messageType)

@@ -11,7 +11,7 @@ import com.vonage.client.voice.VoiceClient
 class Vonage constructor(init: VonageClient.Builder.() -> Unit) {
     private val vonageClient : VonageClient = VonageClient.builder().apply(init).build();
     val messages = Messages(vonageClient.messagesClient)
-    val verify: Verify2Client = vonageClient.verify2Client
+    val verify = Verify(vonageClient.verify2Client)
 
 }
 
