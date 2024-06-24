@@ -63,10 +63,10 @@ abstract class AbstractTest {
         expectedBodyParams: Map<String, Any>? = null) =
             wiremock.requestServerBuilderStep({
                 url equalTo expectedUrl
-                headers contains "User-Agent" like "vonage-java-sdk.*"
+                headers contains "User-Agent" like "vonage-java-sdk\\/.+ java\\/.+"
                 if (authType != null) {
                     headers contains "Authorization" like when (authType) {
-                        AuthType.JWT -> "Bearer eyJ.+"
+                        AuthType.JWT -> "Bearer eyJ0eXBlIjoiSldUIiwiYWxnIjoiUlMyNTYifQ(\\..+){2}"
                         AuthType.API_KEY_SECRET -> "Basic $apiKeySecretEncoded"
                     }
                 }
