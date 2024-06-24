@@ -51,7 +51,7 @@ abstract class AbstractTest {
     }
 
     protected enum class AuthType {
-        JWT, API_KEY_SECRET
+        JWT, API_KEY_SECRET_HEADER, API_KEY_SECRET_QUERY_PARAMS
     }
 
     protected fun baseMockRequest(
@@ -65,9 +65,14 @@ abstract class AbstractTest {
                 url equalTo expectedUrl
                 headers contains "User-Agent" like "vonage-java-sdk\\/.+ java\\/.+"
                 if (authType != null) {
-                    headers contains "Authorization" like when (authType) {
-                        AuthType.JWT -> "Bearer eyJ0eXBlIjoiSldUIiwiYWxnIjoiUlMyNTYifQ(\\..+){2}"
-                        AuthType.API_KEY_SECRET -> "Basic $apiKeySecretEncoded"
+                    val headerContainsAuth = headers contains "Authorization"
+                    when (authType) {
+                        AuthType.JWT -> headerContainsAuth like "Bearer eyJ0eXBlIjoiSldUIiwiYWxnIjoiUlMyNTYifQ(\\..+){2}"
+                        AuthType.API_KEY_SECRET_HEADER -> headerContainsAuth equalTo "Basic $apiKeySecretEncoded"
+                        AuthType.API_KEY_SECRET_QUERY_PARAMS -> {
+                            headers contains "api_key" equalTo apiKey
+                            headers contains "api_secret" equalTo apiSecret
+                        }
                     }
                 }
                 if (contentType != null) {
