@@ -9,6 +9,7 @@ import kotlin.test.assertNotNull
 class VerifyTest : AbstractTest() {
     private val verifyClient = vonageClient.verify
     private val baseUrl = "/v2/verify"
+    private val requestId = "c11236f4-00bf-4b89-84ba-88b25df97315"
 
     @Test
     fun `send verification all workflows and parameters`() {
@@ -25,11 +26,10 @@ class VerifyTest : AbstractTest() {
         val appHash = "ABC123def45"
         val toEmail = "alice@example.com"
         val fromEmail = "bob@example.org"
-        val requestId = "c11236f4-00bf-4b89-84ba-88b25df97315"
         val checkUrl = "https://api.nexmo.com/v2/verify/c11236f4-00bf-4b89-84ba-88b25df97315/silent-auth/redirect"
         val redirectUrl = "https://acme-app.com/sa/redirect"
 
-        mockJsonJwtPostRequestResponse(baseUrl,
+        mockJsonJwtPost(baseUrl,
             expectedRequestParams = mapOf(
                 "brand" to brand,
                 "client_ref" to clientRef,
@@ -93,4 +93,9 @@ class VerifyTest : AbstractTest() {
         assertEquals(URI.create(checkUrl), response.checkUrl)
     }
 
+    @Test
+    fun `cancel verification`() {
+        mockDelete("$baseUrl/$requestId")
+        verifyClient.cancelVerification(requestId)
+    }
 }

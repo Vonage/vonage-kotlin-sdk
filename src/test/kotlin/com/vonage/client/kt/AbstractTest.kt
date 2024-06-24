@@ -101,21 +101,23 @@ abstract class AbstractTest {
                     else -> throw IllegalArgumentException("Unhandled HTTP method: $httpMethod")
             })
 
-    protected fun mockJsonJwtPostRequestResponse(expectedUrl: String,
-                                                 expectedRequestParams: Map<String, Any>? = null,
-                                                 status: Int = 200,
-                                                 expectedResponseParams: Map<String, Any>? = null) =
-        mockJsonJwtPostRequest(expectedUrl, expectedRequestParams)
-            .baseMockJsonReturn(status, expectedResponseParams)
+    protected fun mockJsonJwtPost(expectedUrl: String,
+                                  expectedRequestParams: Map<String, Any>? = null,
+                                  status: Int = 200,
+                                  expectedResponseParams: Map<String, Any>? = null) =
+        mockJsonJwtPostRequest(expectedUrl, expectedRequestParams).mockJsonReturn(status, expectedResponseParams)
+
+    protected fun mockDelete(expectedUrl: String, authType: AuthType? = null): ReturnsStep =
+        baseMockRequest(HttpMethod.DELETE, expectedUrl, authType = authType).mockJsonReturn(204)
 
     protected fun mockJsonJwtPostRequest(expectedUrl: String,
-                                         expectedBodyParams: Map<String, Any>? = null) =
+                                         expectedBodyParams: Map<String, Any>? = null): BuildingStep =
         baseMockRequest(HttpMethod.POST, expectedUrl,
             ContentType.APPLICATION_JSON, ContentType.APPLICATION_JSON,
             AuthType.JWT, expectedBodyParams
         )
 
-    protected fun BuildingStep.baseMockJsonReturn(
+    protected fun BuildingStep.mockJsonReturn(
             status: Int? = null, expectedBody: Map<String, Any>? = null): ReturnsStep =
         returns {
             statusCode = if
@@ -139,7 +141,7 @@ abstract class AbstractTest {
             url: String, requestMethod: HttpMethod, actualCall: () -> Unit, status: Int,
             errorType: String, title: String, detail: String, instance: String): E {
 
-        baseMockRequest(requestMethod, url).baseMockJsonReturn(status, mapOf(
+        baseMockRequest(requestMethod, url).mockJsonReturn(status, mapOf(
             "type" to errorType, "title" to title,
             "detail" to detail, "instance" to instance
         ))

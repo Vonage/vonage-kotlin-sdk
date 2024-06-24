@@ -31,7 +31,7 @@ class MessagesTest : AbstractTest() {
 
 
     private fun testSend(expectedBodyParams: Map<String, Any>, req: MessageRequest) {
-        mockJsonJwtPostRequestResponse(sendUrl, expectedBodyParams, 202, mapOf("message_uuid" to messageUuid))
+        mockJsonJwtPost(sendUrl, expectedBodyParams, 202, mapOf("message_uuid" to messageUuid))
         assertEquals(messageUuid, messagesClient.send(req))
     }
 
