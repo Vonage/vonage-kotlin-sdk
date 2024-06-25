@@ -110,7 +110,7 @@ abstract class AbstractTest {
 
         mockRequest(HttpMethod.POST, expectedUrl,
             contentType = if (expectedRequestParams != null) ContentType.APPLICATION_JSON else null,
-            accept = if (expectedResponseParams != null) ContentType.APPLICATION_JSON else null,
+            accept = if (expectedResponseParams != null && status < 400) ContentType.APPLICATION_JSON else null,
             AuthType.JWT, expectedRequestParams
         ).mockReturn(status, expectedResponseParams)
 
@@ -131,14 +131,14 @@ abstract class AbstractTest {
         }
 
     protected inline fun <reified E: VonageApiResponseException> assertApiResponseException(
-            url: String, requestMethod: HttpMethod, actualCall: () -> Unit) {
+            url: String, requestMethod: HttpMethod, actualCall: () -> Any) {
 
         assert402ApiResponseException<E>(url, requestMethod, actualCall)
         assert429ApiResponseException<E>(url, requestMethod, actualCall)
     }
 
     protected inline fun <reified E: VonageApiResponseException> assertApiResponseException(
-            url: String, requestMethod: HttpMethod, actualCall: () -> Unit, status: Int,
+            url: String, requestMethod: HttpMethod, actualCall: () -> Any, status: Int,
             errorType: String, title: String, detail: String, instance: String): E {
 
         mockRequest(requestMethod, url).mockReturn(status, mapOf(
@@ -146,7 +146,7 @@ abstract class AbstractTest {
             "detail" to detail, "instance" to instance
         ))
 
-        val exception = assertThrows<E>(actualCall)
+        val exception = assertThrows<E> { actualCall.invoke() }
 
         assertEquals(status, exception.statusCode)
         assertEquals(URI.create(errorType), exception.type)
@@ -157,7 +157,7 @@ abstract class AbstractTest {
     }
 
     protected inline fun <reified E: VonageApiResponseException> assert402ApiResponseException(
-            url: String, requestMethod: HttpMethod, actualCall: () -> Unit): E =
+            url: String, requestMethod: HttpMethod, actualCall: () -> Any): E =
 
         assertApiResponseException(url, requestMethod, actualCall, 402,
             "https://developer.nexmo.com/api-errors/#low-balance",
@@ -167,7 +167,7 @@ abstract class AbstractTest {
         )
 
     protected inline fun <reified E: VonageApiResponseException> assert429ApiResponseException(
-            url: String, requestMethod: HttpMethod, actualCall: () -> Unit): E =
+            url: String, requestMethod: HttpMethod, actualCall: () -> Any): E =
         assertApiResponseException(url, requestMethod, actualCall, 429,
             "https://www.developer.vonage.com/api-errors#throttled",
             "Rate Limit Hit",

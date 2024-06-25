@@ -6,9 +6,7 @@ import com.vonage.client.verify2.VerifyResponseException
 import org.junit.jupiter.api.Test
 import java.net.URI
 import java.util.UUID
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import kotlin.test.*
 
 class VerifyTest : AbstractTest() {
     private val verifyClient = vonageClient.verify
@@ -31,8 +29,9 @@ class VerifyTest : AbstractTest() {
     private val fromEmail = "bob@example.org"
     private val checkUrl = "https://api.nexmo.com/v2/verify/$requestId/silent-auth/redirect"
     private val redirectUrl = "https://acme-app.com/sa/redirect"
+    private val checkCodeRequestParams = mapOf("code" to code)
 
-    private fun assertVerifyResponseException(url: String, requestMethod: HttpMethod, actualCall: () -> Unit) {
+    private fun assertVerifyResponseException(url: String, requestMethod: HttpMethod, actualCall: () -> Any) {
         assertApiResponseException<VerifyResponseException>(url, requestMethod, actualCall)
         if (url.contains(requestId)) {
             assertApiResponseException<VerifyResponseException>(url, requestMethod, actualCall,
@@ -178,10 +177,36 @@ class VerifyTest : AbstractTest() {
 
     @Test
     fun `check code`() {
-        mockJsonJwtPost(requestIdUrl, expectedRequestParams = mapOf("code" to code))
+        mockJsonJwtPost(requestIdUrl, checkCodeRequestParams)
         verifyClient.checkVerificationCode(requestId, code)
         assertVerifyResponseException(requestIdUrl, HttpMethod.POST) {
             verifyClient.checkVerificationCode(requestId, code)
         }
+    }
+
+    @Test
+    fun `is valid verification code`() {
+        val call: () -> Boolean = {verifyClient.isValidVerificationCode(requestId, code)}
+
+        mockJsonJwtPost(requestIdUrl, checkCodeRequestParams, 200)
+        assertTrue(call.invoke())
+
+        val title = "Invalid Code"
+
+        mockJsonJwtPost(requestIdUrl, checkCodeRequestParams, 400, mapOf(
+            "title" to title,
+            "type" to "https://www.developer.vonage.com/api-errors/verify#invalid-code",
+            "detail" to "The code you provided does not match the expected value."
+        ))
+        assertFalse(call.invoke())
+
+        mockJsonJwtPost(requestIdUrl, checkCodeRequestParams, 410, mapOf(
+            "title" to title,
+            "type" to "https://www.developer.vonage.com/api-errors/verify#expired",
+            "detail" to "An incorrect code has been provided too many times. Workflow terminated."
+        ))
+        assertFalse(call.invoke())
+
+        assertVerifyResponseException(requestIdUrl, HttpMethod.POST, call)
     }
 }

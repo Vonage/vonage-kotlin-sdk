@@ -21,7 +21,7 @@ class Verify(private val verify2Client: Verify2Client) {
 
     fun isValidVerificationCode(requestId: String, code: String): Boolean {
         try {
-            verify2Client.checkVerificationCode(UUID.fromString(requestId), code)
+            checkVerificationCode(requestId, code)
             return true
         } catch (ex: VerifyResponseException) {
             if (ex.statusCode == 400 || ex.statusCode == 410) {
