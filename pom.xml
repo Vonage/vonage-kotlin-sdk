@@ -5,7 +5,7 @@
 
   <groupId>com.vonage</groupId>
   <artifactId>server-sdk-kotlin</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
 
   <packaging>jar</packaging>
   <name>Vonage Kotlin Server SDK</name>
@@ -262,7 +262,7 @@
             <configuration>
               <serverId>nexus-releases</serverId>
               <nexusUrl>${nexusUrl}</nexusUrl>
-              <autoReleaseAfterClose>false</autoReleaseAfterClose>
+              <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
           </plugin>
         </plugins>
