@@ -2,6 +2,7 @@
 
 [![Maven Release](https://maven-badges.herokuapp.com/maven-central/com.vonage/kotlin-server-sdk/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.vonage/kotlin-server-sdk)
 [![Build Status](https://github.com/Vonage/vonage-kotlin-sdk/actions/workflows/build.yml/badge.svg)](https://github.com/Vonage/vonage-kotlin-sdk/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/vonage/vonage-kotlin-sdk/branch/main/graph/badge.svg)](https://codecov.io/gh/vonage/vonage-kotlin-sdk)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 [![Snyk](https://snyk.io/test/github/vonage/vonage-java-sdk/badge.svg)](https://snyk.io/test/github/vonage/vonage-java-sdk)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.txt)

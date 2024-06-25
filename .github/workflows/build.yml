@@ -37,3 +37,5 @@ jobs:
           cache: maven
       - name: Compile with Maven
         run: mvn --batch-mode clean verify
+      - name: Run Codecov
+        uses: codecov/codecov-action@v4
