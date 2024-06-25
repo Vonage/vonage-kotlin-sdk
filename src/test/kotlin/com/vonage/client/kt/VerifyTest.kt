@@ -11,8 +11,9 @@ import kotlin.test.*
 class VerifyTest : AbstractTest() {
     private val verifyClient = vonageClient.verify
     private val baseUrl = "/v2/verify"
-    private val requestId = "c11236f4-00bf-4b89-84ba-88b25df97315"
-    private val requestIdUrl = "$baseUrl/$requestId"
+    private val requestIdStr = "c11236f4-00bf-4b89-84ba-88b25df97315"
+    private val requestId = UUID.fromString(requestIdStr)
+    private val requestIdUrl = "$baseUrl/$requestIdStr"
     private val brand = "Nexmo KT"
     private val clientRef = "my-personal-reference"
     private val timeout = 60
@@ -27,17 +28,17 @@ class VerifyTest : AbstractTest() {
     private val appHash = "ABC123def45"
     private val toEmail = "alice@example.com"
     private val fromEmail = "bob@example.org"
-    private val checkUrl = "https://api.nexmo.com/v2/verify/$requestId/silent-auth/redirect"
+    private val checkUrl = "https://api.nexmo.com/v2/verify/$requestIdStr/silent-auth/redirect"
     private val redirectUrl = "https://acme-app.com/sa/redirect"
     private val checkCodeRequestParams = mapOf("code" to code)
 
     private fun assertVerifyResponseException(url: String, requestMethod: HttpMethod, actualCall: () -> Any) {
         assertApiResponseException<VerifyResponseException>(url, requestMethod, actualCall)
-        if (url.contains(requestId)) {
+        if (url.contains(requestIdStr)) {
             assertApiResponseException<VerifyResponseException>(url, requestMethod, actualCall,
                 404, errorType = "https://developer.vonage.com/api-errors#not-found",
                 title = "Not Found", instance = "bf0ca0bf927b3b52e3cb03217e1a1ddf",
-                detail = "Request $requestId was not found or it has been verified already."
+                detail = "Request $requestIdStr was not found or it has been verified already."
             )
             if (requestMethod != HttpMethod.DELETE) {
                 assertApiResponseException<VerifyResponseException>(url, requestMethod, actualCall,
@@ -64,7 +65,7 @@ class VerifyTest : AbstractTest() {
                         }
                     )
                 ),
-                expectedResponseParams = mapOf("request_id" to requestId) +
+                expectedResponseParams = mapOf("request_id" to requestIdStr) +
                         if (channel == Channel.SILENT_AUTH) mapOf("check_url" to checkUrl) else mapOf()
             )
 
@@ -79,7 +80,7 @@ class VerifyTest : AbstractTest() {
                 }
             }
             assertNotNull(response)
-            assertEquals(UUID.fromString(requestId), response.requestId)
+            assertEquals(requestId, response.requestId)
             if (channel == Channel.SILENT_AUTH) {
                 assertEquals(URI.create(checkUrl), response.checkUrl)
             }
@@ -136,7 +137,7 @@ class VerifyTest : AbstractTest() {
                 )
             ),
             expectedResponseParams = mapOf(
-                "request_id" to requestId,
+                "request_id" to requestIdStr,
                 "check_url" to checkUrl
             ),
             status = 202
@@ -152,16 +153,17 @@ class VerifyTest : AbstractTest() {
         }
 
         assertNotNull(response)
-        assertEquals(UUID.fromString(requestId), response.requestId)
+        assertEquals(requestId, response.requestId)
         assertEquals(URI.create(checkUrl), response.checkUrl)
     }
 
     @Test
     fun `cancel verification`() {
         mockDelete(requestIdUrl)
+        verifyClient.cancelVerification(requestIdStr)
         verifyClient.cancelVerification(requestId)
         assertVerifyResponseException(requestIdUrl, HttpMethod.DELETE) {
-            verifyClient.cancelVerification(requestId)
+            verifyClient.cancelVerification(requestIdStr)
         }
     }
 
@@ -169,27 +171,26 @@ class VerifyTest : AbstractTest() {
     fun `next workflow`() {
         val expectedUrl = "$requestIdUrl/next-workflow"
         mockJsonJwtPost(expectedUrl)
+        verifyClient.nextWorkflow(requestIdStr)
         verifyClient.nextWorkflow(requestId)
         assertVerifyResponseException(expectedUrl, HttpMethod.POST) {
             verifyClient.nextWorkflow(requestId)
         }
-    }
-
-    @Test
-    fun `check code`() {
-        mockJsonJwtPost(requestIdUrl, checkCodeRequestParams)
-        verifyClient.checkVerificationCode(requestId, code)
-        assertVerifyResponseException(requestIdUrl, HttpMethod.POST) {
-            verifyClient.checkVerificationCode(requestId, code)
+        assertVerifyResponseException(expectedUrl, HttpMethod.POST) {
+            verifyClient.nextWorkflow(requestIdStr)
         }
     }
 
     @Test
-    fun `is valid verification code`() {
-        val call: () -> Boolean = {verifyClient.isValidVerificationCode(requestId, code)}
+    fun `check valid verification code`() {
+        val call: () -> Boolean = {verifyClient.isValidVerificationCode(requestIdStr, code)}
 
         mockJsonJwtPost(requestIdUrl, checkCodeRequestParams, 200)
         assertTrue(call.invoke())
+        verifyClient.checkVerificationCode(requestIdStr, code)
+        verifyClient.checkVerificationCode(requestId, code)
+        assertTrue(verifyClient.isValidVerificationCode(requestId, code))
+
 
         val title = "Invalid Code"
 
@@ -208,5 +209,8 @@ class VerifyTest : AbstractTest() {
         assertFalse(call.invoke())
 
         assertVerifyResponseException(requestIdUrl, HttpMethod.POST, call)
+        assertVerifyResponseException(requestIdUrl, HttpMethod.POST) {
+            verifyClient.checkVerificationCode(requestIdStr, code)
+        }
     }
 }
