@@ -1,6 +1,6 @@
 # Vonage Server SDK for Kotlin (JVM)
 
-[![Maven Release](https://maven-badges.herokuapp.com/maven-central/com.vonage/kotlin-server-sdk/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.vonage/kotlin-server-sdk)
+[![Maven Release](https://maven-badges.herokuapp.com/maven-central/com.vonage/server-sdk-kotlin/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.vonage/server-sdk-kotlin)
 [![Build Status](https://github.com/Vonage/vonage-kotlin-sdk/actions/workflows/build.yml/badge.svg)](https://github.com/Vonage/vonage-kotlin-sdk/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/Vonage/vonage-kotlin-sdk/graph/badge.svg?token=YNBJUD8OUT)](https://codecov.io/gh/Vonage/vonage-kotlin-sdk)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
@@ -36,9 +36,9 @@ See all of our SDKs and integrations on the [Vonage Developer portal](https://de
 
 ## Installation
 
-Releases are published to [Maven Central](https://central.sonatype.com/artifact/com.vonage/kotlin-server-sdk).
+Releases are published to [Maven Central](https://central.sonatype.com/artifact/com.vonage/server-sdk-kotlin).
 Instructions for your build system can be found in the snippets section.
-They're also available from [here](https://mvnrepository.com/artifact/com.vonage/kotlin-server-sdk/latest).
+They're also available from [here](https://mvnrepository.com/artifact/com.vonage/server-sdk-kotlin/latest).
 Release notes can be found in the [changelog](CHANGELOG.md).
 
 ### Build It Yourself
