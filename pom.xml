@@ -261,7 +261,7 @@
             <configuration>
               <serverId>nexus-releases</serverId>
               <nexusUrl>${nexusUrl}</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+              <autoReleaseAfterClose>false</autoReleaseAfterClose>
             </configuration>
           </plugin>
         </plugins>

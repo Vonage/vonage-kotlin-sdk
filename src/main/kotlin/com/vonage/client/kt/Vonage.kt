@@ -12,7 +12,6 @@ class Vonage constructor(init: VonageClient.Builder.() -> Unit) {
     private val vonageClient : VonageClient = VonageClient.builder().apply(init).build();
     val messages = Messages(vonageClient.messagesClient)
     val verify = Verify(vonageClient.verify2Client)
-
 }
 
 fun VonageClient.Builder.authFromEnv(): VonageClient.Builder {
