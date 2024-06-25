@@ -13,7 +13,6 @@ You'll need to have [created a Vonage account](https://dashboard.nexmo.com/sign-
 * [Supported APIs](#supported-apis)
 * [Other SDKs](#other-sdks)
 * [Installation](#installation)
-* [Usage](#usage)
 * [Configuration](#configuration)
 * [FAQ](#frequently-asked-questions)
 * [Contribute!](#contribute)
@@ -57,14 +56,8 @@ mvn install
 such as [Maven](https://maven.apache.org/), [Gradle](https://gradle.org/) or [Ivy](http://ant.apache.org/ivy/).
 
 We provide a [ZIP file for each release](https://github.com/Vonage/vonage-kotlin-sdk/releases/),
-containing the Java Server SDK JAR, along with all the dependencies. Download the file, unzip it, and add the JAR files
+containing the Kotlin Server SDK JAR, along with all the dependencies. Download the file, unzip it, and add the JAR files
 to your project's classpath.
-
-## Usage
-
-* For help understanding our APIs, check out our awesome [developer portal](https://developer.vonage.com/).
-* Check the [Javadoc](https://www.javadoc.io/doc/com.vonage/kotlin-server-sdk/latest/index.html) for full reference documentation.
-* There are also **many useful code samples** in our [Vonage/vonage-kotlin-code-snippets](https://github.com/Vonage/vonage-kotlin-code-snippets) repository.
 
 ## Configuration
 
