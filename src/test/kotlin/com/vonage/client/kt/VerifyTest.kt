@@ -1,35 +1,97 @@
 package com.vonage.client.kt
 
 import com.vonage.client.common.HttpMethod
+import com.vonage.client.verify2.Channel
+import com.vonage.client.verify2.VerifyResponseException
 import org.junit.jupiter.api.Test
 import java.net.URI
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class VerifyTest : AbstractTest() {
     private val verifyClient = vonageClient.verify
     private val baseUrl = "/v2/verify"
     private val requestId = "c11236f4-00bf-4b89-84ba-88b25df97315"
+    private val requestIdUrl = "$baseUrl/$requestId"
+    private val brand = "Nexmo KT"
+    private val clientRef = "my-personal-reference"
+    private val timeout = 60
+    private val fraudCheck = false
+    private val sandbox = true
+    private val codeLength = 5
+    private val code = "1228864"
+    private val locale = "ja-jp"
+    private val whatsappNumber = "447700400080"
+    private val entityId = "1101407360000017170"
+    private val contentId = "1107158078772563946"
+    private val appHash = "ABC123def45"
+    private val toEmail = "alice@example.com"
+    private val fromEmail = "bob@example.org"
+    private val checkUrl = "https://api.nexmo.com/v2/verify/$requestId/silent-auth/redirect"
+    private val redirectUrl = "https://acme-app.com/sa/redirect"
+
+    private fun assertVerifyResponseException(url: String, requestMethod: HttpMethod, actualCall: () -> Unit) {
+        assertApiResponseException<VerifyResponseException>(url, requestMethod, actualCall)
+        if (url.contains(requestId)) {
+            assertApiResponseException<VerifyResponseException>(url, requestMethod, actualCall,
+                404, errorType = "https://developer.vonage.com/api-errors#not-found",
+                title = "Not Found", instance = "bf0ca0bf927b3b52e3cb03217e1a1ddf",
+                detail = "Request $requestId was not found or it has been verified already."
+            )
+            if (requestMethod != HttpMethod.DELETE) {
+                assertApiResponseException<VerifyResponseException>(url, requestMethod, actualCall,
+                    409, errorType = "https://www.developer.vonage.com/api-errors/verify#conflict",
+                    title = "Conflict", instance = "738f9313-418a-4259-9b0d-6670f06fa82d",
+                    detail = "Concurrent verifications to the same number are not allowed."
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `send verification single workflow required parameters`() {
+        for (channel in Channel.entries) {
+            mockJsonJwtPost(
+                baseUrl, status = 202, expectedRequestParams = mapOf(
+                    "brand" to brand, "workflow" to listOf(
+                        mapOf(
+                            "channel" to channel.toString(),
+                            "to" to if (channel == Channel.EMAIL) toEmail else toNumber
+                        ) + when (channel) {
+                            Channel.WHATSAPP, Channel.WHATSAPP_INTERACTIVE -> mapOf("from" to whatsappNumber)
+                            else -> mapOf()
+                        }
+                    )
+                ),
+                expectedResponseParams = mapOf("request_id" to requestId) +
+                        if (channel == Channel.SILENT_AUTH) mapOf("check_url" to checkUrl) else mapOf()
+            )
+
+            val response = verifyClient.sendVerification(brand) {
+                when (channel) {
+                    Channel.VOICE -> voice(toNumber)
+                    Channel.SMS -> sms(toNumber)
+                    Channel.SILENT_AUTH -> silentAuth(toNumber)
+                    Channel.EMAIL -> email(toEmail)
+                    Channel.WHATSAPP -> whatsapp(toNumber, whatsappNumber)
+                    Channel.WHATSAPP_INTERACTIVE -> whatsappCodeless(toNumber, whatsappNumber)
+                }
+            }
+            assertNotNull(response)
+            assertEquals(UUID.fromString(requestId), response.requestId)
+            if (channel == Channel.SILENT_AUTH) {
+                assertEquals(URI.create(checkUrl), response.checkUrl)
+            }
+            else {
+                assertNull(response.checkUrl)
+            }
+        }
+    }
 
     @Test
     fun `send verification all workflows and parameters`() {
-        val brand = "Nexmo KT"
-        val clientRef = "my-personal-reference"
-        val timeout = 60
-        val fraudCheck = false
-        val sandbox = true
-        val codeLength = 5
-        val locale = "ja-jp"
-        val whatsappNumber = "447700400080"
-        val entityId = "1101407360000017170"
-        val contentId = "1107158078772563946"
-        val appHash = "ABC123def45"
-        val toEmail = "alice@example.com"
-        val fromEmail = "bob@example.org"
-        val checkUrl = "https://api.nexmo.com/v2/verify/$requestId/silent-auth/redirect"
-        val redirectUrl = "https://acme-app.com/sa/redirect"
-
         mockJsonJwtPost(baseUrl,
             expectedRequestParams = mapOf(
                 "brand" to brand,
@@ -77,15 +139,16 @@ class VerifyTest : AbstractTest() {
             expectedResponseParams = mapOf(
                 "request_id" to requestId,
                 "check_url" to checkUrl
-            )
+            ),
+            status = 202
         )
 
         val response = verifyClient.sendVerification {
             brand(brand); clientRef(clientRef); channelTimeout(timeout)
             fraudCheck(fraudCheck); codeLength(codeLength); locale(locale)
             silentAuth(toNumber, sandbox, redirectUrl); voice(altNumber); sms(toNumber) {
-                entityId(entityId); contentId(contentId); appHash(appHash); from(altNumber)
-            }; email(toEmail, fromEmail)
+            entityId(entityId); contentId(contentId); appHash(appHash); from(altNumber)
+        }; email(toEmail, fromEmail)
             whatsapp(altNumber, whatsappNumber); whatsappCodeless(toNumber, whatsappNumber)
         }
 
@@ -96,22 +159,29 @@ class VerifyTest : AbstractTest() {
 
     @Test
     fun `cancel verification`() {
-        mockDelete("$baseUrl/$requestId")
+        mockDelete(requestIdUrl)
         verifyClient.cancelVerification(requestId)
+        assertVerifyResponseException(requestIdUrl, HttpMethod.DELETE) {
+            verifyClient.cancelVerification(requestId)
+        }
     }
 
     @Test
     fun `next workflow`() {
-        mockJsonJwtPost("$baseUrl/$requestId/next-workflow")
+        val expectedUrl = "$requestIdUrl/next-workflow"
+        mockJsonJwtPost(expectedUrl)
         verifyClient.nextWorkflow(requestId)
+        assertVerifyResponseException(expectedUrl, HttpMethod.POST) {
+            verifyClient.nextWorkflow(requestId)
+        }
     }
 
     @Test
     fun `check code`() {
-        val code = "1228864"
-        mockJsonJwtPost("$baseUrl/$requestId",
-             expectedRequestParams = mapOf("code" to code)
-        )
+        mockJsonJwtPost(requestIdUrl, expectedRequestParams = mapOf("code" to code))
         verifyClient.checkVerificationCode(requestId, code)
+        assertVerifyResponseException(requestIdUrl, HttpMethod.POST) {
+            verifyClient.checkVerificationCode(requestId, code)
+        }
     }
 }

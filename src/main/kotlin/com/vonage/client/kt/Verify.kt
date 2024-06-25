@@ -34,8 +34,12 @@ class Verify(private val verify2Client: Verify2Client) {
 }
 
 fun VerificationRequest.Builder.silentAuth(
-    number: String, sandbox: Boolean = false, redirectUrl: String? = null): VerificationRequest.Builder =
-        addWorkflow(SilentAuthWorkflow(number, sandbox, redirectUrl))
+        number: String, sandbox: Boolean? = null, redirectUrl: String? = null): VerificationRequest.Builder {
+    val builder = SilentAuthWorkflow.builder(number)
+    if (sandbox != null) builder.sandbox(sandbox)
+    if (redirectUrl != null) builder.redirectUrl(redirectUrl)
+    return addWorkflow(builder.build())
+}
 
 fun VerificationRequest.Builder.sms(
         number: String, init: SmsWorkflow.Builder.() -> Unit = {}): VerificationRequest.Builder =
