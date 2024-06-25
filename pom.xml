@@ -151,8 +151,7 @@
             </goals>
             <configuration>
               <classifier>dokka</classifier>
-              <!--classesDirectory>${project.build.directory}/dokka</classesDirectory>
-              <skipIfEmpty>true</skipIfEmpty-->
+              <javadocDirectory>${project.build.directory}/dokka</javadocDirectory>
             </configuration>
           </execution>
         </executions>
@@ -205,9 +204,11 @@
         <version>1.9.20</version>
         <executions>
           <execution>
-            <phase>pre-site</phase>
+            <phase>prepare-package</phase>
             <goals>
               <goal>dokka</goal>
+              <goal>javadoc</goal>
+              <goal>javadocJar</goal>
             </goals>
           </execution>
         </executions>
