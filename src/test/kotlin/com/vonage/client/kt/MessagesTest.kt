@@ -16,6 +16,7 @@ import kotlin.test.assertNotNull
 class MessagesTest : AbstractTest() {
     private val messagesClient = vonageClient.messages
     private val sendUrl = "/v1/messages"
+    private val sandboxUrl = "https://messages-sandbox.nexmo.com$sendUrl"
     private val messageUuid = testUuid
     private val mmsChannel = "mms"
     private val whatsappChannel = "whatsapp"
@@ -31,7 +32,13 @@ class MessagesTest : AbstractTest() {
 
 
     private fun testSend(expectedBodyParams: Map<String, Any>, req: MessageRequest) {
-        mockJsonJwtPost(sendUrl, expectedBodyParams, 202, mapOf("message_uuid" to messageUuid))
+        val status = 202
+        val expectedResponseParams = mapOf("message_uuid" to messageUuid)
+
+        mockJsonJwtPost(sendUrl, expectedBodyParams, status, expectedResponseParams)
+        assertEquals(messageUuid, messagesClient.send(req))
+
+        mockJsonJwtPost(sandboxUrl, expectedBodyParams, status, expectedResponseParams)
         assertEquals(messageUuid, messagesClient.send(req))
     }
 

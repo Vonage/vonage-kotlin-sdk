@@ -9,9 +9,11 @@ import com.vonage.client.messages.viber.*
 import java.util.UUID
 
 class Messages(private val client: MessagesClient) {
-    fun send(message: MessageRequest): UUID {
-        return client.sendMessage(message).messageUuid
-    }
+    fun send(message: MessageRequest): UUID =
+        client.useRegularEndpoint().sendMessage(message).messageUuid
+
+    fun sendSandbox(message: MessageRequest): UUID =
+        client.useSandboxEndpoint().sendMessage(message).messageUuid
 }
 
 fun parseInboundMessage(json: String) : InboundMessage {
