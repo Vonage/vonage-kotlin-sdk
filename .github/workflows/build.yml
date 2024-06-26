@@ -55,7 +55,9 @@ jobs:
           java-version: ${{ matrix.java }}
           cache: maven
       - name: Test with Maven
-        run: mvn -e --batch-mode clean verify -Dfile.encoding=UTF8
+        env:
+          JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8
+        run: mvn -e --batch-mode clean verify
       - name: Run Codecov
         uses: codecov/codecov-action@v4
         with:
