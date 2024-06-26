@@ -44,6 +44,7 @@
     <nexusUrl>https://oss.sonatype.org</nexusUrl>
     <project.scm.connection>scm:git@github.com:Vonage/vonage-kotlin-sdk</project.scm.connection>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <kotlin.compiler.languageVersion>2.0</kotlin.compiler.languageVersion>
     <kotlin.compiler.apiVersion>2.0</kotlin.compiler.apiVersion>
     <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
