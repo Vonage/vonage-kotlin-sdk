@@ -20,16 +20,19 @@ abstract class AbstractTest {
     protected val applicationId = "00000000-0000-4000-8000-000000000000"
     private val apiSecret = "1234567890abcdef"
     private val apiKeySecretEncoded = "YTFiMmMzZDQ6MTIzNDU2Nzg5MGFiY2RlZg=="
+    protected val testUuid = UUID.fromString("aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab")
     protected val toNumber = "447712345689"
     protected val altNumber = "447700900001"
-    protected val testUuid = UUID.fromString("aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab")
+    protected val networkCode = "65512"
+    protected val startTime = "2020-09-17T12:34:56Z"
+    protected val endTime = "2021-09-17T12:35:28Z"
 
     private val port = 8081
     val wiremock: WireMockServer = WireMockServer(
         options().port(port).notifier(ConsoleNotifier(false))
     )
 
-    val vonageClient = Vonage {
+    val vonage = Vonage {
         apiKey(apiKey); apiSecret(apiSecret); applicationId(applicationId)
         privateKeyPath("src/test/resources/com/vonage/client/kt/application_key")
         httpConfig {
@@ -68,7 +71,7 @@ abstract class AbstractTest {
         contentType: ContentType? = null,
         accept: ContentType? = null,
         authType: AuthType? = null,
-        expectedBodyParams: Map<String, Any>? = null): BuildingStep =
+        expectedParams: Map<String, Any>? = null): BuildingStep =
             wiremock.requestServerBuilderStep({
                 url equalTo expectedUrl
                 headers contains "User-Agent" like "vonage-java-sdk\\/.+ java\\/.+"
@@ -87,12 +90,18 @@ abstract class AbstractTest {
                 }
                 if (contentType != null) {
                     headers contains "Content-Type" equalTo contentType.mime
+                    if (expectedParams != null) when(contentType) {
+                        ContentType.APPLICATION_JSON -> {
+                            body equalTo ObjectMapper().writeValueAsString(expectedParams)
+                        }
+                        ContentType.FORM_URLENCODED -> {
+                            // TODO recursive decomposition for nested params
+                            expectedParams.forEach {k, v -> headers contains k equalTo v.toString() }
+                        }
+                    }
                 }
                 if (accept != null) {
                     headers contains "Accept" equalTo accept.mime
-                }
-                if (expectedBodyParams != null) {
-                    body equalTo ObjectMapper().writeValueAsString(expectedBodyParams)
                 }
             }, when (httpMethod) {
                     HttpMethod.GET -> WireMock::get
@@ -114,8 +123,21 @@ abstract class AbstractTest {
             AuthType.JWT, expectedRequestParams
         ).mockReturn(status, expectedResponseParams)
 
-    protected fun mockDelete(expectedUrl: String, authType: AuthType? = null): ReturnsStep =
+    protected fun mockDelete(expectedUrl: String, authType: AuthType? = null) =
         mockRequest(HttpMethod.DELETE, expectedUrl, authType = authType).mockReturn(204)
+
+    protected fun mockGet(expectedUrl: String,
+                             expectedQueryParams: Map<String, Any>? = null,
+                             status: Int = 200,
+                             authType: AuthType? = AuthType.JWT,
+                             expectedResponseParams: Map<String, Any>) =
+
+        mockRequest(HttpMethod.GET, expectedUrl,
+            contentType = if (expectedQueryParams != null) ContentType.FORM_URLENCODED else null,
+            accept = ContentType.APPLICATION_JSON,
+            authType = authType, expectedQueryParams
+        ).mockReturn(status, expectedResponseParams)
+
 
     protected fun BuildingStep.mockReturn(
             status: Int? = null, expectedBody: Map<String, Any>? = null): ReturnsStep =

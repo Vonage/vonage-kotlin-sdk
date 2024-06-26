@@ -2,16 +2,12 @@ package com.vonage.client.kt
 
 import com.vonage.client.HttpConfig
 import com.vonage.client.VonageClient
-import com.vonage.client.account.AccountClient
-import com.vonage.client.messages.MessagesClient
-import com.vonage.client.verify2.SmsWorkflow
-import com.vonage.client.verify2.Verify2Client
-import com.vonage.client.voice.VoiceClient
 
 class Vonage constructor(init: VonageClient.Builder.() -> Unit) {
     private val vonageClient : VonageClient = VonageClient.builder().apply(init).build();
     val messages = Messages(vonageClient.messagesClient)
     val verify = Verify(vonageClient.verify2Client)
+    val voice = Voice(vonageClient.voiceClient)
 }
 
 fun VonageClient.Builder.authFromEnv(): VonageClient.Builder {

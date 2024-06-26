@@ -8,7 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Sandbox support in Messages
+- Voice API
 
+### Fixed
+- `authFromEnv` now checks for absent environment variables before attempting to set them
 
 ## [0.1.0] - 2024-06-25
 

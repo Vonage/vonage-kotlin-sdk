@@ -9,7 +9,7 @@ import java.util.UUID
 import kotlin.test.*
 
 class VerifyTest : AbstractTest() {
-    private val verifyClient = vonageClient.verify
+    private val verifyClient = vonage.verify
     private val baseUrl = "/v2/verify"
     private val requestIdStr = "c11236f4-00bf-4b89-84ba-88b25df97315"
     private val requestId = UUID.fromString(requestIdStr)

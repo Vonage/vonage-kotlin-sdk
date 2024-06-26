@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class MessagesTest : AbstractTest() {
-    private val messagesClient = vonageClient.messages
+    private val messagesClient = vonage.messages
     private val sendUrl = "/v1/messages"
     private val messageUuid = testUuid
     private val mmsChannel = "mms"
