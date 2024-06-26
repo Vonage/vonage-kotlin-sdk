@@ -15,11 +15,16 @@ class Vonage constructor(init: VonageClient.Builder.() -> Unit) {
 }
 
 fun VonageClient.Builder.authFromEnv(): VonageClient.Builder {
-    apiKey(env("VONAGE_API_KEY"))
-    apiSecret(env("VONAGE_API_SECRET"))
-    signatureSecret(env("VONAGE_SIGNATURE_SECRET"))
-    applicationId(env("VONAGE_APPLICATION_ID"))
-    privateKeyPath(env("VONAGE_PRIVATE_KEY_PATH"))
+    val apiKey = env("VONAGE_API_KEY")
+    val apiSecret = env("VONAGE_API_SECRET")
+    val signatureSecret = env("VONAGE_SIGNATURE_SECRET")
+    val applicationId = env("VONAGE_APPLICATION_ID")
+    val privateKeyPath = env("VONAGE_PRIVATE_KEY_PATH")
+    if (apiKey != null) apiKey(apiKey)
+    if (apiSecret != null) apiSecret(apiSecret)
+    if (signatureSecret != null) signatureSecret(signatureSecret)
+    if (applicationId != null) applicationId(applicationId)
+    if (privateKeyPath != null) privateKeyPath(privateKeyPath)
     return this
 }
 
