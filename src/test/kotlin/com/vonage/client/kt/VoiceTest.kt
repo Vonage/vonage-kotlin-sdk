@@ -11,9 +11,41 @@ import kotlin.test.assertNotNull
 
 class VoiceTest : AbstractTest() {
     private val voiceClient = vonage.voice
-    private val callsUrl = "/v1/calls"
+    private val callsBaseUrl = "/v1/calls"
     private val callIdStr = "63f61863-4a51-4f6b-86e1-46edebcf9356"
+    private val callUrl = "$callsBaseUrl/$callIdStr"
+    private val callObj = voiceClient.call(UUID.fromString(callIdStr))
     private val conversationId = "CON-f972836a-550f-45fa-956c-12a2ab5b7d22"
+
+    private fun testModifyCall(actionName: String, invocation: () -> Unit) {
+        mockPut(expectedUrl = callUrl, expectedRequestParams = mapOf("action" to actionName), status = 204)
+        invocation.invoke()
+    }
+
+    @Test
+    fun `terminate call`() {
+        testModifyCall("hangup", callObj::hangup)
+    }
+
+    @Test
+    fun `mute call`() {
+        testModifyCall("mute", callObj::mute)
+    }
+
+    @Test
+    fun `umute call`() {
+        testModifyCall("unmute", callObj::unmute)
+    }
+
+    @Test
+    fun `earmuff call`() {
+        testModifyCall("earmuff", callObj::earmuff)
+    }
+
+    @Test
+    fun `umearmuff call`() {
+        testModifyCall("unearmuff", callObj::unearmuff)
+    }
 
     @Test
     fun `get call`() {
@@ -22,7 +54,7 @@ class VoiceTest : AbstractTest() {
         val rate = "0.39"
         val phoneType = "phone"
 
-        mockGet(expectedUrl = "$callsUrl/$callIdStr", expectedResponseParams = mapOf(
+        mockGet(expectedUrl = callUrl, expectedResponseParams = mapOf(
             "_links" to mapOf(
                 "self" to mapOf(
                     "href" to "/calls/$callIdStr"
@@ -48,7 +80,7 @@ class VoiceTest : AbstractTest() {
             "network" to networkCode
         ))
 
-        val response = voiceClient.getCall(UUID.fromString(callIdStr))
+        val response = callObj.get()
         assertNotNull(response)
         assertEquals(callIdStr, response.uuid)
         assertEquals(conversationId, response.conversationUuid)

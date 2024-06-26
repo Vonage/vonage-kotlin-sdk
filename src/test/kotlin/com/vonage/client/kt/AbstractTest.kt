@@ -112,16 +112,37 @@ abstract class AbstractTest {
                     else -> throw IllegalArgumentException("Unhandled HTTP method: $httpMethod")
             })
 
-    protected fun mockJsonJwtPost(expectedUrl: String,
-                                  expectedRequestParams: Map<String, Any>? = null,
-                                  status: Int = 200,
-                                  expectedResponseParams: Map<String, Any>? = null) =
+    private fun mockP(requestMethod: HttpMethod, expectedUrl: String,
+                      expectedRequestParams: Map<String, Any>? = null,
+                      status: Int = 200, authType: AuthType? = AuthType.JWT,
+                      expectedResponseParams: Map<String, Any>? = null) =
 
-        mockRequest(HttpMethod.POST, expectedUrl,
+        mockRequest(requestMethod, expectedUrl,
             contentType = if (expectedRequestParams != null) ContentType.APPLICATION_JSON else null,
             accept = if (expectedResponseParams != null && status < 400) ContentType.APPLICATION_JSON else null,
-            AuthType.JWT, expectedRequestParams
+            authType = authType, expectedRequestParams
         ).mockReturn(status, expectedResponseParams)
+
+    protected fun mockPost(expectedUrl: String,
+                           expectedRequestParams: Map<String, Any>? = null,
+                           status: Int = 200,
+                           authType: AuthType? = AuthType.JWT,
+                           expectedResponseParams: Map<String, Any>? = null) =
+        mockP(HttpMethod.POST, expectedUrl, expectedRequestParams, status, authType, expectedResponseParams)
+
+    protected fun mockPut(expectedUrl: String,
+                           expectedRequestParams: Map<String, Any>? = null,
+                           status: Int = 200,
+                           authType: AuthType? = AuthType.JWT,
+                           expectedResponseParams: Map<String, Any>? = null) =
+        mockP(HttpMethod.PUT, expectedUrl, expectedRequestParams, status, authType, expectedResponseParams)
+
+    protected fun mockPatch(expectedUrl: String,
+                          expectedRequestParams: Map<String, Any>? = null,
+                          status: Int = 200,
+                          authType: AuthType? = AuthType.JWT,
+                          expectedResponseParams: Map<String, Any>? = null) =
+        mockP(HttpMethod.PUT, expectedUrl, expectedRequestParams, status, authType, expectedResponseParams)
 
     protected fun mockDelete(expectedUrl: String, authType: AuthType? = null) =
         mockRequest(HttpMethod.DELETE, expectedUrl, authType = authType).mockReturn(204)
@@ -134,8 +155,7 @@ abstract class AbstractTest {
 
         mockRequest(HttpMethod.GET, expectedUrl,
             contentType = if (expectedQueryParams != null) ContentType.FORM_URLENCODED else null,
-            accept = ContentType.APPLICATION_JSON,
-            authType = authType, expectedQueryParams
+            accept = ContentType.APPLICATION_JSON, authType, expectedQueryParams
         ).mockReturn(status, expectedResponseParams)
 
 

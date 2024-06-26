@@ -53,7 +53,7 @@ class VerifyTest : AbstractTest() {
     @Test
     fun `send verification single workflow required parameters`() {
         for (channel in Channel.entries) {
-            mockJsonJwtPost(
+            mockPost(
                 baseUrl, status = 202, expectedRequestParams = mapOf(
                     "brand" to brand, "workflow" to listOf(
                         mapOf(
@@ -92,7 +92,7 @@ class VerifyTest : AbstractTest() {
 
     @Test
     fun `send verification all workflows and parameters`() {
-        mockJsonJwtPost(baseUrl,
+        mockPost(baseUrl,
             expectedRequestParams = mapOf(
                 "brand" to brand,
                 "client_ref" to clientRef,
@@ -170,7 +170,7 @@ class VerifyTest : AbstractTest() {
     @Test
     fun `next workflow`() {
         val expectedUrl = "$requestIdUrl/next-workflow"
-        mockJsonJwtPost(expectedUrl)
+        mockPost(expectedUrl)
         verifyClient.nextWorkflow(requestIdStr)
         verifyClient.nextWorkflow(requestId)
         assertVerifyResponseException(expectedUrl, HttpMethod.POST) {
@@ -185,7 +185,7 @@ class VerifyTest : AbstractTest() {
     fun `check valid verification code`() {
         val call: () -> Boolean = {verifyClient.isValidVerificationCode(requestIdStr, code)}
 
-        mockJsonJwtPost(requestIdUrl, checkCodeRequestParams, 200)
+        mockPost(requestIdUrl, checkCodeRequestParams, 200)
         assertTrue(call.invoke())
         verifyClient.checkVerificationCode(requestIdStr, code)
         verifyClient.checkVerificationCode(requestId, code)
@@ -194,14 +194,14 @@ class VerifyTest : AbstractTest() {
 
         val title = "Invalid Code"
 
-        mockJsonJwtPost(requestIdUrl, checkCodeRequestParams, 400, mapOf(
+        mockPost(requestIdUrl, checkCodeRequestParams, 400, expectedResponseParams = mapOf(
             "title" to title,
             "type" to "https://www.developer.vonage.com/api-errors/verify#invalid-code",
             "detail" to "The code you provided does not match the expected value."
         ))
         assertFalse(call.invoke())
 
-        mockJsonJwtPost(requestIdUrl, checkCodeRequestParams, 410, mapOf(
+        mockPost(requestIdUrl, checkCodeRequestParams, 410, expectedResponseParams = mapOf(
             "title" to title,
             "type" to "https://www.developer.vonage.com/api-errors/verify#expired",
             "detail" to "An incorrect code has been provided too many times. Workflow terminated."

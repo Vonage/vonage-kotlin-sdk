@@ -34,7 +34,10 @@ class MessagesTest : AbstractTest() {
         val status = 202
         val expectedResponseParams = mapOf("message_uuid" to messageUuid)
 
-        mockJsonJwtPost(sendUrl, expectedBodyParams, status, expectedResponseParams)
+        mockPost(
+            expectedUrl = sendUrl, expectedRequestParams = expectedBodyParams,
+            status = status, expectedResponseParams = expectedResponseParams
+        )
         assertEquals(messageUuid, messagesClient.send(req))
 
         // TODO fix mocking full url
