@@ -47,7 +47,6 @@
     <kotlin.compiler.languageVersion>2.0</kotlin.compiler.languageVersion>
     <kotlin.compiler.apiVersion>2.0</kotlin.compiler.apiVersion>
     <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
-    <jacoco.test.argLine>-Djava.security.manager=allow</jacoco.test.argLine>
   </properties>
 
   <dependencies>
@@ -120,7 +119,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.3.0</version>
         <configuration>
-          <argLine>@{jacoco.test.argLine}</argLine>
+          <reuseForks>false</reuseForks>
         </configuration>
       </plugin>
       <plugin>
@@ -133,9 +132,6 @@
             <goals>
               <goal>prepare-agent</goal>
             </goals>
-            <configuration>
-              <propertyName>jacoco.test.argLine</propertyName>
-            </configuration>
           </execution>
           <execution>
             <id>jacoco-report</id>
