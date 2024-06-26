@@ -118,14 +118,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.3.0</version>
-        <configuration>
-          <includes>
-            <include>**/*Test.kt</include>
-          </includes>
-          <useSystemClassLoader>false</useSystemClassLoader>
-          <includeJUnit5Engines>true</includeJUnit5Engines>
-          <argLine>-Djava.security.manager=allow</argLine>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -133,12 +125,13 @@
         <version>0.8.12</version>
         <executions>
           <execution>
+            <id>jacoco-init</id>
             <goals>
               <goal>prepare-agent</goal>
             </goals>
           </execution>
           <execution>
-            <id>report</id>
+            <id>jacoco-report</id>
             <phase>test</phase>
             <goals>
               <goal>report</goal>

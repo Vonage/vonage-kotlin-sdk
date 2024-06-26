@@ -1,7 +1,7 @@
 package com.vonage.client.kt
 
 import org.junit.jupiter.api.Test
-import kotlin.test.assertNotNull
+import kotlin.test.*
 
 class VonageTest {
 
