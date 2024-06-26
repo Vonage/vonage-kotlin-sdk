@@ -47,6 +47,7 @@
     <kotlin.compiler.languageVersion>2.0</kotlin.compiler.languageVersion>
     <kotlin.compiler.apiVersion>2.0</kotlin.compiler.apiVersion>
     <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
+    <argLine>-Djava.security.manager=allow</argLine>
   </properties>
 
   <dependencies>
@@ -118,6 +119,10 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.3.0</version>
+        <configuration>
+          <forkCount>1</forkCount>
+          <reuseForks>true</reuseForks>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
