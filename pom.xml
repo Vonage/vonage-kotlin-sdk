@@ -48,7 +48,6 @@
     <kotlin.compiler.languageVersion>2.0</kotlin.compiler.languageVersion>
     <kotlin.compiler.apiVersion>2.0</kotlin.compiler.apiVersion>
     <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
-    <argLine>-Dfile.encoding=UTF8</argLine>
   </properties>
 
   <dependencies>
