@@ -23,6 +23,7 @@ abstract class AbstractTest {
     protected val testUuid = UUID.fromString("aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab")
     protected val toNumber = "447712345689"
     protected val altNumber = "447700900001"
+    protected val text = "Hello, World!"
     protected val networkCode = "65512"
     protected val startTime = "2020-09-17T12:34:56Z"
     protected val endTime = "2021-09-17T12:35:28Z"

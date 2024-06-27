@@ -21,7 +21,6 @@ class MessagesTest : AbstractTest() {
     private val whatsappChannel = "whatsapp"
     private val viberChannel = "viber_service"
     private val messengerChannel = "messenger"
-    private val text = "Hello, World!"
     private val caption = "Additional text to accompany the media"
     private val imageUrl = "https://example.com/image.jpg"
     private val audioUrl = "https://example.com/audio.mp3"

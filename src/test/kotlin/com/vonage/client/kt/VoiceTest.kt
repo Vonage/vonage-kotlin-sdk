@@ -3,6 +3,9 @@ package com.vonage.client.kt
 import com.vonage.client.voice.CallDirection
 import com.vonage.client.voice.CallStatus
 import com.vonage.client.voice.PhoneEndpoint
+import com.vonage.client.voice.ncco.Ncco
+import com.vonage.client.voice.ncco.TalkAction
+import java.net.URI
 import java.time.Instant
 import java.util.*
 import kotlin.test.Test
@@ -17,8 +20,18 @@ class VoiceTest : AbstractTest() {
     private val callObj = voiceClient.call(UUID.fromString(callIdStr))
     private val conversationId = "CON-f972836a-550f-45fa-956c-12a2ab5b7d22"
 
-    private fun testModifyCall(actionName: String, invocation: () -> Unit) {
-        mockPut(expectedUrl = callUrl, expectedRequestParams = mapOf("action" to actionName), status = 204)
+    private fun testModifyCall(actionName: String = "transfer", invocation: () -> Unit,
+                               nccoAction: Map<String, Any>? = null, nccoUrl: String? = null) {
+        mockPut(expectedUrl = callUrl,
+            expectedRequestParams = mapOf("action" to actionName) + (
+                        if (actionName == "transfer") mapOf(
+                            "destination" to mapOf("type" to "ncco") +
+                            if (nccoUrl != null) mapOf("url" to listOf(nccoUrl))
+                            else mapOf("ncco" to listOf(nccoAction))
+                        ) else mapOf()
+                    ),
+            status = 204
+        )
         invocation.invoke()
     }
 
@@ -100,5 +113,21 @@ class VoiceTest : AbstractTest() {
         assertEquals(Instant.parse(startTime), response.startTime.toInstant())
         assertEquals(Instant.parse(endTime), response.endTime.toInstant())
         assertEquals(networkCode, response.network)
+    }
+
+    @Test
+    fun `transfer call with answer url`() {
+        val answerUrl = "https://example.com/ncco.json"
+        testModifyCall(nccoUrl = answerUrl, invocation = {
+            callObj.transfer(URI.create(answerUrl))
+            callObj.transfer(answerUrl)
+        })
+    }
+
+    @Test
+    fun `transfer call with ncco`() {
+        testModifyCall(nccoAction = mapOf("action" to "talk", "text" to text), invocation = {
+            callObj.transfer(Ncco(TalkAction.builder(text).build()))
+        })
     }
 }
