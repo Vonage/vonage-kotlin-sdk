@@ -27,6 +27,7 @@ abstract class AbstractTest {
     protected val networkCode = "65512"
     protected val startTime = "2020-09-17T12:34:56Z"
     protected val endTime = "2021-09-17T12:35:28Z"
+    protected val timestamp = "2016-11-14T07:45:14Z"
 
     private val port = 8081
     val wiremock: WireMockServer = WireMockServer(
@@ -91,18 +92,20 @@ abstract class AbstractTest {
                 }
                 if (contentType != null) {
                     headers contains "Content-Type" equalTo contentType.mime
-                    if (expectedParams != null) when(contentType) {
-                        ContentType.APPLICATION_JSON -> {
-                            body equalTo ObjectMapper().writeValueAsString(expectedParams)
-                        }
-                        ContentType.FORM_URLENCODED -> {
-                            // TODO recursive decomposition for nested params
-                            expectedParams.forEach {k, v -> headers contains k equalTo v.toString() }
-                        }
-                    }
                 }
                 if (accept != null) {
                     headers contains "Accept" equalTo accept.mime
+                }
+                if (expectedParams != null) {
+                    if (contentType == ContentType.APPLICATION_JSON) {
+                        body equalTo ObjectMapper().writeValueAsString(expectedParams)
+                    }
+                    else {
+                        url like "$expectedUrl\\?.+"
+                        expectedParams.forEach { (k, v) ->
+                            queryParams contains k equalTo v.toString()
+                        }
+                    }
                 }
             }, when (httpMethod) {
                     HttpMethod.GET -> WireMock::get
@@ -154,10 +157,8 @@ abstract class AbstractTest {
                              authType: AuthType? = AuthType.JWT,
                              expectedResponseParams: Map<String, Any>) =
 
-        mockRequest(HttpMethod.GET, expectedUrl,
-            contentType = if (expectedQueryParams != null) ContentType.FORM_URLENCODED else null,
-            accept = ContentType.APPLICATION_JSON, authType, expectedQueryParams
-        ).mockReturn(status, expectedResponseParams)
+        mockRequest(HttpMethod.GET, expectedUrl, accept = ContentType.APPLICATION_JSON, authType = authType,
+            expectedParams = expectedQueryParams).mockReturn(status, expectedResponseParams)
 
 
     protected fun BuildingStep.mockReturn(

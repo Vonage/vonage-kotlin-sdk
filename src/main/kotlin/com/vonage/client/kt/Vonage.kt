@@ -24,10 +24,7 @@ fun VonageClient.Builder.authFromEnv(): VonageClient.Builder {
     return this
 }
 
-fun VonageClient.Builder.httpConfig(init: HttpConfig.Builder.() -> Unit): VonageClient.Builder {
-    return this.httpConfig(HttpConfig.builder().apply(init).build())
-}
+fun VonageClient.Builder.httpConfig(init: HttpConfig.Builder.() -> Unit): VonageClient.Builder =
+    httpConfig(HttpConfig.builder().apply(init).build())
 
-private fun env(variable: String) : String? {
-    return System.getenv(variable)
-}
+private fun env(variable: String) : String? = System.getenv(variable)

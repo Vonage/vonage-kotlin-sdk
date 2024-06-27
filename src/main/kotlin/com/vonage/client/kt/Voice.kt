@@ -1,11 +1,9 @@
 package com.vonage.client.kt
 
-import com.vonage.client.voice.CallInfo
-import com.vonage.client.voice.CallInfoPage
-import com.vonage.client.voice.CallsFilter
-import com.vonage.client.voice.VoiceClient
+import com.vonage.client.voice.*
 import com.vonage.client.voice.ncco.Ncco
 import java.net.URI
+import java.time.Instant
 import java.util.*
 
 class Voice(private val voiceClient: VoiceClient) {
@@ -35,5 +33,13 @@ class Voice(private val voiceClient: VoiceClient) {
         fun transfer(nccoUrl: URI) = transfer(nccoUrl.toString())
     }
 
-    fun listCalls(filter: CallsFilter? = null): CallInfoPage = voiceClient.listCalls(filter)
+    fun listCalls(filter: (CallsFilter.Builder.() -> Unit)? = null): CallInfoPage =
+        if (filter == null) voiceClient.listCalls()
+        else voiceClient.listCalls(CallsFilter.builder().apply(filter).build())
 }
+
+fun CallsFilter.Builder.dateStart(dateStart: String): CallsFilter.Builder =
+    dateStart(Date.from(Instant.parse(dateStart)))
+
+fun CallsFilter.Builder.dateEnd(dateEnd: String): CallsFilter.Builder =
+    dateEnd(Date.from(Instant.parse(dateEnd)))
