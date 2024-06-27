@@ -1,5 +1,7 @@
 package com.vonage.client.kt
 
+import com.vonage.client.common.HttpMethod
+import com.vonage.client.video.Websocket.AudioRate
 import com.vonage.client.voice.*
 import com.vonage.client.voice.ncco.Ncco
 import com.vonage.client.voice.ncco.TalkAction
@@ -40,7 +42,7 @@ class VoiceTest : AbstractTest() {
             "number" to altNumber
         ),
         "status" to "completed",
-        "direction" to "outbound",
+        "direction" to "inbound",
         "rate" to rate,
         "price" to price,
         "duration" to "$duration",
@@ -74,7 +76,7 @@ class VoiceTest : AbstractTest() {
         assertEquals(phoneType, from.type)
         assertEquals(altNumber, (from as PhoneEndpoint).number)
         assertEquals(CallStatus.COMPLETED, callInfo.status)
-        assertEquals(CallDirection.OUTBOUND, callInfo.direction)
+        assertEquals(CallDirection.INBOUND, callInfo.direction)
         assertEquals(rate, callInfo.rate)
         assertEquals(price, callInfo.price)
         assertEquals(duration, callInfo.duration)
@@ -187,4 +189,92 @@ class VoiceTest : AbstractTest() {
         assertEqualsSampleCallsPage(voiceClient.listCalls())
     }
 
+    @Test
+    fun `create call to all endpoint types with all fields and answer url`() {
+        val answerUrl = "https://example.com/answer"
+        val eventUrl = "https://example.com/event"
+        val websocketUri = "wss://example.com/socket"
+        val sipUri = "sip:rebekka@sip.example.com"
+        val customHeaders = mapOf(
+            "customer_id" to "abc123",
+            "purchases" to 19,
+            "Cat person" to true,
+            "Cars" to listOf("M240i", "M2 CS", "C63s", "RS 3"),
+            "Location" to "NY"
+        )
+        val fromPstn = "14155550100"
+        val lengthTimer = 5600
+        val ringingTimer = 42
+        val beepTimeout = 78
+        val answerMethod = HttpMethod.GET
+        val eventMethod = HttpMethod.POST
+        val amdBehaviour = MachineDetection.HANGUP
+        val amdMode = AdvancedMachineDetection.Mode.DETECT_BEEP
+        val wsContentType = "audio/l16;rate=8000"
+        val dtmf = "p*123#"
+        val vbcExt = "4321"
+        val userToUserHeader = "56a390f3d2b7310023a"
+
+        mockPost(callsBaseUrl, expectedRequestParams = mapOf(
+            "answer_url" to listOf(answerUrl),
+            "answer_method" to answerMethod.name,
+            "to" to listOf(
+                mapOf(
+                    "type" to phoneType,
+                    "number" to toNumber,
+                    "dtmfAnswer" to dtmf
+                ),
+                mapOf(
+                    "type" to "vbc",
+                    "extension" to vbcExt
+                ),
+                mapOf(
+                    "type" to "websocket",
+                    "uri" to websocketUri,
+                    "content-type" to wsContentType,
+                    "headers" to customHeaders
+                ),
+                mapOf(
+                    "type" to "sip",
+                    "uri" to sipUri,
+                    "headers" to customHeaders,
+                    "standard_headers" to mapOf("User-to-User" to userToUserHeader)
+                )
+            ),
+            "from" to mapOf(
+                "type" to phoneType,
+                "number" to fromPstn
+            ),
+            "random_from_number" to false,
+            "event_url" to listOf(eventUrl),
+            "event_method" to eventMethod,
+            "advanced_machine_detection" to mapOf(
+                "behavior" to amdBehaviour.name.lowercase(),
+                "mode" to amdMode.name.lowercase(),
+                "beep_timeout" to beepTimeout
+            ),
+            "length_timer" to lengthTimer,
+            "ringing_timer" to ringingTimer
+        ), status = 201, expectedResponseParams = mapOf(
+            "uuid" to callIdStr,
+            "status" to "ringing",
+            "direction" to "outbound",
+            "conversation_uuid" to conversationId
+        ))
+
+        voiceClient.createCall {
+            answerUrl(answerUrl); answerMethod(answerMethod)
+            from(fromPstn); fromRandomNumber(false);
+            eventUrl(eventUrl); eventMethod(eventMethod)
+            lengthTimer(lengthTimer); ringingTimer(ringingTimer)
+            advancedMachineDetection {
+                behavior(amdBehaviour); beepTimeout(beepTimeout); mode(amdMode)
+            }
+            to(
+                PhoneEndpoint(toNumber, dtmf), VbcEndpoint(vbcExt),
+                WebSocketEndpoint(websocketUri, wsContentType, customHeaders),
+                SipEndpoint(sipUri, customHeaders, userToUserHeader)
+            )
+        }
+    }
 }

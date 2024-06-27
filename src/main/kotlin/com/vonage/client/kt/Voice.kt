@@ -8,11 +8,11 @@ import java.util.*
 
 class Voice(private val voiceClient: VoiceClient) {
 
-    fun call(callId: String): Call = Call(callId)
+    fun call(callId: String): ExistingCall = ExistingCall(callId)
 
-    fun call(callId: UUID): Call = call(callId.toString())
+    fun call(callId: UUID): ExistingCall = call(callId.toString())
 
-    inner class Call(val callId: String) {
+    inner class ExistingCall(val callId: String) {
 
         fun get(): CallInfo = voiceClient.getCallDetails(callId)
 
@@ -36,6 +36,9 @@ class Voice(private val voiceClient: VoiceClient) {
     fun listCalls(filter: (CallsFilter.Builder.() -> Unit)? = null): CallInfoPage =
         if (filter == null) voiceClient.listCalls()
         else voiceClient.listCalls(CallsFilter.builder().apply(filter).build())
+
+    fun createCall(call: (Call.Builder.() -> Unit)): CallEvent =
+        voiceClient.createCall(Call.builder().apply(call).build())
 }
 
 fun CallsFilter.Builder.dateStart(dateStart: String): CallsFilter.Builder =
@@ -43,3 +46,6 @@ fun CallsFilter.Builder.dateStart(dateStart: String): CallsFilter.Builder =
 
 fun CallsFilter.Builder.dateEnd(dateEnd: String): CallsFilter.Builder =
     dateEnd(Date.from(Instant.parse(dateEnd)))
+
+fun Call.Builder.advancedMachineDetection(amd: AdvancedMachineDetection.Builder.() -> Unit): Call.Builder =
+    advancedMachineDetection(AdvancedMachineDetection.builder().apply(amd).build());
