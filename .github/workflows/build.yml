@@ -57,6 +57,10 @@ jobs:
       - name: Test with Maven
         env:
           JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF8
+          VONAGE_API_KEY: a1b2c3d4
+          VONAGE_API_SECRET: 1234567890abcdef
+          VONAGE_SIGNATURE_SECRET: abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQR
+          VONAGE_PRIVATE_KEY_PATH: src/test/resources/com/vonage/client/kt/application_key
         run: mvn -e --batch-mode clean verify
       - name: Run Codecov
         uses: codecov/codecov-action@v4

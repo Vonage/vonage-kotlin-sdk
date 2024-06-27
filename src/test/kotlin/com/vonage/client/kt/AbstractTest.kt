@@ -19,7 +19,9 @@ abstract class AbstractTest {
     protected val apiKey = "a1b2c3d4"
     protected val applicationId = "00000000-0000-4000-8000-000000000000"
     private val apiSecret = "1234567890abcdef"
+    private val signatureSecret = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQR"
     private val apiKeySecretEncoded = "YTFiMmMzZDQ6MTIzNDU2Nzg5MGFiY2RlZg=="
+    private val privateKeyPath = "src/test/resources/com/vonage/client/kt/application_key"
     protected val testUuid = UUID.fromString("aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab")
     protected val toNumber = "447712345689"
     protected val altNumber = "447700900001"
@@ -35,8 +37,9 @@ abstract class AbstractTest {
     )
 
     val vonage = Vonage {
-        apiKey(apiKey); apiSecret(apiSecret); applicationId(applicationId)
-        privateKeyPath("src/test/resources/com/vonage/client/kt/application_key")
+        apiKey(apiKey); apiSecret(apiSecret);
+        signatureSecret(signatureSecret); applicationId(applicationId)
+        privateKeyPath(privateKeyPath)
         httpConfig {
             baseUri("http://localhost:$port")
         }
