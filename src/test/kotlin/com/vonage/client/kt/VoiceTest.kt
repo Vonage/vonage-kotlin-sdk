@@ -210,6 +210,8 @@ class VoiceTest : AbstractTest() {
         val eventMethod = HttpMethod.POST
         val amdBehaviour = MachineDetection.HANGUP
         val amdMode = AdvancedMachineDetection.Mode.DETECT_BEEP
+        val callStatus = CallStatus.RINGING
+        val callDirection = CallDirection.OUTBOUND
         val wsContentType = "audio/l16;rate=8000"
         val dtmf = "p*123#"
         val vbcExt = "4321"
@@ -257,12 +259,12 @@ class VoiceTest : AbstractTest() {
             "ringing_timer" to ringingTimer
         ), status = 201, expectedResponseParams = mapOf(
             "uuid" to callIdStr,
-            "status" to "ringing",
-            "direction" to "outbound",
+            "status" to callStatus.name.lowercase(),
+            "direction" to callDirection.name.lowercase(),
             "conversation_uuid" to conversationId
         ))
 
-        voiceClient.createCall {
+        val callEvent = voiceClient.createCall {
             answerUrl(answerUrl); answerMethod(answerMethod)
             from(fromPstn); fromRandomNumber(false);
             eventUrl(eventUrl); eventMethod(eventMethod)
@@ -276,5 +278,11 @@ class VoiceTest : AbstractTest() {
                 SipEndpoint(sipUri, customHeaders, userToUserHeader)
             )
         }
+
+        assertNotNull(callEvent)
+        assertEquals(callIdStr, callEvent.uuid)
+        assertEquals(callStatus, callEvent.status)
+        assertEquals(callDirection, callEvent.direction)
+        assertEquals(conversationId, callEvent.conversationUuid)
     }
 }
