@@ -60,6 +60,7 @@ jobs:
           VONAGE_API_KEY: a1b2c3d4
           VONAGE_API_SECRET: 1234567890abcdef
           VONAGE_SIGNATURE_SECRET: abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQR
+          VONAGE_APPLICATION_ID: 00000000-0000-4000-8000-000000000000
           VONAGE_PRIVATE_KEY_PATH: src/test/resources/com/vonage/client/kt/application_key
         run: mvn -e --batch-mode clean verify
       - name: Run Codecov
