@@ -1,7 +1,6 @@
 package com.vonage.client.kt
 
 import com.vonage.client.common.HttpMethod
-import com.vonage.client.video.Websocket.AudioRate
 import com.vonage.client.voice.*
 import com.vonage.client.voice.ncco.Ncco
 import com.vonage.client.voice.ncco.TalkAction
@@ -25,6 +24,7 @@ class VoiceTest : AbstractTest() {
     private val count = 89
     private val pageSize = 25
     private val recordIndex = 14
+    private val dtmf = "p*123#"
     private val callResponseMap = mapOf(
         "_links" to mapOf(
             "self" to mapOf(
@@ -161,6 +161,19 @@ class VoiceTest : AbstractTest() {
     }
 
     @Test
+    fun `send dtmf`() {
+        val message = "DTMF sent"
+        mockPut(expectedUrl = "$callUrl/dtmf", status = 200,
+            expectedRequestParams = mapOf("digits" to dtmf),
+            expectedResponseParams = mapOf("message" to message, "uuid" to callIdStr)
+        )
+        val response = callObj.sendDtmf(dtmf)
+        assertNotNull(response)
+        assertEquals(message, response.message)
+        assertEquals(callIdStr, response.uuid)
+    }
+
+    @Test
     fun `list calls all filter parameters`() {
         mockGet(callsBaseUrl, expectedQueryParams = mapOf(
             "status" to "unanswered",
@@ -213,7 +226,6 @@ class VoiceTest : AbstractTest() {
         val callStatus = CallStatus.RINGING
         val callDirection = CallDirection.OUTBOUND
         val wsContentType = "audio/l16;rate=8000"
-        val dtmf = "p*123#"
         val vbcExt = "4321"
         val userToUserHeader = "56a390f3d2b7310023a"
 

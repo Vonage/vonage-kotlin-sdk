@@ -31,6 +31,8 @@ class Voice(private val voiceClient: VoiceClient) {
         fun transfer(nccoUrl: String) = voiceClient.transferCall(callId, nccoUrl)
 
         fun transfer(nccoUrl: URI) = transfer(nccoUrl.toString())
+
+        fun sendDtmf(digits: String): DtmfResponse = voiceClient.sendDtmf(callId, digits)
     }
 
     fun listCalls(filter: (CallsFilter.Builder.() -> Unit)? = null): CallInfoPage =
