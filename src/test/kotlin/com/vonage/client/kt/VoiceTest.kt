@@ -25,6 +25,7 @@ class VoiceTest : AbstractTest() {
     private val pageSize = 25
     private val recordIndex = 14
     private val dtmf = "p*123#"
+    private val streamUrl = "https://example.com/waiting.mp3"
     private val callResponseMap = mapOf(
         "_links" to mapOf(
             "self" to mapOf(
@@ -113,6 +114,30 @@ class VoiceTest : AbstractTest() {
         invocation.invoke()
     }
 
+    private fun testStream(loop: Int = 1, level: Double = 0.0, invocation: (() -> StreamResponse)? = null) {
+
+        val message = "Stream ${if (invocation == null) "stopped" else "started"}"
+        val expectedResponseParams = mapOf("message" to message, "uuid" to callIdStr)
+        val expectedUrl = "$callUrl/stream"
+        val response = if (invocation == null) {
+            mockDelete(expectedUrl, expectedResponseParams = expectedResponseParams)
+            callObj.stopStream()
+        }
+        else {
+            mockPut(expectedUrl, status = 200,
+                expectedRequestParams = mapOf(
+                    "stream_url" to listOf(streamUrl),
+                    "loop" to loop, "level" to level
+                ),
+                expectedResponseParams = expectedResponseParams
+            )
+            invocation.invoke()
+        }
+        assertNotNull(response)
+        assertEquals(message, response.message)
+        assertEquals(callIdStr, response.uuid)
+    }
+
     @Test
     fun `terminate call`() {
         testModifyCall("hangup", callObj::hangup)
@@ -171,6 +196,29 @@ class VoiceTest : AbstractTest() {
         assertNotNull(response)
         assertEquals(message, response.message)
         assertEquals(callIdStr, response.uuid)
+    }
+
+    @Test
+    fun `stream audio into call`() {
+        val loop = 3
+        val level = 0.45
+        testStream {
+            callObj.streamAudio(streamUrl)
+        }
+        testStream(loop = loop) {
+            callObj.streamAudio(streamUrl, loop)
+        }
+        testStream(level = level) {
+            callObj.streamAudio(streamUrl, level = level)
+        }
+        testStream(loop = loop, level = level) {
+            callObj.streamAudio(streamUrl, loop = loop, level = level)
+        }
+    }
+
+    @Test
+    fun `stop audio stream`() {
+        testStream()
     }
 
     @Test

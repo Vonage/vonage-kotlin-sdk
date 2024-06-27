@@ -151,8 +151,10 @@ abstract class AbstractTest {
                           expectedResponseParams: Map<String, Any>? = null) =
         mockP(HttpMethod.PUT, expectedUrl, expectedRequestParams, status, authType, expectedResponseParams)
 
-    protected fun mockDelete(expectedUrl: String, authType: AuthType? = null) =
-        mockRequest(HttpMethod.DELETE, expectedUrl, authType = authType).mockReturn(204)
+    protected fun mockDelete(expectedUrl: String, authType: AuthType? = null,
+                             expectedResponseParams: Map<String, Any>? = null) =
+        mockRequest(HttpMethod.DELETE, expectedUrl, authType = authType)
+            .mockReturn(if (expectedResponseParams == null) 204 else 200, expectedResponseParams)
 
     protected fun mockGet(expectedUrl: String,
                              expectedQueryParams: Map<String, Any>? = null,
