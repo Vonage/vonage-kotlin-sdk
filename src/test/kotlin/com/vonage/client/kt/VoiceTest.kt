@@ -138,6 +138,22 @@ class VoiceTest : AbstractTest() {
         assertEquals(callIdStr, response.uuid)
     }
 
+    private fun testTextToSpeech(expectedRequestParams: Map<String, Any>? = null, invocation: () -> TalkResponse) {
+        val message = if (expectedRequestParams != null) "started" else "stopped"
+        val expectedResponseParams = mapOf("message" to message, "uuid" to callIdStr)
+        val talkUrl = "$callUrl/talk"
+        if (expectedRequestParams != null) {
+            mockPut(talkUrl, expectedRequestParams, expectedResponseParams = expectedResponseParams)
+        }
+        else {
+            mockDelete(talkUrl, AuthType.JWT, expectedResponseParams)
+        }
+        val response = invocation.invoke()
+        assertNotNull(response)
+        assertEquals(message, response.message)
+        assertEquals(callIdStr, response.uuid)
+    }
+
     @Test
     fun `terminate call`() {
         testModifyCall("hangup", callObj::hangup)
@@ -219,6 +235,38 @@ class VoiceTest : AbstractTest() {
     @Test
     fun `stop audio stream`() {
         testStream()
+    }
+
+    @Test
+    fun `play text to speech all parameters`() {
+        val style = 1
+        val premium = true
+        val loop = 3
+        val level = 0.65
+        testTextToSpeech(mapOf(
+            "text" to text, "language" to "en-GB-SCT",
+            "style" to style, "premium" to premium,
+            "loop" to loop, "level" to level
+        )) {
+            callObj.startTalk(text) {
+                language(TextToSpeechLanguage.SCOTTISH_ENGLISH)
+                style(style); premium(premium); loop(loop); level(level)
+            }
+        }
+    }
+
+    @Test
+    fun `play text to speech text only`() {
+        testTextToSpeech(mapOf("text" to text)) {
+            callObj.startTalk(text)
+        }
+    }
+
+    @Test
+    fun `stop text to speech`() {
+        testTextToSpeech {
+            callObj.stopTalk()
+        }
     }
 
     @Test

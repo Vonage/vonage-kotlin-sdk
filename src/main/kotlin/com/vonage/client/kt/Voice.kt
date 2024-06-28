@@ -40,13 +40,18 @@ class Voice(private val voiceClient: VoiceClient) {
             else voiceClient.startStream(callId, streamUrl)
 
         fun stopStream(): StreamResponse = voiceClient.stopStream(callId)
+
+        fun startTalk(text: String, properties: (TalkPayload.Builder.() -> Unit) = {}): TalkResponse =
+            voiceClient.startTalk(callId, TalkPayload.builder(text).apply(properties).build())
+
+        fun stopTalk(): TalkResponse = voiceClient.stopTalk(callId)
     }
 
     fun listCalls(filter: (CallsFilter.Builder.() -> Unit)? = null): CallInfoPage =
         if (filter == null) voiceClient.listCalls()
         else voiceClient.listCalls(CallsFilter.builder().apply(filter).build())
 
-    fun createCall(call: (Call.Builder.() -> Unit)): CallEvent =
+    fun createCall(call: Call.Builder.() -> Unit): CallEvent =
         voiceClient.createCall(Call.builder().apply(call).build())
 }
 
