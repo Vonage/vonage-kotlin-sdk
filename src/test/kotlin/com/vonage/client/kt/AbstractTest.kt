@@ -188,17 +188,20 @@ abstract class AbstractTest {
 
     protected inline fun <reified E: VonageApiResponseException> assertApiResponseException(
             url: String, requestMethod: HttpMethod, actualCall: () -> Any, status: Int,
-            errorType: String, title: String, detail: String, instance: String): E {
+            errorType: String? = null, title: String? = null,
+            detail: String? = null, instance: String? = null): E {
 
-        mockRequest(requestMethod, url).mockReturn(status, mapOf(
-            "type" to errorType, "title" to title,
-            "detail" to detail, "instance" to instance
-        ))
+        val responseParams = mutableMapOf<String, Any>()
+        if (errorType != null) responseParams["type"] = errorType
+        if (title != null) responseParams["title"] = title
+        if (detail != null) responseParams["detail"] = detail
+        if (instance != null) responseParams["instance"] = instance
 
+        mockRequest(requestMethod, url).mockReturn(status, responseParams)
         val exception = assertThrows<E> { actualCall.invoke() }
 
         assertEquals(status, exception.statusCode)
-        assertEquals(URI.create(errorType), exception.type)
+        assertEquals(if (errorType != null) URI.create(errorType) else null, exception.type)
         assertEquals(title, exception.title)
         assertEquals(instance, exception.instance)
         assertEquals(detail, exception.detail)

@@ -34,10 +34,8 @@ class Voice(private val voiceClient: VoiceClient) {
 
         fun sendDtmf(digits: String): DtmfResponse = voiceClient.sendDtmf(callId, digits)
 
-        fun streamAudio(streamUrl: String, loop: Int? = null, level: Double? = null): StreamResponse =
-            if (loop != null && level != null) voiceClient.startStream(callId, streamUrl, loop, level)
-            else if (loop != null) voiceClient.startStream(callId, streamUrl, loop)
-            else voiceClient.startStream(callId, streamUrl)
+        fun streamAudio(streamUrl: String, loop: Int = 1, level: Double = 0.0): StreamResponse =
+            voiceClient.startStream(callId, streamUrl, loop, level)
 
         fun stopStream(): StreamResponse = voiceClient.stopStream(callId)
 

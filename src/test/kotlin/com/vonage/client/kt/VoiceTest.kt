@@ -99,6 +99,12 @@ class VoiceTest : AbstractTest() {
         assertEqualsSampleCall(infos[1])
     }
 
+    private fun assertExistingCall404(url: String, requestMethod: HttpMethod, invocation: () -> Any) {
+        assertApiResponseException<VoiceResponseException>(url, requestMethod, invocation, 404,
+            title = "Not Found", detail = "Call $callIdStr doesn't exist."
+        )
+    }
+
     private fun testModifyCall(actionName: String = "transfer", invocation: () -> Unit,
                                nccoAction: Map<String, Any>? = null, nccoUrl: String? = null) {
         mockPut(expectedUrl = callUrl,
@@ -112,21 +118,22 @@ class VoiceTest : AbstractTest() {
             status = 204
         )
         invocation.invoke()
+        assertExistingCall404(callUrl, HttpMethod.PUT, invocation)
     }
 
     private fun testStream(loop: Int = 1, level: Double = 0.0, invocation: (() -> StreamResponse)? = null) {
 
         val message = "Stream ${if (invocation == null) "stopped" else "started"}"
         val expectedResponseParams = mapOf("message" to message, "uuid" to callIdStr)
-        val expectedUrl = "$callUrl/stream"
+        val streamUrl = "$callUrl/stream"
         val response = if (invocation == null) {
-            mockDelete(expectedUrl, expectedResponseParams = expectedResponseParams)
+            mockDelete(streamUrl, expectedResponseParams = expectedResponseParams)
             callObj.stopStream()
         }
         else {
-            mockPut(expectedUrl, status = 200,
+            mockPut(streamUrl, status = 200,
                 expectedRequestParams = mapOf(
-                    "stream_url" to listOf(streamUrl),
+                    "stream_url" to listOf(this.streamUrl),
                     "loop" to loop, "level" to level
                 ),
                 expectedResponseParams = expectedResponseParams
@@ -136,6 +143,9 @@ class VoiceTest : AbstractTest() {
         assertNotNull(response)
         assertEquals(message, response.message)
         assertEquals(callIdStr, response.uuid)
+
+        if (invocation != null) assertExistingCall404(streamUrl, HttpMethod.PUT, invocation)
+        else assertExistingCall404(streamUrl, HttpMethod.DELETE, callObj::stopStream)
     }
 
     private fun testTextToSpeech(expectedRequestParams: Map<String, Any>? = null, invocation: () -> TalkResponse) {
@@ -152,6 +162,11 @@ class VoiceTest : AbstractTest() {
         assertNotNull(response)
         assertEquals(message, response.message)
         assertEquals(callIdStr, response.uuid)
+
+        assertExistingCall404(talkUrl,
+            if (expectedRequestParams != null) HttpMethod.PUT else HttpMethod.DELETE,
+            invocation
+        )
     }
 
     @Test
