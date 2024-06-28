@@ -46,7 +46,7 @@ class VoiceTest : AbstractTest() {
         "direction" to "inbound",
         "rate" to rate,
         "price" to price,
-        "duration" to "$duration",
+        "duration" to duration,
         "start_time" to startTime,
         "end_time" to endTime,
         "network" to networkCode
