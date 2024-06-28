@@ -166,7 +166,7 @@ class VoiceTest : AbstractTest() {
     @Test
     fun `get call`() {
         mockGet(expectedUrl = callUrl, expectedResponseParams = callResponseMap)
-        assertEqualsSampleCall(callObj.get())
+        assertEqualsSampleCall(callObj.info())
     }
 
     @Test

@@ -14,7 +14,7 @@ class Voice(private val voiceClient: VoiceClient) {
 
     inner class ExistingCall(val callId: String) {
 
-        fun get(): CallInfo = voiceClient.getCallDetails(callId)
+        fun info(): CallInfo = voiceClient.getCallDetails(callId)
 
         fun hangup() = voiceClient.terminateCall(callId)
 
