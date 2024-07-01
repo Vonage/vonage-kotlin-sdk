@@ -1,6 +1,7 @@
 package com.vonage.client.kt
 
 import com.vonage.client.voice.*
+import com.vonage.client.voice.ncco.Action
 import com.vonage.client.voice.ncco.Ncco
 import java.net.URI
 import java.time.Instant
@@ -26,7 +27,7 @@ class Voice(private val voiceClient: VoiceClient) {
 
         fun unearmuff() = voiceClient.unearmuffCall(callId)
 
-        fun transfer(ncco: Ncco) = voiceClient.transferCall(callId, ncco)
+        fun transfer(vararg actions: Action) = voiceClient.transferCall(callId, Ncco(actions.asList()))
 
         fun transfer(nccoUrl: String) = voiceClient.transferCall(callId, nccoUrl)
 
@@ -60,4 +61,5 @@ fun CallsFilter.Builder.dateEnd(dateEnd: String): CallsFilter.Builder =
     dateEnd(Date.from(Instant.parse(dateEnd)))
 
 fun Call.Builder.advancedMachineDetection(amd: AdvancedMachineDetection.Builder.() -> Unit): Call.Builder =
-    advancedMachineDetection(AdvancedMachineDetection.builder().apply(amd).build());
+    advancedMachineDetection(AdvancedMachineDetection.builder().apply(amd).build())
+

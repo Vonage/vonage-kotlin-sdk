@@ -212,7 +212,7 @@ class VoiceTest : AbstractTest() {
     @Test
     fun `transfer call with ncco`() {
         testModifyCall(nccoAction = mapOf("action" to "talk", "text" to text), invocation = {
-            callObj.transfer(Ncco(TalkAction.builder(text).build()))
+            callObj.transfer(TalkAction.builder(text).build())
         })
     }
 
