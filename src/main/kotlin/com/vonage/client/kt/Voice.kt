@@ -1,5 +1,6 @@
 package com.vonage.client.kt
 
+import com.vonage.client.users.channels.Websocket.ContentType
 import com.vonage.client.voice.*
 import com.vonage.client.voice.ncco.*
 import java.net.URI
@@ -103,3 +104,34 @@ fun conversationAction(name: String, properties: ConversationAction.Builder.() -
 fun connectAction(endpoint: com.vonage.client.voice.ncco.Endpoint,
                   properties: ConnectAction.Builder.() -> Unit = {}): ConnectAction =
     ConnectAction.builder(endpoint).apply(properties).build()
+
+fun connectToPstn(number: String, dtmfAnswer: String? = null,
+                  onAnswerUrl: String? = null, onAnswerRingback: String? = null,
+                  properties: ConnectAction.Builder.() -> Unit = {}) : ConnectAction =
+    connectAction(com.vonage.client.voice.ncco.PhoneEndpoint.builder(number)
+        .dtmfAnswer(dtmfAnswer).onAnswer(onAnswerUrl, onAnswerRingback).build(), properties
+    )
+
+fun connectToVbc(extension: String, properties: ConnectAction.Builder.() -> Unit = {}) : ConnectAction =
+    connectAction(com.vonage.client.voice.ncco.VbcEndpoint.builder(extension).build(), properties)
+
+fun connectToApp(user: String, properties: ConnectAction.Builder.() -> Unit = {}) : ConnectAction =
+    connectAction(com.vonage.client.voice.ncco.AppEndpoint.builder(user).build(), properties)
+
+fun connectToWebsocket(uri: String, contentType: String, headers: Map<String, Any>? = null,
+                       properties: ConnectAction.Builder.() -> Unit = {}) : ConnectAction =
+    connectAction(com.vonage.client.voice.ncco.WebSocketEndpoint.builder(uri, contentType)
+        .headers(headers).build(), properties
+    )
+
+fun connectToSip(uri: String, customHeaders: Map<String, Any>? = null, userToUserHeader: String? = null,
+                 properties: ConnectAction.Builder.() -> Unit = {}) : ConnectAction {
+    val builder = com.vonage.client.voice.ncco.SipEndpoint.builder(uri)
+    if (customHeaders != null) {
+        builder.headers(customHeaders)
+    }
+    if (userToUserHeader != null) {
+        builder.userToUserHeader(userToUserHeader)
+    }
+    return connectAction(builder.build(), properties)
+}

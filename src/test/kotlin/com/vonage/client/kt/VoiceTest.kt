@@ -29,8 +29,12 @@ class VoiceTest : AbstractTest() {
     private val vbcExt = "4321"
     private val eventUrl = "https://example.com/event"
     private val streamUrl = "https://example.com/waiting.mp3"
+    private val onAnswerUrl = "https://example.com/ncco.json"
     private val websocketUri = "wss://example.com/socket"
+    private val ringbackTone = "http://example.com/ringbackTone.wav"
     private val sipUri = "sip:rebekka@sip.example.com"
+    private val wsContentType = "audio/l16;rate=8000"
+    private val userToUserHeader = "56a390f3d2b7310023a"
     private val conversationName = "selective-audio Demo"
     private val customHeaders = mapOf(
         "customer_id" to "abc123",
@@ -221,6 +225,11 @@ class VoiceTest : AbstractTest() {
         }
     }
 
+    private fun testSingleNccoConnect(params: Map<String, Any>, connectAction: ConnectAction) =
+        testSingleNcco(mapOf("endpoint" to listOf(mapOf(
+            "type" to connectAction.endpoint.first().type) + params)), connectAction
+        )
+
     @Test
     fun `terminate call`() {
         testModifyCall("hangup", callObj::hangup)
@@ -254,10 +263,9 @@ class VoiceTest : AbstractTest() {
 
     @Test
     fun `transfer call with answer url`() {
-        val answerUrl = "https://example.com/ncco.json"
-        testModifyCall(nccoUrl = answerUrl, invocation = {
-            callObj.transfer(URI.create(answerUrl))
-            callObj.transfer(answerUrl)
+        testModifyCall(nccoUrl = onAnswerUrl, invocation = {
+            callObj.transfer(URI.create(onAnswerUrl))
+            callObj.transfer(onAnswerUrl)
         })
     }
 
@@ -394,8 +402,6 @@ class VoiceTest : AbstractTest() {
         val eventMethod = HttpMethod.POST
         val amdBehaviour = MachineDetection.HANGUP
         val amdMode = AdvancedMachineDetection.Mode.DETECT_BEEP
-        val wsContentType = "audio/l16;rate=8000"
-        val userToUserHeader = "56a390f3d2b7310023a"
 
         testCreateCall(mapOf(
             "answer_url" to listOf(answerUrl),
@@ -493,10 +499,85 @@ class VoiceTest : AbstractTest() {
     }
 
     @Test
-    fun `create call with connect action required parameters only`() {
+    fun `create call with single connect action and builder properties`() {
         testSingleNcco(
-            mapOf("endpoint" to listOf(mapOf("type" to "vbc", "extension" to vbcExt))),
-            connectAction(com.vonage.client.voice.ncco.VbcEndpoint.builder(vbcExt).build())
+            mapOf(
+                "endpoint" to listOf(mapOf("type" to phoneType, "number" to altNumber)),
+                "eventUrl" to listOf(eventUrl), "ringbackTone" to ringbackTone
+            ),
+            connectAction(com.vonage.client.voice.ncco.PhoneEndpoint.builder(altNumber).build()) {
+                eventUrl(eventUrl); ringbackTone(ringbackTone)
+            }
+        )
+    }
+
+    @Test
+    fun `create call with single connect action no properties`() {
+        testSingleNcco(
+            mapOf(
+                "endpoint" to listOf(mapOf("type" to phoneType, "number" to altNumber)),
+            ),
+            connectAction(com.vonage.client.voice.ncco.PhoneEndpoint.builder(altNumber).build())
+        )
+    }
+
+    @Test
+    fun `create call with connect to VBC ncco`() {
+        testSingleNccoConnect(
+            mapOf("extension" to vbcExt),
+            connectToVbc(vbcExt)
+        )
+    }
+
+    @Test
+    fun `create call with connect to App ncco`() {
+        testSingleNccoConnect(
+            mapOf("user" to user),
+            connectToApp(user)
+        )
+    }
+
+    @Test
+    fun `create call with connect to PSTN ncco`() {
+        testSingleNccoConnect(
+            mapOf("number" to toNumber),
+            connectToPstn(toNumber)
+        )
+
+        testSingleNccoConnect(
+            mapOf(
+                "number" to toNumber, "dtmfAnswer" to dtmf,
+                "onAnswer" to mapOf("url" to onAnswerUrl, "ringback" to ringbackTone)
+            ),
+            connectToPstn(toNumber, dtmf, onAnswerUrl, ringbackTone)
+        )
+    }
+
+    @Test
+    fun `create call with connect to WebSocket ncco`() {
+        testSingleNccoConnect(
+            mapOf("uri" to websocketUri, "content-type" to wsContentType),
+            connectToWebsocket(websocketUri, wsContentType)
+        )
+
+        testSingleNccoConnect(
+            mapOf("uri" to websocketUri, "content-type" to wsContentType, "headers" to customHeaders),
+            connectToWebsocket(websocketUri, wsContentType, customHeaders)
+        )
+    }
+
+    @Test
+    fun `create call with connect to SIP ncco`() {
+        testSingleNccoConnect(
+            mapOf("uri" to sipUri),
+            connectToSip(sipUri)
+        )
+
+        testSingleNccoConnect(
+            mapOf("uri" to sipUri, "headers" to customHeaders,
+                "standardHeaders" to mapOf("User-to-User" to userToUserHeader)
+            ),
+            connectToSip(sipUri, customHeaders, userToUserHeader)
         )
     }
 
@@ -614,7 +695,6 @@ class VoiceTest : AbstractTest() {
         val machineDetection = MachineDetection.CONTINUE
         val eventType = EventType.SYNCHRONOUS
         val connectTimeout = 38
-        val ringbackTone = "http://example.com/ringbackTone.wav"
         val beepTimeout = 90
 
         testCreateCall(mapOf(
