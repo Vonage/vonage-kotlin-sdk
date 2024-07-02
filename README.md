@@ -20,6 +20,7 @@ You'll need to have [created a Vonage account](https://dashboard.nexmo.com/sign-
 ## Supported APIs
 - [Messages](https://developer.vonage.com/en/messages/overview)
 - [Verify](https://developer.vonage.com/en/verify/overview)
+- [Voice](https://developer.vonage.com/en/voice/voice-api/overview)
 
 ## Other SDKs
 
@@ -79,6 +80,7 @@ val vonage = Vonage {
 You can also use environment variables for convenience, by setting the following:
 - `VONAGE_API_KEY`
 - `VONAGE_API_SECRET`
+- `VONAGE_SIGNATURE_SECRET`
 - `VONAGE_APPLICATION_ID`
 - `VONAGE_PRIVATE_KEY_PATH`
 
