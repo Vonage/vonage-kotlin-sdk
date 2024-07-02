@@ -5,7 +5,7 @@
 
   <groupId>com.vonage</groupId>
   <artifactId>server-sdk-kotlin</artifactId>
-  <version>0.2.0</version>
+  <version>0.3.0</version>
 
   <packaging>jar</packaging>
   <name>Vonage Kotlin Server SDK</name>
@@ -76,7 +76,7 @@
     <dependency>
       <groupId>org.wiremock</groupId>
       <artifactId>wiremock-standalone</artifactId>
-      <version>3.7.0</version>
+      <version>3.8.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
