@@ -22,7 +22,8 @@ abstract class AbstractTest {
     private val signatureSecret = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQR"
     private val apiKeySecretEncoded = "YTFiMmMzZDQ6MTIzNDU2Nzg5MGFiY2RlZg=="
     private val privateKeyPath = "src/test/resources/com/vonage/client/kt/application_key"
-    protected val testUuid = UUID.fromString("aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab")
+    protected val testUuidStr = "aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab"
+    protected val testUuid = UUID.fromString(testUuidStr)
     protected val toNumber = "447712345689"
     protected val altNumber = "447700900001"
     protected val text = "Hello, World!"

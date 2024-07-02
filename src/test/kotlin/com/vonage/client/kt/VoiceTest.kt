@@ -2,8 +2,7 @@ package com.vonage.client.kt
 
 import com.vonage.client.common.HttpMethod
 import com.vonage.client.voice.*
-import com.vonage.client.voice.ncco.Ncco
-import com.vonage.client.voice.ncco.TalkAction
+import com.vonage.client.voice.ncco.*
 import java.net.URI
 import java.time.Instant
 import java.util.*
@@ -25,7 +24,20 @@ class VoiceTest : AbstractTest() {
     private val pageSize = 25
     private val recordIndex = 14
     private val dtmf = "p*123#"
+    private val fromPstn = "14155550100"
+    private val user = "Sam"
+    private val vbcExt = "4321"
+    private val eventUrl = "https://example.com/event"
     private val streamUrl = "https://example.com/waiting.mp3"
+    private val websocketUri = "wss://example.com/socket"
+    private val sipUri = "sip:rebekka@sip.example.com"
+    private val customHeaders = mapOf(
+        "customer_id" to "abc123",
+        "purchases" to 19,
+        "Cat person" to true,
+        "Cars" to listOf("M240i", "M2 CS", "C63s", "RS 3"),
+        "Location" to "NY"
+    )
     private val callResponseMap = mapOf(
         "_links" to mapOf(
             "self" to mapOf(
@@ -71,11 +83,11 @@ class VoiceTest : AbstractTest() {
         val to = callInfo.to
         assertNotNull(to)
         assertEquals(phoneType, to.type)
-        assertEquals(toNumber, (to as PhoneEndpoint).number)
+        assertEquals(toNumber, (to as com.vonage.client.voice.PhoneEndpoint).number)
         val from = callInfo.from
         assertNotNull(from)
         assertEquals(phoneType, from.type)
-        assertEquals(altNumber, (from as PhoneEndpoint).number)
+        assertEquals(altNumber, (from as com.vonage.client.voice.PhoneEndpoint).number)
         assertEquals(CallStatus.COMPLETED, callInfo.status)
         assertEquals(CallDirection.INBOUND, callInfo.direction)
         assertEquals(rate, callInfo.rate)
@@ -167,6 +179,27 @@ class VoiceTest : AbstractTest() {
             if (expectedRequestParams != null) HttpMethod.PUT else HttpMethod.DELETE,
             invocation
         )
+    }
+
+    private fun testCreateCall(expectedRequestParams: Map<String, Any>, call: Call.Builder.() -> Unit) {
+        val callStatus = CallStatus.RINGING
+        val callDirection = CallDirection.OUTBOUND
+
+        mockPost(callsBaseUrl, expectedRequestParams = expectedRequestParams,
+            status = 201, expectedResponseParams = mapOf(
+                "uuid" to callIdStr,
+                "status" to callStatus.name.lowercase(),
+                "direction" to callDirection.name.lowercase(),
+                "conversation_uuid" to conversationId
+            )
+        )
+
+        val callEvent = voiceClient.createCall(call)
+        assertNotNull(callEvent)
+        assertEquals(callIdStr, callEvent.uuid)
+        assertEquals(callStatus, callEvent.status)
+        assertEquals(callDirection, callEvent.direction)
+        assertEquals(conversationId, callEvent.conversationUuid)
     }
 
     @Test
@@ -316,17 +349,6 @@ class VoiceTest : AbstractTest() {
     @Test
     fun `create call to all endpoint types with all fields and answer url`() {
         val answerUrl = "https://example.com/answer"
-        val eventUrl = "https://example.com/event"
-        val websocketUri = "wss://example.com/socket"
-        val sipUri = "sip:rebekka@sip.example.com"
-        val customHeaders = mapOf(
-            "customer_id" to "abc123",
-            "purchases" to 19,
-            "Cat person" to true,
-            "Cars" to listOf("M240i", "M2 CS", "C63s", "RS 3"),
-            "Location" to "NY"
-        )
-        val fromPstn = "14155550100"
         val lengthTimer = 5600
         val ringingTimer = 42
         val beepTimeout = 78
@@ -334,16 +356,17 @@ class VoiceTest : AbstractTest() {
         val eventMethod = HttpMethod.POST
         val amdBehaviour = MachineDetection.HANGUP
         val amdMode = AdvancedMachineDetection.Mode.DETECT_BEEP
-        val callStatus = CallStatus.RINGING
-        val callDirection = CallDirection.OUTBOUND
         val wsContentType = "audio/l16;rate=8000"
-        val vbcExt = "4321"
         val userToUserHeader = "56a390f3d2b7310023a"
 
-        mockPost(callsBaseUrl, expectedRequestParams = mapOf(
+        testCreateCall(mapOf(
             "answer_url" to listOf(answerUrl),
             "answer_method" to answerMethod.name,
             "to" to listOf(
+                mapOf(
+                    "type" to "app",
+                    "user" to user
+                ),
                 mapOf(
                     "type" to phoneType,
                     "number" to toNumber,
@@ -380,14 +403,7 @@ class VoiceTest : AbstractTest() {
             ),
             "length_timer" to lengthTimer,
             "ringing_timer" to ringingTimer
-        ), status = 201, expectedResponseParams = mapOf(
-            "uuid" to callIdStr,
-            "status" to callStatus.name.lowercase(),
-            "direction" to callDirection.name.lowercase(),
-            "conversation_uuid" to conversationId
-        ))
-
-        val callEvent = voiceClient.createCall {
+        )) {
             answerUrl(answerUrl); answerMethod(answerMethod)
             from(fromPstn); fromRandomNumber(false);
             eventUrl(eventUrl); eventMethod(eventMethod)
@@ -396,16 +412,199 @@ class VoiceTest : AbstractTest() {
                 behavior(amdBehaviour); beepTimeout(beepTimeout); mode(amdMode)
             }
             to(
-                PhoneEndpoint(toNumber, dtmf), VbcEndpoint(vbcExt),
-                WebSocketEndpoint(websocketUri, wsContentType, customHeaders),
-                SipEndpoint(sipUri, customHeaders, userToUserHeader)
+                com.vonage.client.voice.AppEndpoint(user),
+                com.vonage.client.voice.PhoneEndpoint(toNumber, dtmf),
+                com.vonage.client.voice.VbcEndpoint(vbcExt),
+                com.vonage.client.voice.WebSocketEndpoint(websocketUri, wsContentType, customHeaders),
+                com.vonage.client.voice.SipEndpoint(sipUri, customHeaders, userToUserHeader)
             )
         }
+    }
 
-        assertNotNull(callEvent)
-        assertEquals(callIdStr, callEvent.uuid)
-        assertEquals(callStatus, callEvent.status)
-        assertEquals(callDirection, callEvent.direction)
-        assertEquals(conversationId, callEvent.conversationUuid)
+    @Test
+    fun `create call with all NCCO actions and all parameters of those actions`() {
+        val bargeIn = false
+        val premium = true
+        val loop = 2
+        val style = 1
+        val level = -0.5f
+        val conversationName = "selective-audio Demo"
+        val canHearId = UUID.randomUUID().toString()
+        val canSpeakId = UUID.randomUUID().toString()
+        val conversationEventMethod = EventMethod.POST
+        val transcriptionEventMethod = EventMethod.GET
+        val notifyEventMethod = conversationEventMethod
+        val recordEventMethod = transcriptionEventMethod
+        val musicOnHoldUrl = "https://nexmo-community.github.io/ncco-examples/assets/voice_api_audio_streaming.mp3"
+        val transcriptionEventUrl = "https://example.com/transcription"
+        val mute = true
+        val record = true
+        val endOnExit = true
+        val startOnEnter = true
+        val inputEventMethod = transcriptionEventMethod
+        val inputActionTypes = listOf("dtmf", "asr")
+        val dtmfTimeout = 7
+        val maxDigits = 16
+        val submitOnHash = true
+        val endOnSilenceSpeech = 4.6
+        val maxDuration = 48
+        val startTimeout = 23
+        val sensitivity = 51
+        val saveAudio = true
+        val speechUuid = canSpeakId
+        val speechContext = listOf("sales", "support", "customer", "Developer")
+        val recordingTimeout = 1260
+        val recordingChannels = 18
+        val endOnKey = 'x'
+        val endOnSilenceRecording = 7
+        val splitRecording = SplitRecording.CONVERSATION
+        val recordEventUrl = "https://example.com/recordings"
+        val beepStart = true
+        val machineDetection = MachineDetection.CONTINUE
+
+        testCreateCall(mapOf(
+            "from" to mapOf(
+                "type" to phoneType,
+                "number" to fromPstn
+            ),
+            "to" to listOf(
+                mapOf(
+                    "type" to phoneType,
+                    "number" to toNumber
+                )
+            ),
+            "machine_detection" to machineDetection.name.lowercase(),
+            "ncco" to listOf(
+                mapOf(
+                    "action" to "talk",
+                    "text" to text,
+                    "language" to "te-IN",
+                    "premium" to premium,
+                    "loop" to loop,
+                    "level" to level,
+                    "style" to style,
+                    "bargeIn" to bargeIn
+                ),
+                mapOf(
+                    "action" to "stream",
+                    "streamUrl" to listOf(streamUrl),
+                    "level" to level,
+                    "bargeIn" to bargeIn,
+                    "loop" to loop
+                ),
+                mapOf(
+                    "action" to "conversation",
+                    "name" to conversationName,
+                    "startOnEnter" to startOnEnter,
+                    "endOnExit" to endOnExit,
+                    "record" to record,
+                    "mute" to mute,
+                    "eventMethod" to conversationEventMethod.name,
+                    "musicOnHoldUrl" to listOf(musicOnHoldUrl),
+                    "eventUrl" to listOf(eventUrl),
+                    "canSpeak" to listOf(canSpeakId, testUuidStr),
+                    "canHear" to listOf(canHearId, testUuidStr),
+                    "transcription" to mapOf(
+                        "language" to "es-DO",
+                        "eventUrl" to listOf(transcriptionEventUrl),
+                        "eventMethod" to transcriptionEventMethod.name,
+                        "sentimentAnalysis" to true
+                    )
+                ),
+                mapOf(
+                    "action" to "input",
+                    "type" to inputActionTypes,
+                    "eventUrl" to listOf(eventUrl),
+                    "eventMethod" to inputEventMethod.name,
+                    "speech" to mapOf(
+                        "uuid" to listOf(speechUuid),
+                        "context" to speechContext,
+                        "endOnSilence" to endOnSilenceSpeech,
+                        "startTimeout" to startTimeout,
+                        "maxDuration" to maxDuration,
+                        "sensitivity" to sensitivity,
+                        "saveAudio" to saveAudio,
+                        "language" to "uk-UA"
+                    ),
+                    "dtmf" to mapOf(
+                        "timeOut" to dtmfTimeout,
+                        "maxDigits" to maxDigits,
+                        "submitOnHash" to submitOnHash
+                    )
+                ),
+                mapOf(
+                    "action" to "notify",
+                    "eventUrl" to listOf(eventUrl),
+                    "eventMethod" to notifyEventMethod.name,
+                    "payload" to customHeaders
+                ),
+                mapOf(
+                    "action" to "record",
+                    "timeOut" to recordingTimeout,
+                    "eventUrl" to listOf(recordEventUrl),
+                    "eventMethod" to recordEventMethod.name,
+                    "endOnSilence" to endOnSilenceRecording,
+                    "endOnKey" to endOnKey,
+                    "beepStart" to beepStart,
+                    "channels" to recordingChannels,
+                    "split" to splitRecording.name.lowercase(),
+                    "transcription" to mapOf(
+                        "language" to "en-ZA",
+                        "eventUrl" to listOf(eventUrl),
+                        "eventMethod" to transcriptionEventMethod.name,
+                        "sentimentAnalysis" to false
+                    )
+                )
+            )
+
+        )) {
+            to(com.vonage.client.voice.PhoneEndpoint(toNumber))
+            machineDetection(machineDetection)
+            from(fromPstn); ncco(
+                talkAction(text) {
+                    language(TextToSpeechLanguage.TELUGU)
+                    bargeIn(bargeIn); premium(premium)
+                    style(style); loop(loop); level(level)
+                },
+                streamAction(streamUrl) {
+                    loop(loop); level(level); bargeIn(bargeIn)
+                },
+                conversationAction(conversationName) {
+                    addCanHear(canHearId); addCanSpeak(canSpeakId)
+                    addCanHear(testUuidStr); addCanSpeak(testUuidStr)
+                    eventMethod(conversationEventMethod); eventUrl(eventUrl)
+                    musicOnHoldUrl(musicOnHoldUrl); record(record); mute(mute);
+                    startOnEnter(startOnEnter); endOnExit(endOnExit)
+                    transcription {
+                        eventMethod(transcriptionEventMethod); eventUrl(transcriptionEventUrl)
+                        language(SpeechSettings.Language.SPANISH_DOMINICAN_REPUBLIC);
+                        sentimentAnalysis(true)
+                    }
+                },
+                inputAction {
+                    eventUrl(eventUrl); eventMethod(inputEventMethod)
+                    type(inputActionTypes); speech {
+                        uuid(speechUuid); context(speechContext)
+                        language(SpeechSettings.Language.UKRAINIAN)
+                        endOnSilence(endOnSilenceSpeech); maxDuration(maxDuration)
+                        sensitivity(sensitivity); startTimeout(startTimeout)
+                        saveAudio(saveAudio);
+                    }
+                    dtmf(timeout = dtmfTimeout, maxDigits = maxDigits, submitOnHash = submitOnHash)
+                },
+                notifyAction(eventUrl, customHeaders, notifyEventMethod),
+                recordAction {
+                    timeOut(recordingTimeout); channels(recordingChannels)
+                    endOnKey(endOnKey); endOnSilence(endOnSilenceRecording)
+                    eventUrl(recordEventUrl); eventMethod(recordEventMethod)
+                    split(splitRecording); beepStart(beepStart); transcription {
+                        language(SpeechSettings.Language.ENGLISH_SOUTH_AFRICA)
+                        eventUrl(eventUrl); eventMethod(transcriptionEventMethod)
+                        sentimentAnalysis(false)
+                    }
+                }
+                // TODO connect action
+            )
+        }
     }
 }

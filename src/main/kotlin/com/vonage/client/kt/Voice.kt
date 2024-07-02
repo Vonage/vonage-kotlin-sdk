@@ -1,8 +1,9 @@
 package com.vonage.client.kt
 
 import com.vonage.client.voice.*
-import com.vonage.client.voice.ncco.Action
-import com.vonage.client.voice.ncco.Ncco
+import com.vonage.client.voice.ncco.*
+import com.vonage.client.voice.ncco.AppEndpoint
+import com.vonage.client.voice.ncco.Endpoint
 import java.net.URI
 import java.time.Instant
 import java.util.*
@@ -62,4 +63,46 @@ fun CallsFilter.Builder.dateEnd(dateEnd: String): CallsFilter.Builder =
 
 fun Call.Builder.advancedMachineDetection(amd: AdvancedMachineDetection.Builder.() -> Unit): Call.Builder =
     advancedMachineDetection(AdvancedMachineDetection.builder().apply(amd).build())
+
+fun InputAction.Builder.speech(settings: SpeechSettings.Builder.() -> Unit): InputAction.Builder =
+    speech(SpeechSettings.builder().apply(settings).build())
+
+fun InputAction.Builder.dtmf(timeout: Int? = null, maxDigits: Int? = null, submitOnHash: Boolean? = null): InputAction.Builder {
+    val dtmfSettings = DtmfSettings()
+    dtmfSettings.timeOut = timeout
+    dtmfSettings.maxDigits = maxDigits
+    dtmfSettings.isSubmitOnHash = submitOnHash
+    return dtmf(dtmfSettings)
+}
+
+fun ConversationAction.Builder.transcription(settings: TranscriptionSettings.Builder.() -> Unit): ConversationAction.Builder =
+    transcription(TranscriptionSettings.builder().apply(settings).build())
+
+fun RecordAction.Builder.transcription(settings: TranscriptionSettings.Builder.() -> Unit): RecordAction.Builder =
+    transcription(TranscriptionSettings.builder().apply(settings).build())
+
+fun ConnectAction.Builder.advancedMachineDetection(amd: AdvancedMachineDetection.Builder.() -> Unit): ConnectAction.Builder =
+    advancedMachineDetection(AdvancedMachineDetection.builder().apply(amd).build())
+
+fun recordAction(properties: RecordAction.Builder.() -> Unit): RecordAction =
+    RecordAction.builder().apply(properties).build()
+
+fun talkAction(text: String, properties: TalkAction.Builder.() -> Unit): TalkAction =
+    TalkAction.builder(text).apply(properties).build()
+
+fun streamAction(streamUrl: String, properties: StreamAction.Builder.() -> Unit): StreamAction =
+    StreamAction.builder(streamUrl).apply(properties).build()
+
+fun notifyAction(eventUrl: String, payload: Map<String, Any>? = null, eventMethod: EventMethod? = null): NotifyAction =
+    NotifyAction.builder(payload, eventUrl).eventMethod(eventMethod).build()
+
+fun inputAction(properties: InputAction.Builder.() -> Unit): InputAction =
+    InputAction.builder().apply(properties).build()
+
+fun conversationAction(name: String, properties: ConversationAction.Builder.() -> Unit): ConversationAction =
+    ConversationAction.builder(name).apply(properties).build()
+
+fun connectAction(vararg endpoints: Endpoint, properties: ConnectAction.Builder.() -> Unit): ConnectAction =
+    ConnectAction.builder(endpoints.asList()).apply(properties).build()
+
 
