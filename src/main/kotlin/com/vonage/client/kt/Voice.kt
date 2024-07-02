@@ -1,6 +1,5 @@
 package com.vonage.client.kt
 
-import com.vonage.client.users.channels.Websocket.ContentType
 import com.vonage.client.voice.*
 import com.vonage.client.voice.ncco.*
 import java.net.URI
@@ -135,3 +134,20 @@ fun connectToSip(uri: String, customHeaders: Map<String, Any>? = null, userToUse
     }
     return connectAction(builder.build(), properties)
 }
+
+fun Call.Builder.toPstn(number: String, dtmfAnswer: String? = null): Call.Builder =
+    to(com.vonage.client.voice.PhoneEndpoint(number, dtmfAnswer))
+
+fun Call.Builder.toSip(uri: String, customHeaders: Map<String, Any>? = null,
+                       userToUserHeader: String? = null): Call.Builder =
+    to(com.vonage.client.voice.SipEndpoint(uri, customHeaders, userToUserHeader))
+
+fun Call.Builder.toWebSocket(uri: String, contentType: String? = null,
+                             headers: Map<String, Any>? = null): Call.Builder =
+    to(com.vonage.client.voice.WebSocketEndpoint(uri, contentType, headers))
+
+fun Call.Builder.toVbc(extension: String): Call.Builder =
+    to(com.vonage.client.voice.VbcEndpoint(extension))
+
+fun Call.Builder.toApp(user: String): Call.Builder =
+    to(com.vonage.client.voice.AppEndpoint(user))

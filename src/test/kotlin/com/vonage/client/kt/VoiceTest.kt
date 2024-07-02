@@ -207,6 +207,19 @@ class VoiceTest : AbstractTest() {
         assertEquals(conversationId, callEvent.conversationUuid)
     }
 
+    private fun testCreateCallToSingleEndpoint(toParams: Map<String, Any>,
+                                               toBuilder: Call.Builder.() -> Call.Builder) {
+        testCreateCall(mapOf(
+            "random_from_number" to true,
+            "answer_url" to listOf(onAnswerUrl),
+            "answer_method" to "GET",
+            "to" to listOf(toParams)
+        )) {
+            fromRandomNumber(true); answerUrl(onAnswerUrl)
+            toBuilder()
+        }
+    }
+
     private fun testSingleNcco(additionalParams: Map<String, Any> = mapOf(), ncco: Action) {
         val requestParams = mapOf(
             "random_from_number" to true,
@@ -389,6 +402,60 @@ class VoiceTest : AbstractTest() {
         )) {
             fromRandomNumber(true); ncco(talkAction(ssmlText))
             to(com.vonage.client.voice.PhoneEndpoint(toNumber))
+        }
+    }
+
+    @Test
+    fun `create call to PSTN`() {
+        val baseMap = mapOf("type" to phoneType, "number" to toNumber)
+        testCreateCallToSingleEndpoint(baseMap) {
+            toPstn(toNumber)
+        }
+
+        testCreateCallToSingleEndpoint(baseMap + mapOf("dtmfAnswer" to dtmf)) {
+            toPstn(toNumber, dtmf)
+        }
+    }
+
+    @Test
+    fun `create call to App`() {
+        testCreateCallToSingleEndpoint(mapOf("type" to "app", "user" to user)) {
+            toApp(user)
+        }
+    }
+
+    @Test
+    fun `create call to VBC`() {
+        testCreateCallToSingleEndpoint(mapOf("type" to "vbc", "extension" to vbcExt)) {
+            toVbc(vbcExt)
+        }
+    }
+
+    @Test
+    fun `create call to SIP`() {
+        val baseMap = mapOf("type" to "sip", "uri" to sipUri)
+        testCreateCallToSingleEndpoint(baseMap) {
+            toSip(sipUri)
+        }
+
+        testCreateCallToSingleEndpoint(baseMap + mapOf(
+            "headers" to customHeaders, "standard_headers" to mapOf("User-to-User" to userToUserHeader)
+        )) {
+            toSip(sipUri, customHeaders, userToUserHeader)
+        }
+    }
+
+    @Test
+    fun `create call to WebSocket`() {
+        val baseMap = mapOf("type" to "websocket", "uri" to websocketUri)
+        testCreateCallToSingleEndpoint(baseMap) {
+            toWebSocket(websocketUri)
+        }
+
+        testCreateCallToSingleEndpoint(baseMap + mapOf(
+            "content-type" to wsContentType, "headers" to customHeaders
+        )) {
+            toWebSocket(websocketUri, wsContentType, customHeaders)
         }
     }
 
