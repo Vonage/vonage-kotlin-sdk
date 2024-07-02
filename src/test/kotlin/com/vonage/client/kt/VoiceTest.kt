@@ -2,6 +2,7 @@ package com.vonage.client.kt
 
 import com.vonage.client.common.HttpMethod
 import com.vonage.client.voice.*
+import com.vonage.client.voice.PhoneEndpoint
 import com.vonage.client.voice.ncco.*
 import java.net.URI
 import java.time.Instant
@@ -344,6 +345,25 @@ class VoiceTest : AbstractTest() {
     fun `list calls no filter`() {
         mockGet(callsBaseUrl, expectedResponseParams = listCallsResponse)
         assertEqualsSampleCallsPage(voiceClient.listCalls())
+    }
+
+    @Test
+    fun `create TTS call with required parameters only`() {
+        val ssmlText = "<speak><prosody rate='fast'>I can speak fast.</prosody></speak>"
+        testCreateCall(mapOf(
+            "random_from_number" to true,
+            "to" to listOf(mapOf(
+                "type" to phoneType,
+                "number" to toNumber
+            )),
+            "ncco" to listOf(mapOf(
+                "action" to "talk",
+                "text" to ssmlText
+            ))
+        )) {
+            fromRandomNumber(true); to(PhoneEndpoint(toNumber))
+            ncco(talkAction(ssmlText))
+        }
     }
 
     @Test
