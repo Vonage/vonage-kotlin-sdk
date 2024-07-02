@@ -2,7 +2,6 @@ package com.vonage.client.kt
 
 import com.vonage.client.common.HttpMethod
 import com.vonage.client.voice.*
-import com.vonage.client.voice.PhoneEndpoint
 import com.vonage.client.voice.ncco.*
 import java.net.URI
 import java.time.Instant
@@ -32,6 +31,7 @@ class VoiceTest : AbstractTest() {
     private val streamUrl = "https://example.com/waiting.mp3"
     private val websocketUri = "wss://example.com/socket"
     private val sipUri = "sip:rebekka@sip.example.com"
+    private val conversationName = "selective-audio Demo"
     private val customHeaders = mapOf(
         "customer_id" to "abc123",
         "purchases" to 19,
@@ -203,6 +203,24 @@ class VoiceTest : AbstractTest() {
         assertEquals(conversationId, callEvent.conversationUuid)
     }
 
+    private fun testSingleNcco(additionalParams: Map<String, Any> = mapOf(), ncco: Action) {
+        val requestParams = mapOf(
+            "random_from_number" to true,
+            "to" to listOf(mapOf(
+                "type" to "websocket",
+                "uri" to websocketUri
+            )),
+            "ncco" to listOf(
+                mapOf("action" to ncco.action) + additionalParams
+            )
+        )
+
+        testCreateCall(requestParams) {
+            ncco(ncco); fromRandomNumber(true);
+            to(com.vonage.client.voice.WebSocketEndpoint(websocketUri, null, null))
+        }
+    }
+
     @Test
     fun `terminate call`() {
         testModifyCall("hangup", callObj::hangup)
@@ -361,8 +379,8 @@ class VoiceTest : AbstractTest() {
                 "text" to ssmlText
             ))
         )) {
-            fromRandomNumber(true); to(PhoneEndpoint(toNumber))
-            ncco(talkAction(ssmlText))
+            fromRandomNumber(true); ncco(talkAction(ssmlText))
+            to(com.vonage.client.voice.PhoneEndpoint(toNumber))
         }
     }
 
@@ -442,13 +460,124 @@ class VoiceTest : AbstractTest() {
     }
 
     @Test
+    fun `create call with talk action required parameters only`() {
+        testSingleNcco(mapOf("text" to text), talkAction(text))
+    }
+
+    @Test
+    fun `create call with stream action required parameters only`() {
+        testSingleNcco(mapOf("streamUrl" to listOf(streamUrl)), streamAction(streamUrl))
+    }
+
+    @Test
+    fun `create call with conversation action required parameters only`() {
+        testSingleNcco(mapOf("name" to conversationName), conversationAction(conversationName))
+    }
+
+    @Test
+    fun `create call with input action required parameters only`() {
+        testSingleNcco(ncco = inputAction())
+    }
+
+    @Test
+    fun `create call with notify action required parameters only`() {
+        testSingleNcco(
+            mapOf("eventUrl" to listOf(eventUrl), "payload" to mapOf<String, Any>()),
+            notifyAction(eventUrl, mapOf())
+        )
+    }
+
+    @Test
+    fun `create call with record action required parameters only`() {
+        testSingleNcco(ncco = recordAction())
+    }
+
+    @Test
+    fun `create call with connect action required parameters only`() {
+        testSingleNcco(
+            mapOf("endpoint" to listOf(mapOf("type" to "vbc", "extension" to vbcExt))),
+            connectAction(com.vonage.client.voice.ncco.VbcEndpoint.builder(vbcExt).build())
+        )
+    }
+
+    @Test
+    fun `create call with all NCCO actions required parameters and empty builder properties`() {
+        val emptyMap = mapOf<String, Any>()
+        
+        testCreateCall(mapOf(
+            "random_from_number" to true,
+            "to" to listOf(mapOf(
+                "type" to "vbc",
+                "extension" to vbcExt
+            )),
+            "advanced_machine_detection" to emptyMap,
+            "ncco" to listOf(
+                mapOf(
+                    "action" to "talk",
+                    "text" to text
+                ),
+                mapOf(
+                    "action" to "stream",
+                    "streamUrl" to listOf(streamUrl)
+                ),
+                mapOf(
+                    "action" to "conversation",
+                    "name" to conversationName,
+                    "record" to true,
+                    "transcription" to emptyMap
+                ),
+                mapOf(
+                    "action" to "input",
+                    "speech" to emptyMap,
+                    "dtmf" to emptyMap
+                ),
+                mapOf(
+                    "action" to "notify",
+                    "eventUrl" to listOf(eventUrl),
+                    "payload" to emptyMap
+                ),
+                mapOf(
+                    "action" to "record",
+                    "transcription" to emptyMap
+                ),
+                mapOf(
+                    "action" to "connect",
+                    "endpoint" to listOf(mapOf(
+                        "type" to "sip",
+                        "uri" to sipUri
+                    )),
+                    "advancedMachineDetection" to emptyMap
+                )
+            )
+        )) {
+            fromRandomNumber(true); to(com.vonage.client.voice.VbcEndpoint(vbcExt))
+            advancedMachineDetection(); ncco(
+                talkAction(text),
+                streamAction(streamUrl),
+                conversationAction(conversationName) {
+                    transcription(); record(true)
+                },
+                inputAction {
+                    speech(); dtmf()
+                },
+                notifyAction(eventUrl, mapOf()),
+                recordAction {
+                    transcription()
+                },
+                connectAction(com.vonage.client.voice.ncco.SipEndpoint.builder(sipUri).build()) {
+                    advancedMachineDetection()
+                }
+            )
+        }
+    }
+
+    @Test
     fun `create call with all NCCO actions and all parameters of those actions`() {
         val bargeIn = false
         val premium = true
         val loop = 2
         val style = 1
         val level = -0.5f
-        val conversationName = "selective-audio Demo"
         val canHearId = UUID.randomUUID().toString()
         val canSpeakId = UUID.randomUUID().toString()
         val conversationEventMethod = EventMethod.POST

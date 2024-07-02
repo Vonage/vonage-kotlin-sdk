@@ -62,7 +62,7 @@ fun CallsFilter.Builder.dateEnd(dateEnd: String): CallsFilter.Builder =
 fun Call.Builder.advancedMachineDetection(amd: AdvancedMachineDetection.Builder.() -> Unit = {}): Call.Builder =
     advancedMachineDetection(AdvancedMachineDetection.builder().apply(amd).build())
 
-fun InputAction.Builder.speech(settings: SpeechSettings.Builder.() -> Unit): InputAction.Builder =
+fun InputAction.Builder.speech(settings: SpeechSettings.Builder.() -> Unit = {}): InputAction.Builder =
     speech(SpeechSettings.builder().apply(settings).build())
 
 fun InputAction.Builder.dtmf(timeout: Int? = null, maxDigits: Int? = null, submitOnHash: Boolean? = null): InputAction.Builder {
@@ -91,7 +91,7 @@ fun talkAction(text: String, properties: TalkAction.Builder.() -> Unit = {}): Ta
 fun streamAction(streamUrl: String, properties: StreamAction.Builder.() -> Unit = {}): StreamAction =
     StreamAction.builder(streamUrl).apply(properties).build()
 
-fun notifyAction(eventUrl: String, payload: Map<String, Any>? = null, eventMethod: EventMethod? = null): NotifyAction =
+fun notifyAction(eventUrl: String, payload: Map<String, Any>, eventMethod: EventMethod? = null): NotifyAction =
     NotifyAction.builder(payload, eventUrl).eventMethod(eventMethod).build()
 
 fun inputAction(properties: InputAction.Builder.() -> Unit = {}): InputAction =
