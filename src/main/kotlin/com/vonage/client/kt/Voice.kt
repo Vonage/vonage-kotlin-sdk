@@ -2,8 +2,6 @@ package com.vonage.client.kt
 
 import com.vonage.client.voice.*
 import com.vonage.client.voice.ncco.*
-import com.vonage.client.voice.ncco.AppEndpoint
-import com.vonage.client.voice.ncco.Endpoint
 import java.net.URI
 import java.time.Instant
 import java.util.*
@@ -102,7 +100,6 @@ fun inputAction(properties: InputAction.Builder.() -> Unit): InputAction =
 fun conversationAction(name: String, properties: ConversationAction.Builder.() -> Unit): ConversationAction =
     ConversationAction.builder(name).apply(properties).build()
 
-fun connectAction(vararg endpoints: Endpoint, properties: ConnectAction.Builder.() -> Unit): ConnectAction =
-    ConnectAction.builder(endpoints.asList()).apply(properties).build()
-
-
+fun connectAction(endpoint: com.vonage.client.voice.ncco.Endpoint,
+                  properties: ConnectAction.Builder.() -> Unit): ConnectAction =
+    ConnectAction.builder(endpoint).apply(properties).build()

@@ -435,13 +435,14 @@ class VoiceTest : AbstractTest() {
         val transcriptionEventMethod = EventMethod.GET
         val notifyEventMethod = conversationEventMethod
         val recordEventMethod = transcriptionEventMethod
+        val inputEventMethod = transcriptionEventMethod
+        val connectEventMethod = conversationEventMethod
         val musicOnHoldUrl = "https://nexmo-community.github.io/ncco-examples/assets/voice_api_audio_streaming.mp3"
         val transcriptionEventUrl = "https://example.com/transcription"
         val mute = true
         val record = true
         val endOnExit = true
         val startOnEnter = true
-        val inputEventMethod = transcriptionEventMethod
         val inputActionTypes = listOf("dtmf", "asr")
         val dtmfTimeout = 7
         val maxDigits = 16
@@ -455,12 +456,17 @@ class VoiceTest : AbstractTest() {
         val speechContext = listOf("sales", "support", "customer", "Developer")
         val recordingTimeout = 1260
         val recordingChannels = 18
+        val limit = 5710
         val endOnKey = 'x'
         val endOnSilenceRecording = 7
         val splitRecording = SplitRecording.CONVERSATION
         val recordEventUrl = "https://example.com/recordings"
         val beepStart = true
         val machineDetection = MachineDetection.CONTINUE
+        val eventType = EventType.SYNCHRONOUS
+        val connectTimeout = 38
+        val ringbackTone = "http://example.com/ringbackTone.wav"
+        val beepTimeout = 90
 
         testCreateCall(mapOf(
             "from" to mapOf(
@@ -554,6 +560,26 @@ class VoiceTest : AbstractTest() {
                         "eventMethod" to transcriptionEventMethod.name,
                         "sentimentAnalysis" to false
                     )
+                ),
+                mapOf(
+                    "action" to "connect",
+                    "eventUrl" to listOf(eventUrl),
+                    "eventMethod" to connectEventMethod.name,
+                    "eventType" to eventType.name.lowercase(),
+                    "limit" to limit,
+                    "randomFromNumber" to true,
+                    "ringbackTone" to ringbackTone,
+                    "timeout" to connectTimeout,
+                    "advancedMachineDetection" to mapOf(
+                        "beep_timeout" to beepTimeout
+                    ),
+                    "endpoint" to listOf(
+                        mapOf(
+                            "type" to phoneType,
+                            "number" to altNumber,
+                            "dtmfAnswer" to dtmf
+                        )
+                    )
                 )
             )
 
@@ -602,8 +628,14 @@ class VoiceTest : AbstractTest() {
                         eventUrl(eventUrl); eventMethod(transcriptionEventMethod)
                         sentimentAnalysis(false)
                     }
+                },
+                connectAction(com.vonage.client.voice.ncco.PhoneEndpoint.builder(altNumber).dtmfAnswer(dtmf).build()) {
+                    eventUrl(eventUrl); eventMethod(connectEventMethod); limit(limit)
+                    eventType(eventType); timeOut(connectTimeout); ringbackTone(ringbackTone);
+                    randomFromNumber(true); advancedMachineDetection {
+                        beepTimeout(beepTimeout)
+                    }
                 }
-                // TODO connect action
             )
         }
     }
