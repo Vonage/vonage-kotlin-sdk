@@ -9,7 +9,7 @@
 
   <packaging>jar</packaging>
   <name>Vonage Kotlin Server SDK</name>
-  <description>Java client for Vonage APIs</description>
+  <description>Kotlin client for Vonage APIs</description>
   <url>https://github.com/Vonage/vonage-kotlin-sdk</url>
   <organization>
     <name>Vonage</name>
