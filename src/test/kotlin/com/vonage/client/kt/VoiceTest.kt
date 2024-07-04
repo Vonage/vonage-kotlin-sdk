@@ -367,7 +367,6 @@ class VoiceTest : AbstractTest() {
             "record_index" to recordIndex,
             "order" to "desc",
             "conversation_uuid" to conversationId
-
         ), expectedResponseParams = listCallsResponse)
 
         val callsPage = voiceClient.listCalls {

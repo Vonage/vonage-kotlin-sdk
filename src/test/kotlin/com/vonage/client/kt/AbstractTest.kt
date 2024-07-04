@@ -12,6 +12,8 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
 import java.net.URI
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -27,6 +29,7 @@ abstract class AbstractTest {
     protected val toNumber = "447712345689"
     protected val altNumber = "447700900001"
     protected val text = "Hello, World!"
+    protected val textHexEncoded = "48656c6c6f2c20576f726c6421"
     protected val networkCode = "65512"
     protected val startTime = "2020-09-17T12:34:56Z"
     protected val endTime = "2021-09-17T12:35:28Z"
@@ -38,9 +41,8 @@ abstract class AbstractTest {
     )
 
     val vonage = Vonage {
-        apiKey(apiKey); apiSecret(apiSecret);
-        signatureSecret(signatureSecret); applicationId(applicationId)
-        privateKeyPath(privateKeyPath)
+        apiKey(apiKey); apiSecret(apiSecret); signatureSecret(signatureSecret);
+        applicationId(applicationId); privateKeyPath(privateKeyPath)
         httpConfig {
             baseUri("http://localhost:$port")
         }
@@ -68,7 +70,14 @@ abstract class AbstractTest {
     }
 
     protected enum class AuthType {
-        JWT, API_KEY_SECRET_HEADER, API_KEY_SECRET_QUERY_PARAMS
+        JWT, API_KEY_SECRET_HEADER, API_KEY_SECRET_QUERY_PARAMS, API_KEY_SIGNATURE_SECRET
+    }
+
+    protected fun Map<String, Any>.toFormEncodedString(): String {
+        val utf8 = StandardCharsets.UTF_8.toString()
+        return entries.joinToString("&") { (key, value) ->
+            "${URLEncoder.encode(key, utf8)}=${URLEncoder.encode(value.toString(), utf8)}"
+        }
     }
 
     protected fun mockRequest(
@@ -79,38 +88,65 @@ abstract class AbstractTest {
         authType: AuthType? = null,
         expectedParams: Map<String, Any>? = null): BuildingStep =
             wiremock.requestServerBuilderStep({
-                url equalTo expectedUrl
+                urlPath equalTo expectedUrl
                 headers contains "User-Agent" like "vonage-java-sdk\\/.+ java\\/.+"
-                if (authType != null) {
-                    val authHeaderName = "Authorization"
-                    when (authType) {
-                        AuthType.JWT -> headers contains authHeaderName like
-                                    "Bearer eyJ0eXBlIjoiSldUIiwiYWxnIjoiUlMyNTYifQ(\\..+){2}"
-                        AuthType.API_KEY_SECRET_HEADER ->
-                            headers contains authHeaderName equalTo "Basic $apiKeySecretEncoded"
-                        AuthType.API_KEY_SECRET_QUERY_PARAMS -> {
-                            headers contains "api_key" equalTo apiKey
-                            headers contains "api_secret" equalTo apiSecret
-                        }
-                    }
-                }
                 if (contentType != null) {
                     headers contains "Content-Type" equalTo contentType.mime
                 }
                 if (accept != null) {
                     headers contains "Accept" equalTo accept.mime
                 }
-                if (expectedParams != null) {
-                    if (contentType == ContentType.APPLICATION_JSON) {
-                        body equalTo ObjectMapper().writeValueAsString(expectedParams)
-                    }
-                    else {
-                        url like "$expectedUrl\\?.+"
-                        expectedParams.forEach { (k, v) ->
-                            queryParams contains k equalTo v.toString()
+                val formEncodedParams = if (
+                        contentType == ContentType.FORM_URLENCODED && httpMethod != HttpMethod.GET
+                    ) mutableMapOf<String, Any>() else null
+
+                if (authType != null) {
+                    val authHeaderName = "Authorization"
+                    val apiKeyName = "api_key"
+                    when (authType) {
+                        AuthType.JWT -> headers contains authHeaderName like
+                                "Bearer eyJ0eXBlIjoiSldUIiwiYWxnIjoiUlMyNTYifQ(\\..+){2}"
+
+                        AuthType.API_KEY_SECRET_HEADER ->
+                            headers contains authHeaderName equalTo "Basic $apiKeySecretEncoded"
+
+                        AuthType.API_KEY_SECRET_QUERY_PARAMS -> {
+                            val apiSecretName = "api_secret"
+                            if (formEncodedParams != null) {
+                                formEncodedParams[apiKeyName] = apiKey
+                                formEncodedParams[apiSecretName] = apiSecret
+                            }
+                            else {
+                                queryParams contains apiKeyName equalTo apiKey
+                                queryParams contains apiSecretName equalTo apiSecret
+                            }
+                        }
+
+                        AuthType.API_KEY_SIGNATURE_SECRET -> {
+                            val signatureName = "sig"
+                            if (formEncodedParams != null) {
+                                formEncodedParams[apiKeyName] = apiKey
+                                formEncodedParams[signatureName] = signatureSecret
+                            }
+                            else {
+                                queryParams contains apiKeyName equalTo apiKey
+                                queryParams contains signatureName equalTo signatureSecret
+                            }
                         }
                     }
                 }
+                if (expectedParams != null) when (contentType) {
+                    ContentType.APPLICATION_JSON -> {
+                        body equalTo ObjectMapper().writeValueAsString(expectedParams)
+                    }
+                    ContentType.FORM_URLENCODED -> {
+                        formEncodedParams?.putAll(expectedParams)
+                    }
+                    else -> {
+                        expectedParams.forEach { (k, v) -> queryParams contains k equalTo v.toString() }
+                    }
+                }
+                // TODO: assertion on the body once it's supported by the WireMock DSL
             }, when (httpMethod) {
                     HttpMethod.GET -> WireMock::get
                     HttpMethod.POST -> WireMock::post
@@ -123,46 +159,35 @@ abstract class AbstractTest {
     private fun mockP(requestMethod: HttpMethod, expectedUrl: String,
                       expectedRequestParams: Map<String, Any>? = null,
                       status: Int = 200, authType: AuthType? = AuthType.JWT,
-                      expectedResponseParams: Map<String, Any>? = null) =
+                      contentType: ContentType?, expectedResponseParams: Map<String, Any>? = null) =
 
-        mockRequest(requestMethod, expectedUrl,
-            contentType = if (expectedRequestParams != null) ContentType.APPLICATION_JSON else null,
+        mockRequest(requestMethod, expectedUrl, if (expectedRequestParams != null) contentType else null,
             accept = if (expectedResponseParams != null && status < 400) ContentType.APPLICATION_JSON else null,
             authType = authType, expectedRequestParams
         ).mockReturn(status, expectedResponseParams)
 
-    protected fun mockPost(expectedUrl: String,
-                           expectedRequestParams: Map<String, Any>? = null,
-                           status: Int = 200,
-                           authType: AuthType? = AuthType.JWT,
-                           expectedResponseParams: Map<String, Any>? = null) =
-        mockP(HttpMethod.POST, expectedUrl, expectedRequestParams, status, authType, expectedResponseParams)
+    protected fun mockPost(expectedUrl: String, expectedRequestParams: Map<String, Any>? = null,
+                           status: Int = 200, contentType: ContentType? = ContentType.APPLICATION_JSON,
+                           authType: AuthType? = AuthType.JWT, expectedResponseParams: Map<String, Any>? = null) =
+        mockP(HttpMethod.POST, expectedUrl, expectedRequestParams, status, authType, contentType, expectedResponseParams)
 
-    protected fun mockPut(expectedUrl: String,
-                           expectedRequestParams: Map<String, Any>? = null,
-                           status: Int = 200,
-                           authType: AuthType? = AuthType.JWT,
-                           expectedResponseParams: Map<String, Any>? = null) =
-        mockP(HttpMethod.PUT, expectedUrl, expectedRequestParams, status, authType, expectedResponseParams)
+    protected fun mockPut(expectedUrl: String, expectedRequestParams: Map<String, Any>? = null,
+                           status: Int = 200, contentType: ContentType? = ContentType.APPLICATION_JSON,
+                           authType: AuthType? = AuthType.JWT, expectedResponseParams: Map<String, Any>? = null) =
+        mockP(HttpMethod.PUT, expectedUrl, expectedRequestParams, status, authType, contentType, expectedResponseParams)
 
-    protected fun mockPatch(expectedUrl: String,
-                          expectedRequestParams: Map<String, Any>? = null,
-                          status: Int = 200,
-                          authType: AuthType? = AuthType.JWT,
-                          expectedResponseParams: Map<String, Any>? = null) =
-        mockP(HttpMethod.PUT, expectedUrl, expectedRequestParams, status, authType, expectedResponseParams)
+    protected fun mockPatch(expectedUrl: String, expectedRequestParams: Map<String, Any>? = null,
+                          status: Int = 200, contentType: ContentType? = ContentType.APPLICATION_JSON,
+                          authType: AuthType? = AuthType.JWT, expectedResponseParams: Map<String, Any>? = null) =
+        mockP(HttpMethod.PUT, expectedUrl, expectedRequestParams, status, authType, contentType, expectedResponseParams)
 
     protected fun mockDelete(expectedUrl: String, authType: AuthType? = null,
                              expectedResponseParams: Map<String, Any>? = null) =
         mockRequest(HttpMethod.DELETE, expectedUrl, authType = authType)
             .mockReturn(if (expectedResponseParams == null) 204 else 200, expectedResponseParams)
 
-    protected fun mockGet(expectedUrl: String,
-                             expectedQueryParams: Map<String, Any>? = null,
-                             status: Int = 200,
-                             authType: AuthType? = AuthType.JWT,
-                             expectedResponseParams: Map<String, Any>) =
-
+    protected fun mockGet(expectedUrl: String, expectedQueryParams: Map<String, Any>? = null, status: Int = 200,
+                          authType: AuthType? = AuthType.JWT, expectedResponseParams: Map<String, Any>) =
         mockRequest(HttpMethod.GET, expectedUrl, accept = ContentType.APPLICATION_JSON, authType = authType,
             expectedParams = expectedQueryParams).mockReturn(status, expectedResponseParams)
 

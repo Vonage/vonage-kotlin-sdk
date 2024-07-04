@@ -419,7 +419,7 @@ class MessagesTest : AbstractTest() {
     fun `parse inbound MMS image`() {
         val timestampStr = "2020-01-29T14:08:30.201Z"
         val networkCode = "54123"
-        val parsed = parseInboundMessage(
+        val parsed = InboundMessage.fromJson(
             """
                 {
                    "channel": "$mmsChannel",
