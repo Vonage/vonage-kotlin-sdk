@@ -3,6 +3,7 @@ package com.vonage.client.kt
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import com.marcinziolo.kotlin.wiremock.*
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.assertThrows
 import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.time.Instant
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -24,16 +26,27 @@ abstract class AbstractTest {
     private val signatureSecret = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQR"
     private val apiKeySecretEncoded = "YTFiMmMzZDQ6MTIzNDU2Nzg5MGFiY2RlZg=="
     private val privateKeyPath = "src/test/resources/com/vonage/client/kt/application_key"
+    protected val apiSecretName = "api_secret"
+    protected val apiKeyName = "api_key"
+    protected val signatureSecretName = "sig"
     protected val testUuidStr = "aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab"
     protected val testUuid = UUID.fromString(testUuidStr)
     protected val toNumber = "447712345689"
     protected val altNumber = "447700900001"
     protected val text = "Hello, World!"
     protected val textHexEncoded = "48656c6c6f2c20576f726c6421"
+    protected val smsMessageId = "0C000000217B7F02"
+    protected val callIdStr = "63f61863-4a51-4f6b-86e1-46edebcf9356"
     protected val networkCode = "65512"
-    protected val startTime = "2020-09-17T12:34:56Z"
-    protected val endTime = "2021-09-17T12:35:28Z"
-    protected val timestamp = "2016-11-14T07:45:14Z"
+    protected val startTimeStr = "2020-09-17T12:34:56Z"
+    protected val startTime = Instant.parse(startTimeStr)
+    protected val endTimeStr = "2021-09-17T12:35:28Z"
+    protected val endTime = Instant.parse(endTimeStr)
+    protected val timestampStr = "2016-11-14T07:45:14Z"
+    protected val timestampDateStr = "2016-11-14 07:45:14"
+    protected val timestamp = Instant.parse(timestampStr)
+    protected val timestamp2Str = "2020-01-29T14:08:30.201Z"
+    protected val timestamp2 = Instant.parse(timestamp2Str)
 
     private val port = 8081
     val wiremock: WireMockServer = WireMockServer(
@@ -73,11 +86,32 @@ abstract class AbstractTest {
         JWT, API_KEY_SECRET_HEADER, API_KEY_SECRET_QUERY_PARAMS, API_KEY_SIGNATURE_SECRET
     }
 
+    private fun HttpMethod.toWireMockMethod(): Method = when (this) {
+        HttpMethod.GET -> WireMock::get
+        HttpMethod.POST -> WireMock::post
+        HttpMethod.PUT -> WireMock::put
+        HttpMethod.PATCH -> WireMock::patch
+        HttpMethod.DELETE -> WireMock::delete
+        else -> throw IllegalArgumentException("Unhandled HTTP method: $this")
+    }
+
     protected fun Map<String, Any>.toFormEncodedString(): String {
         val utf8 = StandardCharsets.UTF_8.toString()
         return entries.joinToString("&") { (key, value) ->
             "${URLEncoder.encode(key, utf8)}=${URLEncoder.encode(value.toString(), utf8)}"
         }
+    }
+
+    protected fun mockPostQueryParams(expectedUrl: String, expectedRequestParams: Map<String, Any>,
+                                      status: Int = 200, expectedResponseParams: Map<String, Any>? = null) {
+        val stub = post(urlPathEqualTo(expectedUrl))
+        expectedRequestParams.forEach {(k, v) -> stub.withFormParam(k, equalTo(v.toString()))}
+        val response = aResponse().withStatus(status)
+        if (expectedResponseParams != null) {
+            response.withBody(expectedResponseParams.toFormEncodedString())
+        }
+        stub.willReturn(response)
+        wiremock.stubFor(stub)
     }
 
     protected fun mockRequest(
@@ -96,13 +130,9 @@ abstract class AbstractTest {
                 if (accept != null) {
                     headers contains "Accept" equalTo accept.mime
                 }
-                val formEncodedParams = if (
-                        contentType == ContentType.FORM_URLENCODED && httpMethod != HttpMethod.GET
-                    ) mutableMapOf<String, Any>() else null
 
                 if (authType != null) {
                     val authHeaderName = "Authorization"
-                    val apiKeyName = "api_key"
                     when (authType) {
                         AuthType.JWT -> headers contains authHeaderName like
                                 "Bearer eyJ0eXBlIjoiSldUIiwiYWxnIjoiUlMyNTYifQ(\\..+){2}"
@@ -111,27 +141,13 @@ abstract class AbstractTest {
                             headers contains authHeaderName equalTo "Basic $apiKeySecretEncoded"
 
                         AuthType.API_KEY_SECRET_QUERY_PARAMS -> {
-                            val apiSecretName = "api_secret"
-                            if (formEncodedParams != null) {
-                                formEncodedParams[apiKeyName] = apiKey
-                                formEncodedParams[apiSecretName] = apiSecret
-                            }
-                            else {
-                                queryParams contains apiKeyName equalTo apiKey
-                                queryParams contains apiSecretName equalTo apiSecret
-                            }
+                            queryParams contains apiKeyName equalTo apiKey
+                            queryParams contains apiSecretName equalTo apiSecret
                         }
 
                         AuthType.API_KEY_SIGNATURE_SECRET -> {
-                            val signatureName = "sig"
-                            if (formEncodedParams != null) {
-                                formEncodedParams[apiKeyName] = apiKey
-                                formEncodedParams[signatureName] = signatureSecret
-                            }
-                            else {
-                                queryParams contains apiKeyName equalTo apiKey
-                                queryParams contains signatureName equalTo signatureSecret
-                            }
+                            queryParams contains apiKeyName equalTo apiKey
+                            queryParams contains signatureSecretName equalTo signatureSecret
                         }
                     }
                 }
@@ -139,22 +155,11 @@ abstract class AbstractTest {
                     ContentType.APPLICATION_JSON -> {
                         body equalTo ObjectMapper().writeValueAsString(expectedParams)
                     }
-                    ContentType.FORM_URLENCODED -> {
-                        formEncodedParams?.putAll(expectedParams)
-                    }
                     else -> {
-                        expectedParams.forEach { (k, v) -> queryParams contains k equalTo v.toString() }
+                        expectedParams.forEach {(k, v) -> queryParams contains k equalTo v.toString()}
                     }
                 }
-                // TODO: assertion on the body once it's supported by the WireMock DSL
-            }, when (httpMethod) {
-                    HttpMethod.GET -> WireMock::get
-                    HttpMethod.POST -> WireMock::post
-                    HttpMethod.PUT -> WireMock::put
-                    HttpMethod.PATCH -> WireMock::patch
-                    HttpMethod.DELETE -> WireMock::delete
-                    else -> throw IllegalArgumentException("Unhandled HTTP method: $httpMethod")
-            })
+            }, httpMethod.toWireMockMethod())
 
     private fun mockP(requestMethod: HttpMethod, expectedUrl: String,
                       expectedRequestParams: Map<String, Any>? = null,

@@ -25,7 +25,6 @@ class SmsTest : AbstractTest() {
     private fun testSuccessSingleMessage(requestParams: Map<String, Any>,
                                          invocation: () -> List<SmsSubmissionResponseMessage>) {
 
-        val messageId = "0C000000217B7F02"
         val remainingBalance = "15.53590000"
         val messagePrice = "0.03330000"
         val network = "23410"
@@ -36,7 +35,7 @@ class SmsTest : AbstractTest() {
                 "messages" to listOf(
                     mapOf(
                         "to" to toNumber,
-                        "message-id" to messageId,
+                        "message-id" to smsMessageId,
                         "status" to "0",
                         "remaining-balance" to remainingBalance,
                         "message-price" to messagePrice,
@@ -54,7 +53,7 @@ class SmsTest : AbstractTest() {
         val first = response.first()
         assertNotNull(first)
         assertEquals(toNumber, first.to)
-        assertEquals(messageId, first.id)
+        assertEquals(smsMessageId, first.id)
         assertEquals(OK, first.status)
         assertEquals(BigDecimal(remainingBalance), first.remainingBalance)
         assertEquals(BigDecimal(messagePrice), first.messagePrice)

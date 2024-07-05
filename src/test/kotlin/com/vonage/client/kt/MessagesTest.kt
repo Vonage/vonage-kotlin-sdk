@@ -417,7 +417,6 @@ class MessagesTest : AbstractTest() {
 
     @Test
     fun `parse inbound MMS image`() {
-        val timestampStr = "2020-01-29T14:08:30.201Z"
         val networkCode = "54123"
         val parsed = InboundMessage.fromJson(
             """
@@ -426,7 +425,7 @@ class MessagesTest : AbstractTest() {
                    "message_uuid": "$messageUuid",
                    "to": "$toNumber",
                    "from": "$altNumber",
-                   "timestamp": "$timestampStr",
+                   "timestamp": "$timestamp2Str",
                    "origin": {
                       "network_code": "$networkCode"
                    },
@@ -444,7 +443,7 @@ class MessagesTest : AbstractTest() {
         assertEquals(messageUuid, parsed.messageUuid)
         assertEquals(toNumber, parsed.to)
         assertEquals(altNumber, parsed.from)
-        assertEquals(Instant.parse(timestampStr), parsed.timestamp)
+        assertEquals(timestamp2, parsed.timestamp)
         assertEquals(networkCode, parsed.networkCode)
         assertEquals(MessageType.IMAGE, parsed.messageType)
         assertEquals(URI.create(imageUrl), parsed.imageUrl)

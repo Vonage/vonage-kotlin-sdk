@@ -9,6 +9,8 @@ class Vonage(init: VonageClient.Builder.() -> Unit) {
     val verify = Verify(vonageClient.verify2Client)
     val voice = Voice(vonageClient.voiceClient)
     val sms = Sms(vonageClient.smsClient)
+    val conversion = Conversion(vonageClient.conversionClient)
+    val redact = Redact(vonageClient.redactClient)
 }
 
 fun VonageClient.Builder.authFromEnv(): VonageClient.Builder {

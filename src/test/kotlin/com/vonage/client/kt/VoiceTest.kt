@@ -12,7 +12,6 @@ import kotlin.test.*
 class VoiceTest : AbstractTest() {
     private val voiceClient = vonage.voice
     private val callsBaseUrl = "/v1/calls"
-    private val callIdStr = "63f61863-4a51-4f6b-86e1-46edebcf9356"
     private val callUrl = "$callsBaseUrl/$callIdStr"
     private val callObj = voiceClient.call(UUID.fromString(callIdStr))
     private val conversationId = "CON-f972836a-550f-45fa-956c-12a2ab5b7d22"
@@ -64,8 +63,8 @@ class VoiceTest : AbstractTest() {
         "rate" to rate,
         "price" to price,
         "duration" to duration,
-        "start_time" to startTime,
-        "end_time" to endTime,
+        "start_time" to startTimeStr,
+        "end_time" to endTimeStr,
         "network" to networkCode
     )
     private val listCallsResponse = mapOf(
@@ -98,8 +97,8 @@ class VoiceTest : AbstractTest() {
         assertEquals(rate, callInfo.rate)
         assertEquals(price, callInfo.price)
         assertEquals(duration, callInfo.duration)
-        assertEquals(Instant.parse(startTime), callInfo.startTime.toInstant())
-        assertEquals(Instant.parse(endTime), callInfo.endTime.toInstant())
+        assertEquals(startTime, callInfo.startTime.toInstant())
+        assertEquals(endTime, callInfo.endTime.toInstant())
         assertEquals(networkCode, callInfo.network)
     }
 
@@ -371,7 +370,7 @@ class VoiceTest : AbstractTest() {
 
         val callsPage = voiceClient.listCalls {
             status(CallStatus.UNANSWERED)
-            dateStart(startTime); dateEnd(endTime)
+            dateStart(startTimeStr); dateEnd(endTimeStr)
             pageSize(pageSize); recordIndex(recordIndex)
             order(CallOrder.DESCENDING); conversationUuid(conversationId)
         }
