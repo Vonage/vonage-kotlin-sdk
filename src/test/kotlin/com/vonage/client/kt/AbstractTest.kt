@@ -23,14 +23,13 @@ abstract class AbstractTest {
     protected val apiKey = "a1b2c3d4"
     protected val applicationId = "00000000-0000-4000-8000-000000000000"
     private val apiSecret = "1234567890abcdef"
-    private val signatureSecret = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQR"
     private val apiKeySecretEncoded = "YTFiMmMzZDQ6MTIzNDU2Nzg5MGFiY2RlZg=="
     private val privateKeyPath = "src/test/resources/com/vonage/client/kt/application_key"
-    protected val apiSecretName = "api_secret"
-    protected val apiKeyName = "api_key"
-    protected val signatureSecretName = "sig"
+    private val apiSecretName = "api_secret"
+    private val apiKeyName = "api_key"
+    private val signatureSecretName = "sig"
     protected val testUuidStr = "aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab"
-    protected val testUuid = UUID.fromString(testUuidStr)
+    protected val testUuid: UUID = UUID.fromString(testUuidStr)
     protected val toNumber = "447712345689"
     protected val altNumber = "447700900001"
     protected val text = "Hello, World!"
@@ -39,22 +38,22 @@ abstract class AbstractTest {
     protected val callIdStr = "63f61863-4a51-4f6b-86e1-46edebcf9356"
     protected val networkCode = "65512"
     protected val startTimeStr = "2020-09-17T12:34:56Z"
-    protected val startTime = Instant.parse(startTimeStr)
+    protected val startTime: Instant = Instant.parse(startTimeStr)
     protected val endTimeStr = "2021-09-17T12:35:28Z"
-    protected val endTime = Instant.parse(endTimeStr)
+    protected val endTime: Instant = Instant.parse(endTimeStr)
     protected val timestampStr = "2016-11-14T07:45:14Z"
     protected val timestampDateStr = "2016-11-14 07:45:14"
-    protected val timestamp = Instant.parse(timestampStr)
+    protected val timestamp: Instant = Instant.parse(timestampStr)
     protected val timestamp2Str = "2020-01-29T14:08:30.201Z"
-    protected val timestamp2 = Instant.parse(timestamp2Str)
+    protected val timestamp2: Instant = Instant.parse(timestamp2Str)
 
     private val port = 8081
-    val wiremock: WireMockServer = WireMockServer(
+    private val wiremock: WireMockServer = WireMockServer(
         options().port(port).notifier(ConsoleNotifier(false))
     )
 
     val vonage = Vonage {
-        apiKey(apiKey); apiSecret(apiSecret); signatureSecret(signatureSecret);
+        apiKey(apiKey); apiSecret(apiSecret);
         applicationId(applicationId); privateKeyPath(privateKeyPath)
         httpConfig {
             baseUri("http://localhost:$port")
@@ -106,8 +105,13 @@ abstract class AbstractTest {
 
     protected fun mockPostQueryParams(expectedUrl: String, expectedRequestParams: Map<String, Any>,
                                       status: Int = 200, expectedResponseParams: Map<String, Any>? = null) {
+
         val stub = post(urlPathEqualTo(expectedUrl))
+            .withFormParam(apiKeyName, equalTo(apiKey))
+            .withFormParam(apiSecretName, equalTo(apiSecret))
+
         expectedRequestParams.forEach {(k, v) -> stub.withFormParam(k, equalTo(v.toString()))}
+
         val response = aResponse().withStatus(status)
         if (expectedResponseParams != null) {
             response.withBody(expectedResponseParams.toJson())
@@ -149,7 +153,7 @@ abstract class AbstractTest {
 
                         AuthType.API_KEY_SIGNATURE_SECRET -> {
                             queryParams contains apiKeyName equalTo apiKey
-                            queryParams contains signatureSecretName equalTo signatureSecret
+                            queryParams contains signatureSecretName
                         }
                     }
                 }
