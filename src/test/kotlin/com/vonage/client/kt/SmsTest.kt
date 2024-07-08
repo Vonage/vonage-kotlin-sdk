@@ -29,8 +29,7 @@ class SmsTest : AbstractTest() {
         val messagePrice = "0.03330000"
         val network = "23410"
 
-        mockPost(sendUrl, requestParams, authType = AuthType.API_KEY_SECRET_QUERY_PARAMS,
-            contentType = ContentType.FORM_URLENCODED, expectedResponseParams = mapOf(
+        mockPostQueryParams(sendUrl, requestParams, expectedResponseParams = mapOf(
                 "message-count" to "1",
                 "messages" to listOf(
                     mapOf(
@@ -87,7 +86,7 @@ class SmsTest : AbstractTest() {
             "text" to text,
             "type" to "text",
             "callback" to callback,
-            "status-report-req" to statusReport,
+            "status-report-req" to if (statusReport) 1 else 0,
             "message-class" to 1,
             "ttl" to ttl,
             "client-ref" to clientRef,
@@ -107,7 +106,7 @@ class SmsTest : AbstractTest() {
     fun `send binary message success required parameters`() {
         testSuccessSingleMessage(mapOf(
             "from" to from, "to" to toNumber, "type" to "binary",
-            "body" to textHexEncoded, "udh" to udhHex
+            "body" to textHexEncoded, "udh" to udhHex.lowercase()
         )) {
             smsClient.sendBinary(from, toNumber, text.encodeToByteArray(), udhBinary)
         }
@@ -120,10 +119,10 @@ class SmsTest : AbstractTest() {
             "to" to toNumber,
             "body" to textHexEncoded,
             "type" to "binary",
-            "udh" to udhHex,
+            "udh" to udhHex.lowercase(),
             "protocol-id" to protocolId,
             "callback" to callback,
-            "status-report-req" to statusReport,
+            "status-report-req" to if (statusReport) 1 else 0,
             "message-class" to 2,
             "ttl" to ttl,
             "client-ref" to clientRef,
@@ -146,8 +145,7 @@ class SmsTest : AbstractTest() {
         )
         val successMap = mapOf("status" to "0")
 
-        mockPost(sendUrl, expectedRequestParams, authType = AuthType.API_KEY_SECRET_QUERY_PARAMS,
-            contentType = ContentType.FORM_URLENCODED, expectedResponseParams = mapOf(
+        mockPostQueryParams(sendUrl, expectedRequestParams, expectedResponseParams = mapOf(
                 "message-count" to "2147483647",
                 "messages" to listOf(
                     successMap, successMap, successMap, successMap,

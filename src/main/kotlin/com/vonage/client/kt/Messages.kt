@@ -16,8 +16,6 @@ class Messages(private val client: MessagesClient) {
         client.useSandboxEndpoint().sendMessage(message).messageUuid
 }
 
-fun parseInboundMessage(json: String) : InboundMessage = InboundMessage.fromJson(json)
-
 fun smsText(init: SmsTextRequest.Builder.() -> Unit): SmsTextRequest =
     SmsTextRequest.builder().apply(init).build()
 

@@ -6,11 +6,8 @@ import java.util.*
 
 class Conversion(private val conversionClient: ConversionClient) {
 
-    private fun convert(type: ConversionRequest.Type, messageId: String, delivered: Boolean,
-                        timestamp: Instant? = null) =
-        conversionClient.submitConversion(type, messageId, delivered,
-            if (timestamp == null) null else Date.from(timestamp)
-        )
+    private fun convert(type: ConversionRequest.Type, messageId: String, delivered: Boolean, timestamp: Instant) =
+        conversionClient.submitConversion(type, messageId, delivered, Date.from(timestamp))
 
     fun convertSms(messageId: String, delivered: Boolean, timestamp: Instant = Instant.now()) =
         convert(ConversionRequest.Type.SMS, messageId, delivered, timestamp)

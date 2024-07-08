@@ -95,12 +95,14 @@ abstract class AbstractTest {
         else -> throw IllegalArgumentException("Unhandled HTTP method: $this")
     }
 
-    protected fun Map<String, Any>.toFormEncodedString(): String {
+    private fun Map<String, Any>.toFormEncodedString(): String {
         val utf8 = StandardCharsets.UTF_8.toString()
         return entries.joinToString("&") { (key, value) ->
             "${URLEncoder.encode(key, utf8)}=${URLEncoder.encode(value.toString(), utf8)}"
         }
     }
+
+    private fun Map<String, Any>.toJson(): String = ObjectMapper().writeValueAsString(this)
 
     protected fun mockPostQueryParams(expectedUrl: String, expectedRequestParams: Map<String, Any>,
                                       status: Int = 200, expectedResponseParams: Map<String, Any>? = null) {
@@ -108,7 +110,7 @@ abstract class AbstractTest {
         expectedRequestParams.forEach {(k, v) -> stub.withFormParam(k, equalTo(v.toString()))}
         val response = aResponse().withStatus(status)
         if (expectedResponseParams != null) {
-            response.withBody(expectedResponseParams.toFormEncodedString())
+            response.withBody(expectedResponseParams.toJson())
         }
         stub.willReturn(response)
         wiremock.stubFor(stub)
@@ -153,7 +155,7 @@ abstract class AbstractTest {
                 }
                 if (expectedParams != null) when (contentType) {
                     ContentType.APPLICATION_JSON -> {
-                        body equalTo ObjectMapper().writeValueAsString(expectedParams)
+                        body equalTo expectedParams.toJson()
                     }
                     else -> {
                         expectedParams.forEach {(k, v) -> queryParams contains k equalTo v.toString()}
@@ -205,7 +207,7 @@ abstract class AbstractTest {
                     else status ?: 200
 
             if (expectedBody != null) {
-                body = ObjectMapper().writeValueAsString(expectedBody)
+                body = expectedBody.toJson()
                 header = "Content-Type" to ContentType.APPLICATION_JSON.mime
             }
         }
