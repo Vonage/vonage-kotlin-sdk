@@ -141,7 +141,7 @@ abstract class AbstractTest {
                     val authHeaderName = "Authorization"
                     when (authType) {
                         AuthType.JWT -> headers contains authHeaderName like
-                                "Bearer eyJ0eXBlIjoiSldUIiwiYWxnIjoiUlMyNTYifQ(\\..+){2}"
+                                "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9(\\..+){2}"
 
                         AuthType.API_KEY_SECRET_HEADER ->
                             headers contains authHeaderName equalTo "Basic $apiKeySecretEncoded"

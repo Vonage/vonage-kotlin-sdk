@@ -4,11 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.4.0] - 2024-07-??
+## [0.3.1] - 2024-07-12
 
-### Added
-- TODO
-
+### Changed
+- Upgraded Java SDK version to 8.9.2
 
 ## [0.3.0] - 2024-07-08
 

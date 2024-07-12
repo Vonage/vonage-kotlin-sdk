@@ -5,7 +5,7 @@
 
   <groupId>com.vonage</groupId>
   <artifactId>server-sdk-kotlin</artifactId>
-  <version>0.4.0</version>
+  <version>0.3.1</version>
 
   <packaging>jar</packaging>
   <name>Vonage Kotlin Server SDK</name>
@@ -53,13 +53,13 @@
   <dependencies>
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-stdlib-jdk8</artifactId>
+      <artifactId>kotlin-stdlib</artifactId>
       <version>2.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.vonage</groupId>
       <artifactId>server-sdk</artifactId>
-      <version>8.9.1</version>
+      <version>8.9.2</version>
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
