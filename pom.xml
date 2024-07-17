@@ -7,7 +7,6 @@
   <artifactId>server-sdk-kotlin</artifactId>
   <version>0.4.0</version>
 
-  <packaging>jar</packaging>
   <name>Vonage Kotlin Server SDK</name>
   <description>Kotlin client for Vonage APIs</description>
   <url>https://github.com/Vonage/vonage-kotlin-sdk</url>

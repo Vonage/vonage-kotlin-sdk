@@ -46,6 +46,7 @@ abstract class AbstractTest {
     protected val timestamp: Instant = Instant.parse(timestampStr)
     protected val timestamp2Str = "2020-01-29T14:08:30.201Z"
     protected val timestamp2: Instant = Instant.parse(timestamp2Str)
+    protected val currency = "EUR"
 
     private val port = 8081
     private val wiremock: WireMockServer = WireMockServer(
