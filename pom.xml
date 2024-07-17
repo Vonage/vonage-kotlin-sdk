@@ -5,7 +5,7 @@
 
   <groupId>com.vonage</groupId>
   <artifactId>server-sdk-kotlin</artifactId>
-  <version>0.3.1</version>
+  <version>0.4.0</version>
 
   <packaging>jar</packaging>
   <name>Vonage Kotlin Server SDK</name>
@@ -48,6 +48,7 @@
     <kotlin.compiler.languageVersion>2.0</kotlin.compiler.languageVersion>
     <kotlin.compiler.apiVersion>2.0</kotlin.compiler.apiVersion>
     <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
+    <java.version>8</java.version>
   </properties>
 
   <dependencies>
@@ -108,7 +109,7 @@
                   <version>3.6.3</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
-                  <version>1.8</version>
+                  <version>${java.version}</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
@@ -189,9 +190,9 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.13.0</version>
         <configuration>
-          <source>8</source>
-          <target>8</target>
-          <release>8</release>
+          <release>${java.version}</release>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
         </configuration>
       </plugin>
       <plugin>
