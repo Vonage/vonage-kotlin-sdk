@@ -189,7 +189,7 @@ class VerifyLegacyTest : AbstractTest() {
 
     @Test
     fun `psd2 request all parameters`() {
-        val country = "AT"
+        val country = "DE"
         assertVerify(mapOf(
             "number" to toNumber,
             "amount" to amount,
@@ -205,7 +205,7 @@ class VerifyLegacyTest : AbstractTest() {
             psd2Verify(toNumber, amount, payee) {
                 length(codeLength); pinExpiry(pinExpiry)
                 nextEventWait(nextEventWait); country(country)
-                locale(Locale.of("de", country))
+                locale(Locale.GERMANY)
                 workflow(Psd2Request.Workflow.SMS_TTS)
             }
         }
