@@ -158,7 +158,7 @@ class VerifyLegacyTest : AbstractTest() {
     }
 
     @Test
-    fun `verify request success all parameters`() {
+    fun `verify request all parameters`() {
         assertVerify(mapOf(
             "brand" to payee, "number" to toNumber,
             "sender_id" to altNumber,
@@ -179,7 +179,7 @@ class VerifyLegacyTest : AbstractTest() {
     }
 
     @Test
-    fun `psd2 request success required parameters`() {
+    fun `psd2 request required parameters`() {
         assertVerify(mapOf(
             "number" to toNumber, "amount" to amount, "payee" to payee
         )) {
@@ -188,7 +188,7 @@ class VerifyLegacyTest : AbstractTest() {
     }
 
     @Test
-    fun `psd2 request success all parameters`() {
+    fun `psd2 request all parameters`() {
         val country = "AT"
         assertVerify(mapOf(
             "number" to toNumber,
@@ -213,24 +213,45 @@ class VerifyLegacyTest : AbstractTest() {
 
     @Test
     fun `check verification code`() {
-        mockPostQueryParams(getBaseUri("check"), expectedRequestParams = mapOf(
+        val expectedUrl = getBaseUri("check")
+        val expectedRequestParams = mapOf(
             "request_id" to requestId,
             "code" to pinCode
-        ), expectedResponseParams = mapOf(
-            "request_id" to requestId,
-            "event_id" to eventId,
-            "status" to 0,
-            "price" to price,
-            "currency" to currency,
-            "estimated_price_messages_sent" to estimatedPriceMessagesSent
-        ))
-        val response = existingRequest.check(pinCode)
-        assertNotNull(response)
-        assertEquals(requestId, response.requestId)
-        assertEquals(eventId, response.eventId)
-        assertEquals(VerifyStatus.OK, response.status)
-        assertEquals(currency, response.currency)
-        assertEquals(BigDecimal(estimatedPriceMessagesSent), response.estimatedPriceMessagesSent)
+        )
+        mockPostQueryParams(expectedUrl, expectedRequestParams,
+            expectedResponseParams = mapOf(
+                "request_id" to requestId,
+                "event_id" to eventId,
+                "status" to 0,
+                "price" to price,
+                "currency" to currency,
+                "estimated_price_messages_sent" to estimatedPriceMessagesSent
+            )
+        )
+
+        val parsedSuccess = existingRequest.check(pinCode)
+        assertNotNull(parsedSuccess)
+        assertNull(parsedSuccess.errorText)
+        assertEquals(requestId, parsedSuccess.requestId)
+        assertEquals(eventId, parsedSuccess.eventId)
+        assertEquals(VerifyStatus.OK, parsedSuccess.status)
+        assertEquals(currency, parsedSuccess.currency)
+        assertEquals(BigDecimal(estimatedPriceMessagesSent), parsedSuccess.estimatedPriceMessagesSent)
+
+        val errorText = "The code inserted does not match the expected value"
+        mockPostQueryParams(expectedUrl, expectedRequestParams,
+            expectedResponseParams = mapOf(
+                "request_id" to requestId,
+                "status" to 16,
+                "error_text" to errorText
+            )
+        )
+
+        val parsedFailure = existingRequest.check(pinCode)
+        assertNotNull(parsedFailure)
+        assertEquals(requestId, parsedFailure.requestId)
+        assertEquals(VerifyStatus.INVALID_CODE, parsedFailure.status)
+        assertEquals(errorText, parsedFailure.errorText)
     }
 
     @Test
