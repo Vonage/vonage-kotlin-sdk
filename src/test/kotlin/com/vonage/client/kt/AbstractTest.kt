@@ -1,6 +1,5 @@
 package com.vonage.client.kt
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.*
@@ -12,6 +11,7 @@ import com.vonage.client.common.HttpMethod
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
+import com.fasterxml.jackson.databind.ObjectMapper
 import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -25,9 +25,9 @@ abstract class AbstractTest {
     private val apiSecret = "1234567890abcdef"
     private val apiKeySecretEncoded = "YTFiMmMzZDQ6MTIzNDU2Nzg5MGFiY2RlZg=="
     private val privateKeyPath = "src/test/resources/com/vonage/client/kt/application_key"
+    private val signatureSecretName = "sig"
     private val apiSecretName = "api_secret"
     private val apiKeyName = "api_key"
-    private val signatureSecretName = "sig"
     protected val testUuidStr = "aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab"
     protected val testUuid: UUID = UUID.fromString(testUuidStr)
     protected val toNumber = "447712345689"
@@ -43,6 +43,9 @@ abstract class AbstractTest {
     protected val endTime: Instant = Instant.parse(endTimeStr)
     protected val timestampStr = "2016-11-14T07:45:14Z"
     protected val timestampDateStr = "2016-11-14 07:45:14"
+    protected val timestampDate = strToDate(timestampDateStr)
+    protected val timestampDate2Str = "2019-03-02 18:46:57"
+    protected val timestampDate2 = strToDate(timestampDate2Str)
     protected val timestamp: Instant = Instant.parse(timestampStr)
     protected val timestamp2Str = "2020-01-29T14:08:30.201Z"
     protected val timestamp2: Instant = Instant.parse(timestamp2Str)
@@ -71,6 +74,9 @@ abstract class AbstractTest {
         wiremock.resetAll()
         wiremock.stop()
     }
+
+    protected fun strToDate(dateStr: String): Date =
+        Date(Instant.parse(dateStr.replace(' ', 'T') + 'Z').toEpochMilli())
 
     protected enum class ContentType(val mime: String) {
         APPLICATION_JSON("application/json"),

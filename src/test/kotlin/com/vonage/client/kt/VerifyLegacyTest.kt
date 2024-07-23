@@ -10,6 +10,7 @@ class VerifyLegacyTest : AbstractTest() {
     private val requestId = "abcdef0123456789abcdef0123456789"
     private val existingRequest = verifyClient.request(requestId)
     private val eventId = "0A00000012345678"
+    private val accountId = "abcdef01"
     private val payee = "Acme Inc"
     private val amount = 48.31
     private val pinExpiry = 60
@@ -32,6 +33,80 @@ class VerifyLegacyTest : AbstractTest() {
         assertNotNull(parsed)
         assertEquals(requestId, parsed.requestId)
         assertEquals(VerifyStatus.OK, parsed.status)
+    }
+
+    private fun assertControlSuccess(command: VerifyControlCommand) {
+        val cmdStr = command.name.lowercase()
+        mockPostQueryParams(
+            expectedUrl = getBaseUri("control"),
+            expectedRequestParams = mapOf(
+                "request_id" to requestId,
+                "cmd" to cmdStr
+            ),
+            expectedResponseParams = mapOf(
+                "status" to "0",
+                "command" to cmdStr
+            )
+        )
+        val response = when(command) {
+            VerifyControlCommand.CANCEL -> existingRequest.cancel()
+            VerifyControlCommand.TRIGGER_NEXT_EVENT -> existingRequest.advance()
+        }
+        assertNotNull(response)
+        assertEquals(command, response.command)
+        assertEquals(VerifyStatus.OK, VerifyStatus.fromInt(response.status.toInt()))
+        assertNull(response.errorText)
+    }
+
+    private fun assertSearchSuccess(vararg requestIds: String) {
+        val single = requestIds.size == 1
+        mockPostQueryParams(
+            expectedUrl = getBaseUri("search"),
+            expectedRequestParams = if (single)
+                mapOf("request_id" to requestIds.first()) else
+                mapOf("request_ids" to requestIds.last()),  // Will contain duplicates otherwise
+            expectedResponseParams = mapOf(
+                "status" to "0",
+                "verification_requests" to listOf(
+                    mapOf("status" to "EXPIRED"),
+                    mapOf(
+                        "request_id" to requestId,
+                        "account_id" to accountId,
+                        "number" to toNumber,
+                        "currency" to currency,
+                        "sender_id" to payee,
+                        "date_submitted" to timestampDateStr,
+                        "date_finalized" to timestampDate2Str,
+                        "first_event_date" to timestampDateStr,
+                        "last_event_date" to timestampDate2Str,
+                        "status" to "IN PROGRESS",
+                        "price" to price,
+                        "estimated_price_messages_sent" to estimatedPriceMessagesSent
+                    ),
+                    mapOf()
+                )
+            )
+        )
+        val response = if (single) existingRequest.search() else verifyClient.search(*requestIds)
+        assertNotNull(response)
+        assertNull(response.errorText)
+        assertEquals(3, response.verificationRequests.size)
+        assertNotNull(response.verificationRequests[2])
+        assertEquals(VerifyDetails.Status.EXPIRED, response.verificationRequests[0].status)
+        val detail = response.verificationRequests[1]
+        assertNotNull(detail)
+        assertEquals(requestId, detail.requestId)
+        assertEquals(accountId, detail.accountId)
+        assertEquals(toNumber, detail.number)
+        assertEquals(currency, detail.currency)
+        assertEquals(payee, detail.senderId)
+        assertEquals(timestampDate, detail.dateSubmitted)
+        assertEquals(timestampDate2, detail.dateFinalized)
+        assertEquals(timestampDate, detail.firstEventDate)
+        assertEquals(timestampDate2, detail.lastEventDate)
+        assertEquals(VerifyDetails.Status.IN_PROGRESS, detail.status)
+        assertEquals(BigDecimal(price), detail.price)
+        assertEquals(BigDecimal(estimatedPriceMessagesSent), detail.estimatedPriceMessagesSent)
     }
 
     @Test
@@ -118,22 +193,22 @@ class VerifyLegacyTest : AbstractTest() {
     }
 
     @Test
-    fun `cancel verification`() {
-
+    fun `cancel verification success`() {
+        assertControlSuccess(VerifyControlCommand.CANCEL)
     }
 
     @Test
-    fun `advance verification`() {
-
+    fun `advance verification success`() {
+        assertControlSuccess(VerifyControlCommand.TRIGGER_NEXT_EVENT)
     }
 
     @Test
-    fun `search single request`() {
-
+    fun `search single request success`() {
+        assertSearchSuccess(requestId)
     }
 
     @Test
-    fun `search multiple requests`() {
-
+    fun `search multiple requests success`() {
+        assertSearchSuccess(requestId, textHexEncoded, testUuidStr)
     }
 }
