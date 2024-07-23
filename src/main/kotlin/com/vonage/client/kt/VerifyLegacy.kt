@@ -26,8 +26,19 @@ class VerifyLegacy(private val verifyClient: VerifyClient) {
         fun check(code: String): CheckResponse = verifyClient.check(requestId, code)
 
         fun search(): SearchVerifyResponse = verifyClient.search(requestId)
-    }
 
-    fun VerifyResponse.asExistingRequest(): ExistingRequest = request(this)
+        @Override
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            other as ExistingRequest
+            return requestId == other.requestId
+        }
+
+        @Override
+        override fun hashCode(): Int {
+            return requestId.hashCode()
+        }
+    }
 
 }

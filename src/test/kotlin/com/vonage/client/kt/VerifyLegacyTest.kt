@@ -23,42 +23,77 @@ class VerifyLegacyTest : AbstractTest() {
     private fun getBaseUri(endpoint: String): String =
         "/verify/$endpoint/json".replace("//", "/")
 
-    private fun assertVerifySuccess(params: Map<String, Any>, invocation: VerifyLegacy.() -> VerifyResponse) {
+    private fun assertVerify(params: Map<String, Any>, invocation: VerifyLegacy.() -> VerifyResponse) {
         val expectedUrl = getBaseUri(if (params.containsKey("payee")) "psd2" else "")
+        val successResponse =
         mockPostQueryParams(expectedUrl, params, expectedResponseParams = mapOf(
-                "request_id" to requestId,
-                "status" to "0"
+            "request_id" to requestId,
+            "status" to "0"
         ))
-        val parsed = invocation.invoke(verifyClient)
-        assertNotNull(parsed)
-        assertEquals(requestId, parsed.requestId)
-        assertEquals(VerifyStatus.OK, parsed.status)
+        val successParsed = invocation.invoke(verifyClient)
+        assertNotNull(successParsed)
+        assertEquals(requestId, successParsed.requestId)
+        assertEquals(VerifyStatus.OK, successParsed.status)
+        assertEquals(existingRequest, verifyClient.request(successParsed))
+
+        val errorText = "Your request is incomplete and missing the mandatory parameter `number`"
+        mockPostQueryParams(expectedUrl, params, expectedResponseParams = mapOf(
+            "request_id" to requestId,
+            "status" to "2",
+            "error_text" to errorText,
+            "network" to networkCode
+        ))
+        val failureParsed = invocation.invoke(verifyClient)
+        assertNotNull(failureParsed)
+        assertEquals(requestId, failureParsed.requestId)
+        assertEquals(VerifyStatus.MISSING_PARAMS, failureParsed.status)
+        assertEquals(errorText, failureParsed.errorText)
+        assertEquals(networkCode, failureParsed.network)
     }
 
-    private fun assertControlSuccess(command: VerifyControlCommand) {
+    private fun invokeControl(command: VerifyControlCommand) = when(command) {
+            VerifyControlCommand.CANCEL -> existingRequest.cancel()
+            VerifyControlCommand.TRIGGER_NEXT_EVENT -> existingRequest.advance()
+        }
+
+    private fun assertControl(command: VerifyControlCommand) {
         val cmdStr = command.name.lowercase()
-        mockPostQueryParams(
-            expectedUrl = getBaseUri("control"),
-            expectedRequestParams = mapOf(
-                "request_id" to requestId,
-                "cmd" to cmdStr
-            ),
+        val expectedUrl = getBaseUri("control")
+        val expectedRequestParams = mapOf(
+            "request_id" to requestId,
+            "cmd" to cmdStr
+        )
+        mockPostQueryParams(expectedUrl, expectedRequestParams,
             expectedResponseParams = mapOf(
                 "status" to "0",
                 "command" to cmdStr
             )
         )
-        val response = when(command) {
-            VerifyControlCommand.CANCEL -> existingRequest.cancel()
-            VerifyControlCommand.TRIGGER_NEXT_EVENT -> existingRequest.advance()
+        val parsedSuccess = invokeControl(command)
+        assertNotNull(parsedSuccess)
+        assertEquals(command, parsedSuccess.command)
+        assertEquals(VerifyStatus.OK, VerifyStatus.fromInt(parsedSuccess.status.toInt()))
+        assertNull(parsedSuccess.errorText)
+
+        val errorText = "Your account does not have sufficient credit to process this request."
+        mockPostQueryParams(expectedUrl, expectedRequestParams,
+            expectedResponseParams = mapOf(
+                "status" to "9",
+                "error_text" to errorText
+            )
+        )
+
+        try {
+            val parsedFailure = invokeControl(command)
+            fail("Expected VerifyException but got $parsedFailure")
         }
-        assertNotNull(response)
-        assertEquals(command, response.command)
-        assertEquals(VerifyStatus.OK, VerifyStatus.fromInt(response.status.toInt()))
-        assertNull(response.errorText)
+        catch (ex: VerifyException) {
+            assertEquals(VerifyStatus.PARTNER_QUOTA_EXCEEDED, VerifyStatus.fromInt(ex.status.toInt()))
+            assertEquals(errorText, ex.errorText)
+        }
     }
 
-    private fun assertSearchSuccess(vararg requestIds: String) {
+    private fun assertSearch(vararg requestIds: String) {
         val single = requestIds.size == 1
         mockPostQueryParams(
             expectedUrl = getBaseUri("search"),
@@ -110,15 +145,21 @@ class VerifyLegacyTest : AbstractTest() {
     }
 
     @Test
+    fun `existing request hashCode is based on the requestId`() {
+        assertEquals(requestId.hashCode(), existingRequest.hashCode())
+        assertEquals(existingRequest, verifyClient.request(requestId))
+    }
+
+    @Test
     fun `verify request success required parameters`() {
-        assertVerifySuccess(mapOf("brand" to payee, "number" to toNumber)) {
+        assertVerify(mapOf("brand" to payee, "number" to toNumber)) {
             verify(toNumber, payee)
         }
     }
 
     @Test
     fun `verify request success all parameters`() {
-        assertVerifySuccess(mapOf(
+        assertVerify(mapOf(
             "brand" to payee, "number" to toNumber,
             "sender_id" to altNumber,
             "pin_expiry" to pinExpiry,
@@ -139,7 +180,7 @@ class VerifyLegacyTest : AbstractTest() {
 
     @Test
     fun `psd2 request success required parameters`() {
-        assertVerifySuccess(mapOf(
+        assertVerify(mapOf(
             "number" to toNumber, "amount" to amount, "payee" to payee
         )) {
             psd2Verify(toNumber, amount, payee)
@@ -149,7 +190,7 @@ class VerifyLegacyTest : AbstractTest() {
     @Test
     fun `psd2 request success all parameters`() {
         val country = "AT"
-        assertVerifySuccess(mapOf(
+        assertVerify(mapOf(
             "number" to toNumber,
             "amount" to amount,
             "payee" to payee,
@@ -171,7 +212,7 @@ class VerifyLegacyTest : AbstractTest() {
     }
 
     @Test
-    fun `check verification code success`() {
+    fun `check verification code`() {
         mockPostQueryParams(getBaseUri("check"), expectedRequestParams = mapOf(
             "request_id" to requestId,
             "code" to pinCode
@@ -193,22 +234,22 @@ class VerifyLegacyTest : AbstractTest() {
     }
 
     @Test
-    fun `cancel verification success`() {
-        assertControlSuccess(VerifyControlCommand.CANCEL)
+    fun `cancel verification`() {
+        assertControl(VerifyControlCommand.CANCEL)
     }
 
     @Test
-    fun `advance verification success`() {
-        assertControlSuccess(VerifyControlCommand.TRIGGER_NEXT_EVENT)
+    fun `advance verification`() {
+        assertControl(VerifyControlCommand.TRIGGER_NEXT_EVENT)
     }
 
     @Test
-    fun `search single request success`() {
-        assertSearchSuccess(requestId)
+    fun `search single request`() {
+        assertSearch(requestId)
     }
 
     @Test
-    fun `search multiple requests success`() {
-        assertSearchSuccess(requestId, textHexEncoded, testUuidStr)
+    fun `search multiple requests`() {
+        assertSearch(requestId, textHexEncoded, testUuidStr)
     }
 }
