@@ -18,7 +18,7 @@ class ConversionTest : AbstractTest() {
     fun `submit sms conversion with timestamp`() {
         val delivered = true
         mockSuccess(smsMessageId, smsEndpoint, delivered, true)
-        conversionClient.convertSms(smsMessageId, delivered, timestamp)
+        conversionClient.convertSms(smsMessageId, delivered, timestampDate.toInstant())
     }
 
     @Test
