@@ -2,6 +2,7 @@ package com.vonage.client.kt
 
 import com.vonage.client.insight.*
 import com.vonage.client.insight.CarrierDetails.NetworkType
+import com.vonage.client.insight.RoamingDetails.RoamingStatus
 import java.math.BigDecimal
 import kotlin.test.*
 
@@ -32,6 +33,10 @@ class NumberInsightTest : AbstractTest() {
     private val currentName = "Nexmo"
     private val currentCountry = countryCode
     private val currentNetworkType = NetworkType.LANDLINE_PREMIUM
+    private val roamingStatus = RoamingStatus.ROAMING
+    private val roamingCountryCode = "DE"
+    private val roamingNetworkCode = "26201"
+    private val roamingNetworkName = "Telekom Deutschland GmbH"
     private val lookupOutcomeMessage = "Partial success - some fields populated"
     private val validNumber = Validity.INFERRED_NOT_VALID
     private val active = true
@@ -99,6 +104,12 @@ class NumberInsightTest : AbstractTest() {
         }
         if (type == InsightType.ADVANCED) {
             expectedResponseParams.putAll(mapOf(
+                "roaming" to mapOf(
+                    "status" to roamingStatus.name.lowercase(),
+                    "roaming_country_code" to roamingCountryCode,
+                    "roaming_network_code" to roamingNetworkCode,
+                    "roaming_network_name" to roamingNetworkName
+                ),
                 "reachable" to reachable,
                 "lookup_outcome" to 1,
                 "lookup_outcome_message" to lookupOutcomeMessage,
@@ -136,7 +147,7 @@ class NumberInsightTest : AbstractTest() {
         assertEquals(BigDecimal(refundPrice), response.refundPrice)
         assertEquals(BigDecimal(remainingBalance), response.remainingBalance)
         assertEquals(ported, response.ported)
-        if (response::class == StandardInsightResponse::class.java) {
+        if (response::class == StandardInsightResponse::class) {
             assertEquals(firstName, response.firstName)
             assertEquals(lastName, response.lastName)
             assertEquals(callerName, response.callerName)
@@ -172,6 +183,12 @@ class NumberInsightTest : AbstractTest() {
         assertNotNull(rtd)
         assertEquals(active, rtd.activeStatus)
         assertEquals(handsetStatus, rtd.handsetStatus)
+        val roaming = response.roaming
+        assertNotNull(roaming)
+        assertEquals(roamingStatus, roaming.status)
+        assertEquals(roamingCountryCode, roaming.roamingCountryCode)
+        assertEquals(roamingNetworkCode, roaming.roamingNetworkCode)
+        assertEquals(roamingNetworkName, roaming.roamingNetworkName)
     }
 
     @Test
