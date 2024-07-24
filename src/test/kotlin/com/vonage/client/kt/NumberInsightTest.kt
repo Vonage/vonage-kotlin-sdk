@@ -18,7 +18,7 @@ class NumberInsightTest : AbstractTest() {
     private val requestPrice = "0.035900000"
     private val refundPrice = "0.01500000"
     private val remainingBalance = "1.23456789"
-    private val reachable = "reachable"
+    private val reachable = Reachability.REACHABLE
     private val ported = PortedStatus.ASSUMED_PORTED
     private val callerType = CallerType.CONSUMER
     private val firstName = "Max"
@@ -32,6 +32,11 @@ class NumberInsightTest : AbstractTest() {
     private val currentName = "Nexmo"
     private val currentCountry = countryCode
     private val currentNetworkType = NetworkType.LANDLINE_PREMIUM
+    private val lookupOutcomeMessage = "Partial success - some fields populated"
+    private val validNumber = Validity.INFERRED_NOT_VALID
+    private val active = true
+    private val handsetStatus = "On"
+
 
     private enum class InsightType {
         BASIC, STANDARD, ADVANCED
@@ -94,8 +99,14 @@ class NumberInsightTest : AbstractTest() {
         }
         if (type == InsightType.ADVANCED) {
             expectedResponseParams.putAll(mapOf(
-                "reachable" to reachable
-                // TODO: the rest
+                "reachable" to reachable,
+                "lookup_outcome" to 1,
+                "lookup_outcome_message" to lookupOutcomeMessage,
+                "valid_number" to validNumber.name.lowercase(),
+                "real_time_data" to mapOf(
+                    "active_status" to active,
+                    "handset_status" to handsetStatus
+                )
             ))
         }
 
@@ -153,7 +164,14 @@ class NumberInsightTest : AbstractTest() {
 
     private fun assertAdvancedResponse(response: AdvancedInsightResponse) {
         assertStandardResponse(response)
-        // TODO
+        assertEquals(reachable, response.reachability)
+        assertEquals(LookupOutcome.PARTIAL_SUCCESS, response.lookupOutcome)
+        assertEquals(lookupOutcomeMessage, response.lookupOutcomeMessage)
+        assertEquals(validNumber, response.validNumber)
+        val rtd = response.realTimeData
+        assertNotNull(rtd)
+        assertEquals(active, rtd.activeStatus)
+        assertEquals(handsetStatus, rtd.handsetStatus)
     }
 
     @Test
