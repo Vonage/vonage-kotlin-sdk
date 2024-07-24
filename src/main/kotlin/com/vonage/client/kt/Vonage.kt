@@ -12,6 +12,7 @@ class Vonage(init: VonageClient.Builder.() -> Unit) {
     val conversion = Conversion(vonageClient.conversionClient)
     val redact = Redact(vonageClient.redactClient)
     val verifyLegacy = VerifyLegacy(vonageClient.verifyClient)
+    val numberInsight = NumberInsight(vonageClient.insightClient)
 }
 
 fun VonageClient.Builder.authFromEnv(): VonageClient.Builder {
