@@ -1,6 +1,8 @@
 package com.vonage.client.kt
 
 import com.vonage.client.insight.*
+import com.vonage.client.insight.CarrierDetails.NetworkType
+import java.math.BigDecimal
 import kotlin.test.*
 
 class NumberInsightTest : AbstractTest() {
@@ -17,7 +19,19 @@ class NumberInsightTest : AbstractTest() {
     private val refundPrice = "0.01500000"
     private val remainingBalance = "1.23456789"
     private val reachable = "reachable"
-
+    private val ported = PortedStatus.ASSUMED_PORTED
+    private val callerType = CallerType.CONSUMER
+    private val firstName = "Max"
+    private val lastName = "Mustermann"
+    private val callerName = "$firstName $lastName"
+    private val originalNetworkCode = "12345"
+    private val originalName = "Acme Inc"
+    private val originalCountry = "CA"
+    private val originalNetworkType = NetworkType.PAGER
+    private val currentNetworkCode = networkCode
+    private val currentName = "Nexmo"
+    private val currentCountry = countryCode
+    private val currentNetworkType = NetworkType.LANDLINE_PREMIUM
 
     private enum class InsightType {
         BASIC, STANDARD, ADVANCED
@@ -35,7 +49,7 @@ class NumberInsightTest : AbstractTest() {
             }
         }
 
-        val expectedResponseParams = mutableMapOf(
+        val expectedResponseParams = mutableMapOf<String, Any>(
             "status" to 0,
             "status_message" to statusMessage,
             "request_id" to testUuidStr,
@@ -47,12 +61,36 @@ class NumberInsightTest : AbstractTest() {
             "country_prefix" to countryPrefix
         )
         if (type != InsightType.BASIC) {
+            val callerIdentity = mapOf(
+                "caller_name" to callerName,
+                "last_name" to lastName,
+                "first_name" to firstName,
+                "caller_type" to callerType.name.lowercase()
+            )
+
             expectedResponseParams.putAll(mapOf(
                 "request_price" to requestPrice,
                 "refund_price" to refundPrice,
                 "remaining_balance" to remainingBalance,
-                // TODO: the rest
+                "current_carrier" to mapOf(
+                    "network_code" to currentNetworkCode,
+                    "name" to currentName,
+                    "country" to currentCountry,
+                    "network_type" to currentNetworkType
+                ),
+                "ported" to ported.name.lowercase(),
+                "original_carrier" to mapOf(
+                    "network_code" to originalNetworkCode,
+                    "name" to originalName,
+                    "country" to originalCountry,
+                    "network_type" to originalNetworkType
+                ),
+                "caller_identity" to callerIdentity
             ))
+
+            if (type == InsightType.STANDARD) {
+                expectedResponseParams.putAll(callerIdentity)
+            }
         }
         if (type == InsightType.ADVANCED) {
             expectedResponseParams.putAll(mapOf(
@@ -83,7 +121,34 @@ class NumberInsightTest : AbstractTest() {
 
     private fun assertStandardResponse(response: StandardInsightResponse) {
         assertBasicResponse(response)
-        // TODO
+        assertEquals(BigDecimal(requestPrice), response.requestPrice)
+        assertEquals(BigDecimal(refundPrice), response.refundPrice)
+        assertEquals(BigDecimal(remainingBalance), response.remainingBalance)
+        assertEquals(ported, response.ported)
+        if (response::class == StandardInsightResponse::class.java) {
+            assertEquals(firstName, response.firstName)
+            assertEquals(lastName, response.lastName)
+            assertEquals(callerName, response.callerName)
+            assertEquals(callerType, response.callerType)
+        }
+        val callerIdentity = response.callerIdentity
+        assertNotNull(callerIdentity)
+        assertEquals(firstName, callerIdentity.firstName)
+        assertEquals(lastName, callerIdentity.lastName)
+        assertEquals(callerName, callerIdentity.name)
+        assertEquals(callerType, callerIdentity.type)
+        val currentCarrier = response.currentCarrier
+        assertNotNull(currentCarrier)
+        assertEquals(currentName, currentCarrier.name)
+        assertEquals(currentCountry, currentCarrier.country)
+        assertEquals(currentNetworkType, currentCarrier.networkType)
+        assertEquals(currentNetworkCode, currentCarrier.networkCode)
+        val originalCarrier = response.originalCarrier
+        assertNotNull(originalCarrier)
+        assertEquals(originalName, originalCarrier.name)
+        assertEquals(originalCountry, originalCarrier.country)
+        assertEquals(originalNetworkType, originalCarrier.networkType)
+        assertEquals(originalNetworkCode, originalCarrier.networkCode)
     }
 
     private fun assertAdvancedResponse(response: AdvancedInsightResponse) {
@@ -118,12 +183,12 @@ class NumberInsightTest : AbstractTest() {
     @Test
     fun `advanced insight required params`() {
         mockInsight(InsightType.ADVANCED, false)
-        assertStandardResponse(niClient.advanced(toNumber))
+        assertAdvancedResponse(niClient.advanced(toNumber))
     }
 
     @Test
     fun `advanced insight all params`() {
         mockInsight(InsightType.ADVANCED, true)
-        assertStandardResponse(niClient.advanced(toNumber, countryCode, cnam, realTimeData))
+        assertAdvancedResponse(niClient.advanced(toNumber, countryCode, cnam, realTimeData))
     }
 }
