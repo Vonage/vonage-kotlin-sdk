@@ -21,6 +21,7 @@ You'll need to have [created a Vonage account](https://dashboard.nexmo.com/sign-
 - [Messages](https://developer.vonage.com/en/messages/overview)
 - [Verify](https://developer.vonage.com/en/verify/overview)
 - [Voice](https://developer.vonage.com/en/voice/voice-api/overview)
+- [Number Insight](https://developer.vonage.com/en/number-insight/overview)
 - [SMS](https://developer.vonage.com/en/messaging/sms/overview)
 - [Conversion](https://developer.vonage.com/en/messaging/conversion-api/overview)
 - [Redact](https://developer.vonage.com/en/redact/overview)
