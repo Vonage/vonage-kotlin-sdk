@@ -44,7 +44,7 @@ class NumberInsightTest : AbstractTest() {
 
 
     private enum class InsightType {
-        BASIC, STANDARD, ADVANCED
+        BASIC, STANDARD, ADVANCED, ADVANCED_ASYNC
     }
 
     private fun mockInsight(type: InsightType, optionalParams: Boolean = false) {
@@ -52,56 +52,77 @@ class NumberInsightTest : AbstractTest() {
         if (optionalParams) {
             expectedRequestParams["country"] = countryCode
             if (type != InsightType.BASIC) {
-                expectedRequestParams["cnam"] = true
+                expectedRequestParams["cnam"] = cnam
             }
             if (type == InsightType.ADVANCED) {
-                expectedRequestParams["real_time_data"] = true
+                expectedRequestParams["real_time_data"] = realTimeData
             }
         }
 
         val expectedResponseParams = mutableMapOf<String, Any>(
             "status" to 0,
-            "status_message" to statusMessage,
             "request_id" to testUuidStr,
-            "international_format_number" to toNumber,
-            "national_format_number" to nationalNumber,
-            "country_code" to countryCode,
-            "country_code_iso3" to countryCodeIso3,
-            "country_name" to countryName,
-            "country_prefix" to countryPrefix
+            "status_message" to statusMessage
         )
-        if (type != InsightType.BASIC) {
-            val callerIdentity = mapOf(
-                "caller_name" to callerName,
-                "last_name" to lastName,
-                "first_name" to firstName,
-                "caller_type" to callerType.name.lowercase()
+        if (type != InsightType.ADVANCED_ASYNC) {
+            expectedResponseParams.putAll(
+                mapOf(
+                    "international_format_number" to toNumber,
+                    "national_format_number" to nationalNumber,
+                    "country_code" to countryCode,
+                    "country_code_iso3" to countryCodeIso3,
+                    "country_name" to countryName,
+                    "country_prefix" to countryPrefix
+                )
             )
+        }
 
+        if (type != InsightType.BASIC) {
             expectedResponseParams.putAll(mapOf(
                 "request_price" to requestPrice,
-                "refund_price" to refundPrice,
-                "remaining_balance" to remainingBalance,
-                "current_carrier" to mapOf(
-                    "network_code" to currentNetworkCode,
-                    "name" to currentName,
-                    "country" to currentCountry,
-                    "network_type" to currentNetworkType
-                ),
-                "ported" to ported.name.lowercase(),
-                "original_carrier" to mapOf(
-                    "network_code" to originalNetworkCode,
-                    "name" to originalName,
-                    "country" to originalCountry,
-                    "network_type" to originalNetworkType
-                ),
-                "caller_identity" to callerIdentity
+                "remaining_balance" to remainingBalance
             ))
 
-            if (type == InsightType.STANDARD) {
-                expectedResponseParams.putAll(callerIdentity)
+            if (type == InsightType.ADVANCED_ASYNC) {
+                expectedResponseParams.putAll(mapOf(
+                    "number" to toNumber,
+                    "error_text" to statusMessage
+                ))
+            }
+            else {
+                val callerIdentity = mapOf(
+                    "caller_name" to callerName,
+                    "last_name" to lastName,
+                    "first_name" to firstName,
+                    "caller_type" to callerType.name.lowercase()
+                )
+
+                expectedResponseParams.putAll(
+                    mapOf(
+                        "refund_price" to refundPrice,
+                        "current_carrier" to mapOf(
+                            "network_code" to currentNetworkCode,
+                            "name" to currentName,
+                            "country" to currentCountry,
+                            "network_type" to currentNetworkType
+                        ),
+                        "ported" to ported.name.lowercase(),
+                        "original_carrier" to mapOf(
+                            "network_code" to originalNetworkCode,
+                            "name" to originalName,
+                            "country" to originalCountry,
+                            "network_type" to originalNetworkType
+                        ),
+                        "caller_identity" to callerIdentity
+                    )
+                )
+
+                if (type == InsightType.STANDARD) {
+                    expectedResponseParams.putAll(callerIdentity)
+                }
             }
         }
+
         if (type == InsightType.ADVANCED) {
             expectedResponseParams.putAll(mapOf(
                 "roaming" to mapOf(
@@ -122,7 +143,7 @@ class NumberInsightTest : AbstractTest() {
         }
 
         mockPostQueryParams(
-            expectedUrl = "/ni/${type.name.lowercase()}/json",
+            expectedUrl = "/ni/${type.name.lowercase().replace('_', '/')}/json",
             expectedRequestParams = expectedRequestParams,
             expectedResponseParams = expectedResponseParams
         )
@@ -225,5 +246,17 @@ class NumberInsightTest : AbstractTest() {
     fun `advanced insight all params`() {
         mockInsight(InsightType.ADVANCED, true)
         assertAdvancedResponse(niClient.advanced(toNumber, countryCode, cnam, realTimeData))
+    }
+
+    @Test
+    fun `advanced async insight required params`() {
+        mockInsight(InsightType.ADVANCED_ASYNC, false)
+        niClient.advancedAsync(toNumber, callbackUrl)
+    }
+
+    @Test
+    fun `advanced async insight all params`() {
+        mockInsight(InsightType.ADVANCED_ASYNC, true)
+        niClient.advancedAsync(toNumber, callbackUrl, countryCode, cnam)
     }
 }

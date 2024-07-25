@@ -17,4 +17,11 @@ class NumberInsight(private val niClient: InsightClient) {
         niClient.getAdvancedNumberInsight(AdvancedInsightRequest.builder().async(false)
             .number(number).country(countryCode).cnam(cnam).realTimeData(realTimeData).build()
         )
+
+    fun advancedAsync(number: String, callbackUrl: String, countryCode: String? = null, cnam: Boolean = false) {
+        niClient.getAdvancedNumberInsight(
+            AdvancedInsightRequest.builder().async(true)
+                .number(number).country(countryCode).cnam(cnam).callback(callbackUrl).build()
+        )
+    }
 }
