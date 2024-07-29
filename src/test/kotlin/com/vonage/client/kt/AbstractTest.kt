@@ -37,12 +37,17 @@ import kotlin.test.assertEquals
 abstract class AbstractTest {
     protected val apiKey = "a1b2c3d4"
     protected val applicationId = "00000000-0000-4000-8000-000000000000"
+    protected val accessToken = "abc123456def"
     private val apiSecret = "1234567890abcdef"
     private val apiKeySecretEncoded = "YTFiMmMzZDQ6MTIzNDU2Nzg5MGFiY2RlZg=="
     private val privateKeyPath = "src/test/resources/com/vonage/client/kt/application_key"
     private val signatureSecretName = "sig"
     private val apiSecretName = "api_secret"
     private val apiKeyName = "api_key"
+    private val authHeaderName = "Authorization"
+    private val basicSecretEncodedHeader = "Basic $apiKeySecretEncoded"
+    private val jwtBearerPattern = "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9(\\..+){2}"
+    private val accessTokenBearer = "Bearer $accessToken"
     protected val testUuidStr = "aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab"
     protected val testUuid: UUID = UUID.fromString(testUuidStr)
     protected val toNumber = "447712345689"
@@ -106,7 +111,7 @@ abstract class AbstractTest {
     }
 
     protected enum class AuthType {
-        JWT, API_KEY_SECRET_HEADER, API_KEY_SECRET_QUERY_PARAMS, API_KEY_SIGNATURE_SECRET
+        JWT, API_KEY_SECRET_HEADER, API_KEY_SECRET_QUERY_PARAMS, API_KEY_SIGNATURE_SECRET, ACCESS_TOKEN
     }
 
     private fun HttpMethod.toWireMockMethod(): Method = when (this) {
@@ -128,11 +133,21 @@ abstract class AbstractTest {
     private fun Map<String, Any>.toJson(): String = ObjectMapper().writeValueAsString(this)
 
     protected fun mockPostQueryParams(expectedUrl: String, expectedRequestParams: Map<String, Any>,
+                                      authType: AuthType? = AuthType.API_KEY_SECRET_QUERY_PARAMS,
                                       status: Int = 200, expectedResponseParams: Map<String, Any>? = null) {
 
         val stub = post(urlPathEqualTo(expectedUrl))
-            .withFormParam(apiKeyName, equalTo(apiKey))
-            .withFormParam(apiSecretName, equalTo(apiSecret))
+        when (authType) {
+            AuthType.API_KEY_SECRET_QUERY_PARAMS -> {
+                stub.withFormParam(apiKeyName, equalTo(apiKey))
+                    .withFormParam(apiSecretName, equalTo(apiSecret))
+            }
+            AuthType.JWT -> stub.withHeader(authHeaderName, matching(jwtBearerPattern))
+            AuthType.ACCESS_TOKEN -> stub.withHeader(authHeaderName, equalTo(accessTokenBearer))
+            AuthType.API_KEY_SECRET_HEADER -> stub.withHeader(authHeaderName, equalTo(basicSecretEncodedHeader))
+            AuthType.API_KEY_SIGNATURE_SECRET -> stub.withFormParam(apiKeyName, equalTo(apiKey))
+            null -> Unit
+        }
 
         expectedRequestParams.forEach {(k, v) -> stub.withFormParam(k, equalTo(v.toString()))}
 
@@ -162,13 +177,14 @@ abstract class AbstractTest {
                 }
 
                 if (authType != null) {
-                    val authHeaderName = "Authorization"
                     when (authType) {
-                        AuthType.JWT -> headers contains authHeaderName like
-                                "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9(\\..+){2}"
+                        AuthType.JWT -> headers contains authHeaderName like jwtBearerPattern
+
+                        AuthType.ACCESS_TOKEN ->
+                            headers contains authHeaderName equalTo accessTokenBearer
 
                         AuthType.API_KEY_SECRET_HEADER ->
-                            headers contains authHeaderName equalTo "Basic $apiKeySecretEncoded"
+                            headers contains authHeaderName equalTo basicSecretEncodedHeader
 
                         AuthType.API_KEY_SECRET_QUERY_PARAMS -> {
                             queryParams contains apiKeyName equalTo apiKey
