@@ -22,6 +22,7 @@ You'll need to have [created a Vonage account](https://dashboard.nexmo.com/sign-
 - [Verify](https://developer.vonage.com/en/verify/overview)
 - [Voice](https://developer.vonage.com/en/voice/voice-api/overview)
 - [SIM Swap](https://developer.vonage.com/en/sim-swap/overview)
+- [Number Verification](https://developer.vonage.com/en/number-verification/overview)
 - [Number Insight](https://developer.vonage.com/en/number-insight/overview)
 - [SMS](https://developer.vonage.com/en/messaging/sms/overview)
 - [Conversion](https://developer.vonage.com/en/messaging/conversion-api/overview)

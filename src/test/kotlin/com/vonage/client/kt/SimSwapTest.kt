@@ -53,7 +53,7 @@ class SimSwapTest : AbstractTest() {
                 "refresh_token" to "xyz789012ghi",
                 "token_type" to "Bearer",
                 "expires" to 3600
-            ),
+            )
         )
     }
 
