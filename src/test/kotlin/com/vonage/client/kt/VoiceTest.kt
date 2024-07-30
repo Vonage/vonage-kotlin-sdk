@@ -918,13 +918,14 @@ class VoiceTest : AbstractTest() {
                 inputAction {
                     eventUrl(eventUrl); eventMethod(inputEventMethod)
                     type(inputActionTypes); speech {
-                        uuid(speechUuid); context(speechContext)
+                        uuid(speechUuid); context(speechContext); saveAudio(saveAudio)
                         language(SpeechSettings.Language.UKRAINIAN)
                         endOnSilence(endOnSilenceSpeech); maxDuration(maxDuration)
                         sensitivity(sensitivity); startTimeout(startTimeout)
-                        saveAudio(saveAudio);
                     }
-                    dtmf(timeout = dtmfTimeout, maxDigits = maxDigits, submitOnHash = submitOnHash)
+                    dtmf {
+                        timeOut(dtmfTimeout); maxDigits(maxDigits); submitOnHash(submitOnHash)
+                    }
                 },
                 notifyAction(eventUrl, customHeaders, notifyEventMethod),
                 recordAction {

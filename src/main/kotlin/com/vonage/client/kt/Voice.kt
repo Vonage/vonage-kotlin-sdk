@@ -80,13 +80,8 @@ fun Call.Builder.advancedMachineDetection(amd: AdvancedMachineDetection.Builder.
 fun InputAction.Builder.speech(settings: SpeechSettings.Builder.() -> Unit = {}): InputAction.Builder =
     speech(SpeechSettings.builder().apply(settings).build())
 
-fun InputAction.Builder.dtmf(timeout: Int? = null, maxDigits: Int? = null, submitOnHash: Boolean? = null): InputAction.Builder {
-    val dtmfSettings = DtmfSettings()
-    dtmfSettings.timeOut = timeout
-    dtmfSettings.maxDigits = maxDigits
-    dtmfSettings.isSubmitOnHash = submitOnHash
-    return dtmf(dtmfSettings)
-}
+fun InputAction.Builder.dtmf(settings: DtmfSettings.Builder.() -> Unit = {}): InputAction.Builder =
+    dtmf(DtmfSettings.builder().apply(settings).build())
 
 fun ConversationAction.Builder.transcription(settings: TranscriptionSettings.Builder.() -> Unit = {}):
         ConversationAction.Builder = transcription(TranscriptionSettings.builder().apply(settings).build())

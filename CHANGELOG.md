@@ -4,11 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.6.0] - 2024-07-31
+## [0.6.0] - 2024-07-30
 
 ### Added
 - SIM Swap API
 - Number Verification API
+
+### Changed
+- `InputAction.Builder.dtmf` extension method uses `DtmfSettings` builder instead of setters
 
 ## [0.5.0] - 2024-07-25
 
