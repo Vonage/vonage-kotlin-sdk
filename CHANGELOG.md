@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - SIM Swap API
+- Number Verification API
 
 ## [0.5.0] - 2024-07-25
 
