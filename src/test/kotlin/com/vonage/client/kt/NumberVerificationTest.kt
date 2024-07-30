@@ -62,8 +62,7 @@ class NumberVerificationTest : AbstractTest() {
                 URLEncoder.encode(redirectUrl, "UTF-8")
             }&response_type=code"
 
-        val expectedUrlWithoutState = URI.create("$expectedUrlStr&state=null")
-        assertEquals(expectedUrlWithoutState, nvClient.createVerificationUrl(toNumber, redirectUrl))
+        assertEquals(URI.create(expectedUrlStr), nvClient.createVerificationUrl(toNumber, redirectUrl))
 
         val expectedUrlWithState = URI.create("$expectedUrlStr&state=$state")
         assertEquals(expectedUrlWithState, nvClient.createVerificationUrl(toNumber, redirectUrl, state))

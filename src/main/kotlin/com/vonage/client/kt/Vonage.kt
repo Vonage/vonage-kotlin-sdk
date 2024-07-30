@@ -28,8 +28,9 @@ class Vonage(init: VonageClient.Builder.() -> Unit) {
     val redact = Redact(vonageClient.redactClient)
     val verifyLegacy = VerifyLegacy(vonageClient.verifyClient)
     val numberInsight = NumberInsight(vonageClient.insightClient)
-    val simSwap = SimSwap(vonageClient.simSwapClient)
+    val numbers = Numbers(vonageClient.numbersClient)
     val numberVerification = NumberVerification(vonageClient.numberVerificationClient)
+    val simSwap = SimSwap(vonageClient.simSwapClient)
 }
 
 fun VonageClient.Builder.authFromEnv(): VonageClient.Builder {
