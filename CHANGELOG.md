@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Number Verification API
 
 ### Changed
-- `InputAction.Builder.dtmf` extension method uses `DtmfSettings` builder instead of setters
+- `InputAction.Builder#dtmf` extension method uses `DtmfSettings` builder instead of setters
+- `Messages#send` now uses optional Boolean parameter for sandbox instead of separate method
 
 ## [0.5.0] - 2024-07-25
 

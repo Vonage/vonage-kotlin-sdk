@@ -53,11 +53,6 @@ class MessagesTest : AbstractTest() {
             status = status, expectedResponseParams = expectedResponseParams
         )
         assertEquals(messageUuid, messagesClient.send(req))
-
-        // TODO fix mocking full url
-        //val sandboxUrl = "https://messages-sandbox.nexmo.com$sendUrl"
-        //mockJsonJwtPost(sandboxUrl, expectedBodyParams, status, expectedResponseParams)
-        //assertEquals(messageUuid, messagesClient.sendSandbox(req))
     }
 
     private fun baseBody(messageType: String, channel: String): Map<String, Any> =
