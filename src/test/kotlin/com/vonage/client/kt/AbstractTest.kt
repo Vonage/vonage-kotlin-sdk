@@ -77,6 +77,9 @@ abstract class AbstractTest {
     protected val currency = "EUR"
     protected val exampleUrlBase = "https://example.com"
     protected val callbackUrl = "$exampleUrlBase/callback"
+    protected val statusCallbackUrl = "$callbackUrl/status"
+    protected val moCallbackUrl = "$callbackUrl/inbound-sms"
+    protected val drCallbackUrl = "$callbackUrl/delivery-receipt"
 
     private val port = 8081
     private val wiremock: WireMockServer = WireMockServer(

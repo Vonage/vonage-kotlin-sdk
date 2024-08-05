@@ -19,18 +19,20 @@ import com.vonage.client.HttpConfig
 import com.vonage.client.VonageClient
 
 class Vonage(init: VonageClient.Builder.() -> Unit) {
-    private val vonageClient : VonageClient = VonageClient.builder().apply(init).build();
-    val messages = Messages(vonageClient.messagesClient)
-    val verify = Verify(vonageClient.verify2Client)
-    val voice = Voice(vonageClient.voiceClient)
-    val sms = Sms(vonageClient.smsClient)
+    private val vonageClient : VonageClient = VonageClient.builder().apply(init).build()
+    val account = Account(vonageClient.accountClient)
     val conversion = Conversion(vonageClient.conversionClient)
-    val redact = Redact(vonageClient.redactClient)
-    val verifyLegacy = VerifyLegacy(vonageClient.verifyClient)
+    val messages = Messages(vonageClient.messagesClient)
     val numberInsight = NumberInsight(vonageClient.insightClient)
     val numbers = Numbers(vonageClient.numbersClient)
     val numberVerification = NumberVerification(vonageClient.numberVerificationClient)
+    val redact = Redact(vonageClient.redactClient)
     val simSwap = SimSwap(vonageClient.simSwapClient)
+    val sms = Sms(vonageClient.smsClient)
+    val verify = Verify(vonageClient.verify2Client)
+    val verifyLegacy = VerifyLegacy(vonageClient.verifyClient)
+    val voice = Voice(vonageClient.voiceClient)
+
 }
 
 fun VonageClient.Builder.authFromEnv(): VonageClient.Builder {

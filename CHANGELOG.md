@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Numbers API
+- Account API
 
 ### Changed
 - Explicit return types for all methods
