@@ -19,7 +19,9 @@ import com.vonage.client.numbers.*
 
 class Numbers(private val numbersClient: NumbersClient) {
 
-    inner class ExistingNumber(val countryCode: String, val msisdn: String) {
+    fun number(countryCode: String, msisdn: String) = ExistingNumber(countryCode, msisdn)
+
+    inner class ExistingNumber internal constructor(val countryCode: String, val msisdn: String) {
 
         fun buy(targetApiKey: String? = null) =
             numbersClient.buyNumber(countryCode, msisdn, targetApiKey)

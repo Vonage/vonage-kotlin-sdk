@@ -29,8 +29,6 @@ class VerifyTest : AbstractTest() {
     private val requestIdStr = "c11236f4-00bf-4b89-84ba-88b25df97315"
     private val requestId = UUID.fromString(requestIdStr)
     private val requestIdUrl = "$baseUrl/$requestIdStr"
-    private val brand = "Nexmo KT"
-    private val clientRef = "my-personal-reference"
     private val timeout = 60
     private val fraudCheck = false
     private val sandbox = true
@@ -38,8 +36,6 @@ class VerifyTest : AbstractTest() {
     private val code = "1228864"
     private val locale = "ja-jp"
     private val whatsappNumber = "447700400080"
-    private val entityId = "1101407360000017170"
-    private val contentId = "1107158078772563946"
     private val appHash = "ABC123def45"
     private val toEmail = "alice@example.com"
     private val fromEmail = "bob@example.org"

@@ -96,7 +96,6 @@ class MessagesTest : AbstractTest() {
 
     @Test
     fun `send SMS text all parameters`() {
-        val clientRef = "My reference"
         val webhookUrl = "https://example.com/status"
         val ttl = 9000
         val contentId = "1107457532145798767"
