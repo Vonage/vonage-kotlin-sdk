@@ -24,14 +24,11 @@ import kotlin.test.*
 class SmsTest : AbstractTest() {
     private val smsClient = vonage.sms
     private val sendUrl = "/sms/json"
-    private val from = "Nexmo"
-    private val clientRef = "my-personal-reference"
+    private val from = brand
     private val accountRef = "customer1234"
     private val ttl = 900000
     private val statusReport = true
-    private val callback = "https://example.com/sms-dlr"
-    private val entityId = "1101456324675322134"
-    private val contentId = "1107457532145798767"
+    private val callback = "$exampleUrlBase/sms-dlr"
     private val udhBinary = byteArrayOf(0x05, 0x00, 0x03, 0x7A, 0x02, 0x01)
     @OptIn(ExperimentalStdlibApi::class)
     private val udhHex = udhBinary.toHexString(HexFormat.UpperCase)

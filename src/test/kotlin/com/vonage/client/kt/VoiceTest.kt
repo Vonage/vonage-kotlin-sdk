@@ -27,7 +27,7 @@ class VoiceTest : AbstractTest() {
     private val voiceClient = vonage.voice
     private val callsBaseUrl = "/v1/calls"
     private val callUrl = "$callsBaseUrl/$callIdStr"
-    private val callObj = voiceClient.call(UUID.fromString(callIdStr))
+    private val callObj = voiceClient.call(callIdStr)
     private val conversationId = "CON-f972836a-550f-45fa-956c-12a2ab5b7d22"
     private val price = "23.40"
     private val duration = 60
@@ -45,7 +45,6 @@ class VoiceTest : AbstractTest() {
     private val onAnswerUrl = "https://example.com/ncco.json"
     private val websocketUri = "wss://example.com/socket"
     private val ringbackTone = "http://example.com/ringbackTone.wav"
-    private val sipUri = "sip:rebekka@sip.example.com"
     private val wsContentType = "audio/l16;rate=8000"
     private val userToUserHeader = "56a390f3d2b7310023a"
     private val conversationName = "selective-audio Demo"

@@ -25,9 +25,7 @@ class Voice(private val voiceClient: VoiceClient) {
 
     fun call(callId: String): ExistingCall = ExistingCall(callId)
 
-    fun call(callId: UUID): ExistingCall = call(callId.toString())
-
-    inner class ExistingCall(val callId: String) {
+    inner class ExistingCall internal constructor(val callId: String) {
 
         fun info(): CallInfo = voiceClient.getCallDetails(callId)
 

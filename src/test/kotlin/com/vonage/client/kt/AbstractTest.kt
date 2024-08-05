@@ -52,8 +52,13 @@ abstract class AbstractTest {
     protected val testUuid: UUID = UUID.fromString(testUuidStr)
     protected val toNumber = "447712345689"
     protected val altNumber = "447700900001"
+    protected val brand = "Nexmo KT"
     protected val text = "Hello, World!"
+    protected val sipUri = "sip:rebekka@sip.example.com"
+    protected val clientRef = "my-personal-reference"
     protected val textHexEncoded = "48656c6c6f2c20576f726c6421"
+    protected val entityId = "1101407360000017170"
+    protected val contentId = "1107158078772563946"
     protected val smsMessageId = "0C000000217B7F02"
     protected val callIdStr = "63f61863-4a51-4f6b-86e1-46edebcf9356"
     protected val networkCode = "65512"

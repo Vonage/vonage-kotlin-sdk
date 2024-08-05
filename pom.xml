@@ -5,7 +5,7 @@
 
   <groupId>com.vonage</groupId>
   <artifactId>server-sdk-kotlin</artifactId>
-  <version>0.6.0</version>
+  <version>0.7.0</version>
 
   <name>Vonage Kotlin Server SDK</name>
   <description>Kotlin client for Vonage APIs</description>
@@ -59,7 +59,7 @@
     <dependency>
       <groupId>com.vonage</groupId>
       <artifactId>server-sdk</artifactId>
-      <version>8.9.4</version>
+      <version>8.10.0</version>
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
