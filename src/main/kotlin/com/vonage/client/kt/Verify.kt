@@ -27,35 +27,32 @@ class Verify(private val verify2Client: Verify2Client) {
         VerificationRequest.builder().brand(brand).apply(init).build()
     )
 
-    fun cancelVerification(requestId: UUID): Unit = verify2Client.cancelVerification(requestId)
+    inner class ExistingRequest internal constructor(private val requestId: UUID) {
 
-    fun cancelVerification(requestId: String): Unit = cancelVerification(UUID.fromString(requestId))
+        fun cancel(): Unit = verify2Client.cancelVerification(requestId)
 
-    fun nextWorkflow(requestId: UUID): Unit = verify2Client.nextWorkflow(requestId)
+        fun nextWorkflow(): Unit = verify2Client.nextWorkflow(requestId)
 
-    fun nextWorkflow(requestId: String): Unit = nextWorkflow(UUID.fromString(requestId))
+        fun checkVerificationCode(code: String): VerifyCodeResponse =
+            verify2Client.checkVerificationCode(requestId, code)
 
-    fun checkVerificationCode(requestId: UUID, code: String): VerifyCodeResponse =
-        verify2Client.checkVerificationCode(requestId, code)
-
-    fun checkVerificationCode(requestId: String, code: String): VerifyCodeResponse =
-        checkVerificationCode(UUID.fromString(requestId), code)
-
-    fun isValidVerificationCode(requestId: String, code: String): Boolean =
-        isValidVerificationCode(UUID.fromString(requestId), code)
-
-    fun isValidVerificationCode(requestId: UUID, code: String): Boolean {
-        try {
-            checkVerificationCode(requestId, code)
-            return true
-        } catch (ex: VerifyResponseException) {
-            if (ex.statusCode == 400 || ex.statusCode == 410) {
-                return false
-            } else {
-                throw ex
+        fun isValidVerificationCode(code: String): Boolean {
+            try {
+                checkVerificationCode(code)
+                return true
+            } catch (ex: VerifyResponseException) {
+                if (ex.statusCode == 400 || ex.statusCode == 410) {
+                    return false
+                } else {
+                    throw ex
+                }
             }
         }
     }
+
+    fun request(requestId: UUID): ExistingRequest = ExistingRequest(requestId)
+
+    fun request(requestId: String): ExistingRequest = request(UUID.fromString(requestId))
 }
 
 fun VerificationRequest.Builder.silentAuth(

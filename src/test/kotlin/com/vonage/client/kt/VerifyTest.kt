@@ -29,6 +29,7 @@ class VerifyTest : AbstractTest() {
     private val requestIdStr = "c11236f4-00bf-4b89-84ba-88b25df97315"
     private val requestId = UUID.fromString(requestIdStr)
     private val requestIdUrl = "$baseUrl/$requestIdStr"
+    private val existingRequest = verifyClient.request(requestIdStr)
     private val timeout = 60
     private val fraudCheck = false
     private val sandbox = true
@@ -171,10 +172,9 @@ class VerifyTest : AbstractTest() {
     @Test
     fun `cancel verification`() {
         mockDelete(requestIdUrl)
-        verifyClient.cancelVerification(requestIdStr)
-        verifyClient.cancelVerification(requestId)
+        existingRequest.cancel()
         assertVerifyResponseException(requestIdUrl, HttpMethod.DELETE) {
-            verifyClient.cancelVerification(requestIdStr)
+            existingRequest.cancel()
         }
     }
 
@@ -182,26 +182,24 @@ class VerifyTest : AbstractTest() {
     fun `next workflow`() {
         val expectedUrl = "$requestIdUrl/next-workflow"
         mockPost(expectedUrl)
-        verifyClient.nextWorkflow(requestIdStr)
-        verifyClient.nextWorkflow(requestId)
+        existingRequest.nextWorkflow()
         assertVerifyResponseException(expectedUrl, HttpMethod.POST) {
-            verifyClient.nextWorkflow(requestId)
+            existingRequest.nextWorkflow()
         }
         assertVerifyResponseException(expectedUrl, HttpMethod.POST) {
-            verifyClient.nextWorkflow(requestIdStr)
+            existingRequest.nextWorkflow()
         }
     }
 
     @Test
     fun `check valid verification code`() {
-        val call: () -> Boolean = {verifyClient.isValidVerificationCode(requestIdStr, code)}
+        val call: () -> Boolean = {
+            existingRequest.isValidVerificationCode(code)
+        }
 
         mockPost(requestIdUrl, checkCodeRequestParams, 200)
         assertTrue(call.invoke())
-        verifyClient.checkVerificationCode(requestIdStr, code)
-        verifyClient.checkVerificationCode(requestId, code)
-        assertTrue(verifyClient.isValidVerificationCode(requestId, code))
-
+        existingRequest.checkVerificationCode(code)
 
         val title = "Invalid Code"
 
@@ -221,7 +219,7 @@ class VerifyTest : AbstractTest() {
 
         assertVerifyResponseException(requestIdUrl, HttpMethod.POST, call)
         assertVerifyResponseException(requestIdUrl, HttpMethod.POST) {
-            verifyClient.checkVerificationCode(requestIdStr, code)
+            existingRequest.checkVerificationCode(code)
         }
     }
 }
