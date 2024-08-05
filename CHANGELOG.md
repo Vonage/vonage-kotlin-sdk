@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Numbers API
 
+### Changed
+- Explicit return types for all methods
+- Introduced `ExistingRequest` class to Verify (v2) to reduce duplicating `requestId` parameter
+
 ## [0.6.0] - 2024-07-30
 
 ### Added
