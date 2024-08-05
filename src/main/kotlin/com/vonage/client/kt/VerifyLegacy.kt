@@ -17,7 +17,7 @@ package com.vonage.client.kt
 
 import com.vonage.client.verify.*
 
-class VerifyLegacy(private val verifyClient: VerifyClient) {
+class VerifyLegacy internal constructor(private val verifyClient: VerifyClient) {
 
     fun verify(number: String, brand: String, properties: (VerifyRequest.Builder.() -> Unit) = {}): VerifyResponse =
         verifyClient.verify(VerifyRequest.builder(number, brand).apply(properties).build())

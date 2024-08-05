@@ -16,12 +16,13 @@
 package com.vonage.client.kt
 
 import com.vonage.client.camara.simswap.*
+import java.time.Instant
 
-class SimSwap(private val simSwapClient: SimSwapClient) {
+class SimSwap internal constructor(private val simSwapClient: SimSwapClient) {
 
     fun checkSimSwap(phoneNumber: String, maxAgeHours: Int = 240): Boolean =
         simSwapClient.checkSimSwap(phoneNumber, maxAgeHours)
 
-    fun retrieveSimSwapDate(phoneNumber: String) =
+    fun retrieveSimSwapDate(phoneNumber: String): Instant? =
         simSwapClient.retrieveSimSwapDate(phoneNumber)
 }

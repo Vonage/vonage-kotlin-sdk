@@ -23,7 +23,7 @@ import com.vonage.client.messages.messenger.*
 import com.vonage.client.messages.viber.*
 import java.util.UUID
 
-class Messages(private val messagesClient: MessagesClient) {
+class Messages internal constructor(private val messagesClient: MessagesClient) {
     fun send(message: MessageRequest, sandbox: Boolean = false): UUID =
         (if (sandbox) messagesClient.useSandboxEndpoint()
             else messagesClient.useRegularEndpoint()).sendMessage(message).messageUuid

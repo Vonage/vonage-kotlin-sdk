@@ -27,18 +27,18 @@ class Verify(private val verify2Client: Verify2Client) {
         VerificationRequest.builder().brand(brand).apply(init).build()
     )
 
-    fun cancelVerification(requestId: UUID) = verify2Client.cancelVerification(requestId)
+    fun cancelVerification(requestId: UUID): Unit = verify2Client.cancelVerification(requestId)
 
-    fun cancelVerification(requestId: String) = cancelVerification(UUID.fromString(requestId))
+    fun cancelVerification(requestId: String): Unit = cancelVerification(UUID.fromString(requestId))
 
-    fun nextWorkflow(requestId: UUID) = verify2Client.nextWorkflow(requestId)
+    fun nextWorkflow(requestId: UUID): Unit = verify2Client.nextWorkflow(requestId)
 
-    fun nextWorkflow(requestId: String) = nextWorkflow(UUID.fromString(requestId))
+    fun nextWorkflow(requestId: String): Unit = nextWorkflow(UUID.fromString(requestId))
 
-    fun checkVerificationCode(requestId: UUID, code: String) =
+    fun checkVerificationCode(requestId: UUID, code: String): VerifyCodeResponse =
         verify2Client.checkVerificationCode(requestId, code)
 
-    fun checkVerificationCode(requestId: String, code: String) =
+    fun checkVerificationCode(requestId: String, code: String): VerifyCodeResponse =
         checkVerificationCode(UUID.fromString(requestId), code)
 
     fun isValidVerificationCode(requestId: String, code: String): Boolean =

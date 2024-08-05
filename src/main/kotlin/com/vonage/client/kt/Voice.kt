@@ -29,21 +29,21 @@ class Voice(private val voiceClient: VoiceClient) {
 
         fun info(): CallInfo = voiceClient.getCallDetails(callId)
 
-        fun hangup() = voiceClient.terminateCall(callId)
+        fun hangup(): Unit = voiceClient.terminateCall(callId)
 
-        fun mute() = voiceClient.muteCall(callId)
+        fun mute(): Unit = voiceClient.muteCall(callId)
 
-        fun unmute() = voiceClient.unmuteCall(callId)
+        fun unmute(): Unit = voiceClient.unmuteCall(callId)
 
-        fun earmuff() = voiceClient.earmuffCall(callId)
+        fun earmuff(): Unit = voiceClient.earmuffCall(callId)
 
-        fun unearmuff() = voiceClient.unearmuffCall(callId)
+        fun unearmuff(): Unit = voiceClient.unearmuffCall(callId)
 
-        fun transfer(vararg actions: Action) = voiceClient.transferCall(callId, Ncco(actions.asList()))
+        fun transfer(vararg actions: Action): Unit = voiceClient.transferCall(callId, Ncco(actions.asList()))
 
-        fun transfer(nccoUrl: String) = voiceClient.transferCall(callId, nccoUrl)
+        fun transfer(nccoUrl: String): Unit = voiceClient.transferCall(callId, nccoUrl)
 
-        fun transfer(nccoUrl: URI) = transfer(nccoUrl.toString())
+        fun transfer(nccoUrl: URI): Unit = transfer(nccoUrl.toString())
 
         fun sendDtmf(digits: String): DtmfResponse = voiceClient.sendDtmf(callId, digits)
 

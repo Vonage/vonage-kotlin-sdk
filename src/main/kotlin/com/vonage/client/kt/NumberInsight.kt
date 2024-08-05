@@ -17,7 +17,7 @@ package com.vonage.client.kt
 
 import com.vonage.client.insight.*
 
-class NumberInsight(private val niClient: InsightClient) {
+class NumberInsight internal constructor(private val niClient: InsightClient) {
 
     fun basic(number: String, countryCode: String? = null): BasicInsightResponse =
         niClient.getBasicNumberInsight(number, countryCode)

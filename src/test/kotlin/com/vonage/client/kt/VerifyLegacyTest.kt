@@ -163,6 +163,8 @@ class VerifyLegacyTest : AbstractTest() {
     fun `existing request hashCode is based on the requestId`() {
         assertEquals(requestId.hashCode(), existingRequest.hashCode())
         assertEquals(existingRequest, verifyClient.request(requestId))
+        assertEquals(existingRequest, existingRequest)
+        assertFalse(existingRequest.equals(requestId))
     }
 
     @Test
