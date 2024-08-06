@@ -15,14 +15,17 @@
  */
 package com.vonage.client.kt
 
-import com.vonage.client.account.SecretResponse
-import com.vonage.client.account.SettingsResponse
+import com.vonage.client.account.*
+import com.vonage.client.common.HttpMethod
+import org.junit.jupiter.api.assertThrows
 import kotlin.test.*
 
 class AccountTest : AbstractTest() {
     private val account = vonage.account
+    private val authType = AuthType.API_KEY_SECRET_HEADER
     private val secretId = "ad6dc56f-07b5-46e1-a527-85530e625800"
     private val secret = "ABCDEFGH01234abc"
+    private val trx = "8ef2447e69604f642ae59363aa5f781b"
     private val baseUrl = "/account"
     private val secretsUrl = "${baseUrl}s/$apiKey/secrets"
     private val secretsAltUrl = "${baseUrl}s/$apiKey2/secrets"
@@ -30,11 +33,16 @@ class AccountTest : AbstractTest() {
     private val altSecretUrl = "$secretsAltUrl/$secretId"
     private val secretsNoApiKey = account.secrets()
     private val secretsWithApiKey = account.secrets(apiKey2)
+    private val errorCode = 401
     private val secretResponse = linksSelfHref(secretUrl) + mapOf(
         "id" to secretId,
         "created_at" to timestampStr
     )
     private val secretRequest = mapOf("secret" to secret)
+    private val errorResponse = mapOf(
+        "error-code" to errorCode.toString(),
+        "error-code-label" to "authentication failed"
+    )
 
     private fun assertUpdateSettings(params: Map<String, String>, invocation: Account.() -> SettingsResponse) {
         val maxOutbound = 30
@@ -42,7 +50,7 @@ class AccountTest : AbstractTest() {
         val maxCalls = 9
         mockPostQueryParams(
             expectedUrl = "$baseUrl/settings",
-            authType = AuthType.API_KEY_SECRET_HEADER,
+            authType = authType,
             expectedRequestParams = params,
             expectedResponseParams = mapOf(
                 "mo-callback-url" to moCallbackUrl,
@@ -71,10 +79,17 @@ class AccountTest : AbstractTest() {
     private fun getSecretsObj(withApiKey: Boolean) =
         if (withApiKey) secretsWithApiKey else secretsNoApiKey
 
+    private fun getSecretUrl(withApiKey: Boolean) =
+        if (withApiKey) altSecretUrl else secretUrl
+
+    private fun getSecretsUrl(withApiKey: Boolean) =
+        if (withApiKey) secretsAltUrl else secretsUrl
+
     private fun assertListSecrets(withApiKey: Boolean) {
+        val url = getSecretsUrl(withApiKey)
         mockGet(
-            expectedUrl = if (withApiKey) secretsAltUrl else secretsUrl,
-            authType = AuthType.API_KEY_SECRET_HEADER,
+            expectedUrl = url,
+            authType = authType,
             expectedResponseParams = linksSelfHref() + mapOf(
                 "_embedded" to mapOf("secrets" to listOf(
                     secretResponse,
@@ -82,8 +97,9 @@ class AccountTest : AbstractTest() {
                 ))
             )
         )
+        val invocation = { getSecretsObj(withApiKey).list() }
 
-        val response = getSecretsObj(withApiKey).list()
+        val response = invocation.invoke()
         assertNotNull(response)
         assertEquals(2, response.size)
         assertSecretResponse(response[0])
@@ -91,35 +107,53 @@ class AccountTest : AbstractTest() {
         assertNotNull(blank)
         assertNull(blank.created)
         assertNull(blank.id)
+
+        assert401ApiResponseException<AccountResponseException>(url, HttpMethod.GET, invocation)
     }
 
     private fun assertCreateSecret(withApiKey: Boolean) {
+        val url = getSecretsUrl(withApiKey)
+        val invocation = { getSecretsObj(withApiKey).create(secret) }
         mockPost(
-            expectedUrl = if (withApiKey) secretsAltUrl else secretsUrl,
-            authType = AuthType.API_KEY_SECRET_HEADER,
+            expectedUrl = url, authType = authType,
             expectedRequestParams = secretRequest,
             status = 201, expectedResponseParams = secretResponse
         )
-        assertSecretResponse(getSecretsObj(withApiKey).create(secret))
+        assertSecretResponse(invocation.invoke())
+        assert401ApiResponseException<AccountResponseException>(url, HttpMethod.POST, invocation)
     }
 
     private fun assertGetSecret(withApiKey: Boolean) {
+        val url = getSecretUrl(withApiKey)
         mockGet(
-            expectedUrl = if (withApiKey) altSecretUrl else secretUrl,
-            authType = AuthType.API_KEY_SECRET_HEADER,
+            expectedUrl = url, authType = authType,
             expectedResponseParams = secretResponse
         )
-        assertSecretResponse(getSecretsObj(withApiKey).get(secretId))
+        val invocation = { getSecretsObj(withApiKey).get(secretId) }
+        assertSecretResponse(invocation.invoke())
+        assert401ApiResponseException<AccountResponseException>(url, HttpMethod.GET, invocation)
+    }
+
+    private fun assertDeleteSecret(withApiKey: Boolean) {
+        val url = getSecretUrl(withApiKey)
+        val invocation = { getSecretsObj(withApiKey).delete(secretId) }
+        mockDelete(url, authType)
+        invocation.invoke()
+
+        mockRequest(HttpMethod.DELETE, expectedUrl = url, authType = authType)
+            .mockReturn(status = errorCode, errorResponse)
+
+        assertThrows<AccountResponseException>(invocation)
     }
 
     @Test
-    fun `get balance`() {
+    fun `get balance success`() {
         val value = 10.28
         val autoReload = true
 
         mockGet(
             expectedUrl = "$baseUrl/get-balance",
-            authType = AuthType.API_KEY_SECRET_HEADER,
+            authType = authType,
             expectedResponseParams = mapOf(
                 "value" to value,
                 "autoReload" to autoReload
@@ -133,12 +167,20 @@ class AccountTest : AbstractTest() {
     }
 
     @Test
-    fun `top up balance`() {
-        val trx = "8ef2447e69604f642ae59363aa5f781b"
+    fun `get balance error`() {
+        mockGet(
+            expectedUrl = "$baseUrl/get-balance",
+            status = errorCode, authType = authType,
+            expectedResponseParams = errorResponse
+        )
+        assertThrows<AccountResponseException> { account.getBalance() }
+    }
 
+    @Test
+    fun `top up balance success`() {
         mockPostQueryParams(
             expectedUrl = "$baseUrl/top-up",
-            authType = AuthType.API_KEY_SECRET_HEADER,
+            authType = authType,
             expectedRequestParams = mapOf("trx" to trx),
             expectedResponseParams = mapOf(
                 "error-code" to "200",
@@ -146,6 +188,18 @@ class AccountTest : AbstractTest() {
             )
         )
         account.topUp(trx)
+    }
+
+    @Test
+    fun `top up balance error`() {
+        mockPostQueryParams(
+            expectedUrl = "$baseUrl/top-up",
+            authType = authType, status = errorCode,
+            expectedRequestParams = mapOf("trx" to trx),
+            expectedResponseParams = errorResponse
+        )
+
+        assertThrows<AccountResponseException> { account.topUp(trx) }
     }
 
     @Test
@@ -200,15 +254,13 @@ class AccountTest : AbstractTest() {
 
     @Test
     fun `revoke secret default api key`() {
-        mockDelete(secretUrl, AuthType.API_KEY_SECRET_HEADER)
-        secretsNoApiKey.delete(secretId)
+        assertDeleteSecret(false)
         assertNull(secretsNoApiKey.apiKey)
     }
 
     @Test
     fun `revoke secret alternate api key`() {
-        mockDelete(altSecretUrl, AuthType.API_KEY_SECRET_HEADER)
-        secretsWithApiKey.delete(secretId)
+        assertDeleteSecret(true)
         assertEquals(apiKey2, secretsWithApiKey.apiKey)
     }
 }

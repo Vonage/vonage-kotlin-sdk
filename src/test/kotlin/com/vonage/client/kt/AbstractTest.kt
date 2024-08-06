@@ -271,6 +271,7 @@ abstract class AbstractTest {
     protected inline fun <reified E: VonageApiResponseException> assertApiResponseException(
             url: String, requestMethod: HttpMethod, actualCall: () -> Any) {
 
+        assert401ApiResponseException<E>(url, requestMethod, actualCall)
         assert402ApiResponseException<E>(url, requestMethod, actualCall)
         assert429ApiResponseException<E>(url, requestMethod, actualCall)
     }
@@ -296,6 +297,16 @@ abstract class AbstractTest {
         assertEquals(detail, exception.detail)
         return exception
     }
+
+    protected inline fun <reified E: VonageApiResponseException> assert401ApiResponseException(
+        url: String, requestMethod: HttpMethod, actualCall: () -> Any): E =
+
+        assertApiResponseException(url, requestMethod, actualCall, 401,
+            "https://developer.nexmo.com/api-errors#unauthorized",
+            "Unauthorized",
+            "You did not provide correct credentials.",
+            "bf0ca0bf927b3b52e3cb03217e1a1ddf"
+        )
 
     protected inline fun <reified E: VonageApiResponseException> assert402ApiResponseException(
             url: String, requestMethod: HttpMethod, actualCall: () -> Any): E =
