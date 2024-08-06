@@ -24,9 +24,7 @@ class NumbersTest : AbstractTest() {
     private val numbersClient = vonage.numbers
     private val country = "GB"
     private val targetApiKey = "1a2345b7"
-    private val moHttpUrl = "$callbackUrl/inbound-sms"
     private val moSmppSysType = "inbound"
-    private val voiceStatusCallback = "$callbackUrl/status"
     private val featureNames = Feature.entries.map(Feature::name)
     private val pattern = "1337*"
     private val count = 1247
@@ -66,7 +64,7 @@ class NumbersTest : AbstractTest() {
                 "numbers" to listOf(
                     mapOf(),
                     baseRequestParams + mapOf(
-                        "moHttpUrl" to moHttpUrl,
+                        "moHttpUrl" to moCallbackUrl,
                         "type" to type.name.lowercase().replace('_', '-'),
                         "features" to featureNames,
                         "messagesCallbackType" to "app",
@@ -101,7 +99,7 @@ class NumbersTest : AbstractTest() {
         assertNotNull(main)
         assertEquals(country, main.country)
         assertEquals(toNumber, main.msisdn)
-        assertEquals(moHttpUrl, main.moHttpUrl)
+        assertEquals(moCallbackUrl, main.moHttpUrl)
         assertEquals(type, Type.fromString(main.type))
         assertEquals(featureNames, main.features.toList())
         assertEquals(UUID.fromString(messagesCallbackValue), main.messagesCallbackValue)
@@ -206,16 +204,16 @@ class NumbersTest : AbstractTest() {
     fun `update all parameters`() {
         mockAction("update", mapOf(
             "app_id" to applicationId,
-            "moHttpUrl" to moHttpUrl,
+            "moHttpUrl" to moCallbackUrl,
             "moSmppSysType" to moSmppSysType,
-            "voiceStatusCallback" to voiceStatusCallback,
+            "voiceStatusCallback" to statusCallbackUrl,
             "voiceCallbackType" to "tel",
             "voiceCallbackValue" to altNumber
         ))
         existingNumber.update {
             applicationId(applicationId)
-            moHttpUrl(moHttpUrl); moSmppSysType(moSmppSysType)
-            voiceStatusCallback(voiceStatusCallback)
+            moHttpUrl(moCallbackUrl); moSmppSysType(moSmppSysType)
+            voiceStatusCallback(statusCallbackUrl)
             voiceCallback(CallbackType.TEL, altNumber)
         }
     }

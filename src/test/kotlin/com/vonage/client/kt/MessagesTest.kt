@@ -98,8 +98,6 @@ class MessagesTest : AbstractTest() {
     fun `send SMS text all parameters`() {
         val webhookUrl = "https://example.com/status"
         val ttl = 9000
-        val contentId = "1107457532145798767"
-        val entityId = "1101456324675322134"
 
         testSend(textBody("sms", mapOf(
             "client_ref" to clientRef,
@@ -426,7 +424,6 @@ class MessagesTest : AbstractTest() {
 
     @Test
     fun `parse inbound MMS image`() {
-        val networkCode = "54123"
         val parsed = InboundMessage.fromJson(
             """
                 {

@@ -36,6 +36,7 @@ import kotlin.test.assertEquals
 
 abstract class AbstractTest {
     protected val apiKey = "a1b2c3d4"
+    protected val apiKey2 = "f9e8d7c6"
     protected val applicationId = "00000000-0000-4000-8000-000000000000"
     protected val accessToken = "abc123456def"
     private val apiSecret = "1234567890abcdef"
@@ -77,6 +78,9 @@ abstract class AbstractTest {
     protected val currency = "EUR"
     protected val exampleUrlBase = "https://example.com"
     protected val callbackUrl = "$exampleUrlBase/callback"
+    protected val statusCallbackUrl = "$callbackUrl/status"
+    protected val moCallbackUrl = "$callbackUrl/inbound-sms"
+    protected val drCallbackUrl = "$callbackUrl/delivery-receipt"
 
     private val port = 8081
     private val wiremock: WireMockServer = WireMockServer(
@@ -102,8 +106,11 @@ abstract class AbstractTest {
         wiremock.stop()
     }
 
-    protected fun strToDate(dateStr: String): Date =
+    private fun strToDate(dateStr: String): Date =
         Date(Instant.parse(dateStr.replace(' ', 'T') + 'Z').toEpochMilli())
+
+    protected fun linksSelfHref(url: String = "$exampleUrlBase/self"): Map<String, Any> =
+        mapOf("_links" to mapOf("self" to mapOf("href" to url)))
 
     protected enum class ContentType(val mime: String) {
         APPLICATION_JSON("application/json"),
@@ -264,6 +271,7 @@ abstract class AbstractTest {
     protected inline fun <reified E: VonageApiResponseException> assertApiResponseException(
             url: String, requestMethod: HttpMethod, actualCall: () -> Any) {
 
+        assert401ApiResponseException<E>(url, requestMethod, actualCall)
         assert402ApiResponseException<E>(url, requestMethod, actualCall)
         assert429ApiResponseException<E>(url, requestMethod, actualCall)
     }
@@ -289,6 +297,16 @@ abstract class AbstractTest {
         assertEquals(detail, exception.detail)
         return exception
     }
+
+    protected inline fun <reified E: VonageApiResponseException> assert401ApiResponseException(
+        url: String, requestMethod: HttpMethod, actualCall: () -> Any): E =
+
+        assertApiResponseException(url, requestMethod, actualCall, 401,
+            "https://developer.nexmo.com/api-errors#unauthorized",
+            "Unauthorized",
+            "You did not provide correct credentials.",
+            "bf0ca0bf927b3b52e3cb03217e1a1ddf"
+        )
 
     protected inline fun <reified E: VonageApiResponseException> assert402ApiResponseException(
             url: String, requestMethod: HttpMethod, actualCall: () -> Any): E =

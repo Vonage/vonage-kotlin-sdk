@@ -28,7 +28,6 @@ class SmsTest : AbstractTest() {
     private val accountRef = "customer1234"
     private val ttl = 900000
     private val statusReport = true
-    private val callback = "$exampleUrlBase/sms-dlr"
     private val udhBinary = byteArrayOf(0x05, 0x00, 0x03, 0x7A, 0x02, 0x01)
     @OptIn(ExperimentalStdlibApi::class)
     private val udhHex = udhBinary.toHexString(HexFormat.UpperCase)
@@ -97,7 +96,7 @@ class SmsTest : AbstractTest() {
             "to" to toNumber,
             "text" to text,
             "type" to "text",
-            "callback" to callback,
+            "callback" to moCallbackUrl,
             "status-report-req" to if (statusReport) 1 else 0,
             "message-class" to 1,
             "ttl" to ttl,
@@ -109,7 +108,7 @@ class SmsTest : AbstractTest() {
                 unicode = false, statusReport = statusReport,
                 ttl = ttl, messageClass = Message.MessageClass.CLASS_1,
                 clientRef = clientRef, contentId = contentId, entityId = entityId,
-                callbackUrl = callback
+                callbackUrl = moCallbackUrl
             )
         }
     }
@@ -133,7 +132,7 @@ class SmsTest : AbstractTest() {
             "type" to "binary",
             "udh" to udhHex.lowercase(),
             "protocol-id" to protocolId,
-            "callback" to callback,
+            "callback" to moCallbackUrl,
             "status-report-req" to if (statusReport) 1 else 0,
             "message-class" to 2,
             "ttl" to ttl,
@@ -144,7 +143,7 @@ class SmsTest : AbstractTest() {
             smsClient.sendBinary(from, toNumber, text.encodeToByteArray(), udh = udhBinary,
                 protocolId = protocolId, statusReport = statusReport, ttl = ttl,
                 messageClass = Message.MessageClass.CLASS_2, clientRef = clientRef,
-                contentId = contentId, entityId = entityId, callbackUrl = callback
+                contentId = contentId, entityId = entityId, callbackUrl = moCallbackUrl
             )
         }
     }

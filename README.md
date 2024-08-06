@@ -18,6 +18,7 @@ You'll need to have [created a Vonage account](https://dashboard.nexmo.com/sign-
 * [Contribute!](#contribute)
 
 ## Supported APIs
+- [Account](https://developer.vonage.com/en/account/overview)
 - [Conversion](https://developer.vonage.com/en/messaging/conversion-api/overview)
 - [Messages](https://developer.vonage.com/en/messages/overview)
 - [Number Insight](https://developer.vonage.com/en/number-insight/overview)
