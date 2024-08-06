@@ -40,7 +40,6 @@
   </issueManagement>
 
   <properties>
-    <nexusUrl>https://oss.sonatype.org</nexusUrl>
     <project.scm.connection>scm:git@github.com:Vonage/vonage-kotlin-sdk</project.scm.connection>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -270,7 +269,7 @@
             <extensions>true</extensions>
             <configuration>
               <serverId>nexus-releases</serverId>
-              <nexusUrl>${nexusUrl}</nexusUrl>
+              <nexusUrl>https://oss.sonatype.org</nexusUrl>
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
           </plugin>
