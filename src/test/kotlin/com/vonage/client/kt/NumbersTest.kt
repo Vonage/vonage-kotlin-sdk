@@ -17,20 +17,26 @@ package com.vonage.client.kt
 
 import com.vonage.client.numbers.*
 import com.vonage.client.numbers.UpdateNumberRequest.CallbackType
+import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.*
 
 class NumbersTest : AbstractTest() {
-    private val numbersClient = vonage.numbers
+    private val client = vonage.numbers
+    private val authType = AuthType.API_KEY_SECRET_HEADER
     private val country = "GB"
     private val targetApiKey = "1a2345b7"
     private val moSmppSysType = "inbound"
+    private val buyEndpoint = "buy"
+    private val cancelEndpoint = "cancel"
+    private val updateEndpoint = "update"
     private val featureNames = Feature.entries.map(Feature::name)
     private val pattern = "1337*"
     private val count = 1247
     private val size = 25
     private val index = 6
-    private val existingNumber = numbersClient.number(country, toNumber)
+    private val errorCode = 401
+    private val existingNumber = client.number(country, toNumber)
     private val baseRequestParams = mapOf(
         "country" to existingNumber.countryCode,
         "msisdn" to existingNumber.msisdn
@@ -40,13 +46,31 @@ class NumbersTest : AbstractTest() {
         "error-code" to "200",
         "error-code-label" to "success"
     )
+    private val errorResponse = mapOf(
+        "error-code" to errorCode.toString(),
+        "error-code-label" to "authentication failed"
+    )
+
+    private fun assertThrowsGet(url: String, invocation: Numbers.() -> Any) {
+        mockGet(expectedUrl = url,
+            status = errorCode, authType = authType,
+            expectedResponseParams = errorResponse
+        )
+        assertThrows<NumbersResponseException> { invocation.invoke(client) }
+    }
+
+    private fun assertThrowsPost(endpoint: String, invocation: Numbers.ExistingNumber.() -> Any) {
+        mockPost(expectedUrl = "/number/$endpoint",
+            status = errorCode, authType = authType,
+            expectedResponseParams = errorResponse
+        )
+        assertThrows<NumbersResponseException> { invocation.invoke(existingNumber) }
+    }
 
     private fun mockAction(endpoint: String, additionalParams: Map<String, String> = mapOf()) {
-        mockPostQueryParams(
-            expectedUrl = "/number/$endpoint",
+        mockPostQueryParams(expectedUrl = "/number/$endpoint",
             expectedRequestParams = baseRequestParams + additionalParams,
-            authType = AuthType.API_KEY_SECRET_HEADER,
-            expectedResponseParams = successResponseMap
+            authType = authType, expectedResponseParams = successResponseMap
         )
     }
 
@@ -54,11 +78,12 @@ class NumbersTest : AbstractTest() {
         val type = Type.MOBILE_LVN
         val voiceCallbackType = CallbackType.SIP
         val messagesCallbackValue = "aaaaaaaa-bbbb-cccc-dddd-0123456789ab"
-
+        val url = "/account/numbers"
+        
         mockGet(
-            expectedUrl = "/account/numbers",
+            expectedUrl = url,
             expectedQueryParams = params,
-            authType = AuthType.API_KEY_SECRET_HEADER,
+            authType = authType,
             expectedResponseParams = mapOf(
                 "count" to count,
                 "numbers" to listOf(
@@ -77,7 +102,7 @@ class NumbersTest : AbstractTest() {
             )
         )
 
-        val response = invocation.invoke(numbersClient)
+        val response = invocation.invoke(client)
         assertNotNull(response)
         assertEquals(count, response.count)
         val numbers = response.numbers
@@ -105,14 +130,17 @@ class NumbersTest : AbstractTest() {
         assertEquals(UUID.fromString(messagesCallbackValue), main.messagesCallbackValue)
         assertEquals(voiceCallbackType, CallbackType.fromString(main.voiceCallbackType))
         assertEquals(sipUri, main.voiceCallbackValue)
+
+        assertThrowsGet(url, invocation)
     }
 
     private fun assertAvailableNumbers(params: Map<String, Any>, invocation: Numbers.() -> SearchNumbersResponse) {
         val landline = "44800123456"
+        val url = "/number/search"
         mockGet(
-            expectedUrl = "/number/search",
+            expectedUrl = url,
             expectedQueryParams = params,
-            authType = AuthType.API_KEY_SECRET_HEADER,
+            authType = authType,
             expectedResponseParams = mapOf(
                 "count" to count,
                 "numbers" to listOf(
@@ -132,7 +160,7 @@ class NumbersTest : AbstractTest() {
             )
         )
 
-        val response = invocation.invoke(numbersClient)
+        val response = invocation.invoke(client)
         assertNotNull(response)
         assertEquals(count, response.count)
         val numbers = response.numbers
@@ -168,41 +196,48 @@ class NumbersTest : AbstractTest() {
         assertEquals(Feature.SMS, Feature.fromString(mobileFeatures[0]))
         assertEquals(Feature.MMS, Feature.fromString(mobileFeatures[1]))
         assertNull(mobile.cost)
+
+        assertThrowsGet(url, invocation)
     }
 
     @Test
     fun `buy number`() {
-        mockAction("buy")
+        mockAction(buyEndpoint)
         existingNumber.buy()
+        assertThrowsPost(buyEndpoint) { buy() }
     }
 
     @Test
     fun `buy number with target api key`() {
-        mockAction("buy", targetApiKeyMap)
+        mockAction(buyEndpoint, targetApiKeyMap)
         existingNumber.buy(targetApiKey)
+        assertThrowsPost(buyEndpoint) { buy(targetApiKey) }
     }
 
     @Test
     fun `cancel number`() {
-        mockAction("cancel")
+        mockAction(cancelEndpoint)
         existingNumber.cancel()
+        assertThrowsPost(cancelEndpoint) { cancel() }
     }
 
     @Test
     fun `cancel number with target api key`() {
-        mockAction("cancel", targetApiKeyMap)
+        mockAction(cancelEndpoint, targetApiKeyMap)
         existingNumber.cancel(targetApiKey)
+        assertThrowsPost(cancelEndpoint) { cancel(targetApiKey) }
     }
 
     @Test
     fun `update no parameters`() {
-        mockAction("update")
+        mockAction(updateEndpoint)
         existingNumber.update {}
+        assertThrowsPost(updateEndpoint) { update {} }
     }
 
     @Test
     fun `update all parameters`() {
-        mockAction("update", mapOf(
+        mockAction(updateEndpoint, mapOf(
             "app_id" to applicationId,
             "moHttpUrl" to moCallbackUrl,
             "moSmppSysType" to moSmppSysType,
