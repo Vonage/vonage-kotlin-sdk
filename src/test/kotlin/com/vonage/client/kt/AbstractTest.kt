@@ -36,6 +36,7 @@ import kotlin.test.assertEquals
 
 abstract class AbstractTest {
     protected val apiKey = "a1b2c3d4"
+    protected val apiKey2 = "f9e8d7c6"
     protected val applicationId = "00000000-0000-4000-8000-000000000000"
     protected val accessToken = "abc123456def"
     private val apiSecret = "1234567890abcdef"
@@ -105,8 +106,11 @@ abstract class AbstractTest {
         wiremock.stop()
     }
 
-    protected fun strToDate(dateStr: String): Date =
+    private fun strToDate(dateStr: String): Date =
         Date(Instant.parse(dateStr.replace(' ', 'T') + 'Z').toEpochMilli())
+
+    protected fun linksSelfHref(url: String = "$exampleUrlBase/self"): Map<String, Any> =
+        mapOf("_links" to mapOf("self" to mapOf("href" to url)))
 
     protected enum class ContentType(val mime: String) {
         APPLICATION_JSON("application/json"),

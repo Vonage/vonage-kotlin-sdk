@@ -15,16 +15,26 @@
  */
 package com.vonage.client.kt
 
+import com.vonage.client.account.SecretResponse
 import com.vonage.client.account.SettingsResponse
 import kotlin.test.*
 
 class AccountTest : AbstractTest() {
     private val account = vonage.account
     private val secretId = "ad6dc56f-07b5-46e1-a527-85530e625800"
+    private val secret = "ABCDEFGH01234abc"
     private val baseUrl = "/account"
-    private val secretsBaseUrl = "/accounts/$apiKey/secrets"
-    private val secretUrl = "$secretsBaseUrl/$secretId"
-    private val secretObj = account.secret(secretId)
+    private val secretsUrl = "${baseUrl}s/$apiKey/secrets"
+    private val secretsAltUrl = "${baseUrl}s/$apiKey2/secrets"
+    private val secretUrl = "$secretsUrl/$secretId"
+    private val altSecretUrl = "$secretsAltUrl/$secretId"
+    private val secretsNoApiKey = account.secrets()
+    private val secretsWithApiKey = account.secrets(apiKey2)
+    private val secretResponse = linksSelfHref(secretUrl) + mapOf(
+        "id" to secretId,
+        "created_at" to timestampStr
+    )
+    private val secretRequest = mapOf("secret" to secret)
 
     private fun assertUpdateSettings(params: Map<String, String>, invocation: Account.() -> SettingsResponse) {
         val maxOutbound = 30
@@ -50,6 +60,56 @@ class AccountTest : AbstractTest() {
         assertEquals(maxOutbound, response.maxOutboundMessagesPerSecond)
         assertEquals(maxInbound, response.maxInboundMessagesPerSecond)
         assertEquals(maxCalls, response.maxApiCallsPerSecond)
+    }
+
+    private fun assertSecretResponse(response: SecretResponse) {
+        assertNotNull(response)
+        assertEquals(secretId, response.id)
+        assertEquals(timestamp, response.created)
+    }
+
+    private fun getSecretsObj(withApiKey: Boolean) =
+        if (withApiKey) secretsWithApiKey else secretsNoApiKey
+
+    private fun assertListSecrets(withApiKey: Boolean) {
+        mockGet(
+            expectedUrl = if (withApiKey) secretsAltUrl else secretsUrl,
+            authType = AuthType.API_KEY_SECRET_HEADER,
+            expectedResponseParams = linksSelfHref() + mapOf(
+                "_embedded" to mapOf("secrets" to listOf(
+                    secretResponse,
+                    mapOf()
+                ))
+            )
+        )
+
+        val response = getSecretsObj(withApiKey).list()
+        assertNotNull(response)
+        assertEquals(2, response.size)
+        assertSecretResponse(response[0])
+        val blank = response[1]
+        assertNotNull(blank)
+        assertNull(blank.created)
+        assertNull(blank.id)
+    }
+
+    private fun assertCreateSecret(withApiKey: Boolean) {
+        mockPost(
+            expectedUrl = if (withApiKey) secretsAltUrl else secretsUrl,
+            authType = AuthType.API_KEY_SECRET_HEADER,
+            expectedRequestParams = secretRequest,
+            status = 201, expectedResponseParams = secretResponse
+        )
+        assertSecretResponse(getSecretsObj(withApiKey).create(secret))
+    }
+
+    private fun assertGetSecret(withApiKey: Boolean) {
+        mockGet(
+            expectedUrl = if (withApiKey) altSecretUrl else secretUrl,
+            authType = AuthType.API_KEY_SECRET_HEADER,
+            expectedResponseParams = secretResponse
+        )
+        assertSecretResponse(getSecretsObj(withApiKey).get(secretId))
     }
 
     @Test
@@ -109,23 +169,46 @@ class AccountTest : AbstractTest() {
     }
 
     @Test
-    fun `list secrets`() {
-
+    fun `list secrets default api key`() {
+        assertListSecrets(false)
     }
 
     @Test
-    fun `create secret`() {
-
+    fun `list secrets alternate api key`() {
+        assertListSecrets(true)
     }
 
     @Test
-    fun `get secret`() {
-
+    fun `create secret default api key`() {
+        assertCreateSecret(false)
     }
 
     @Test
-    fun `revoke secret`() {
+    fun `create secret alternate api key`() {
+        assertCreateSecret(true)
+    }
+
+    @Test
+    fun `get secret default api key`() {
+        assertGetSecret(false)
+    }
+
+    @Test
+    fun `get secret alternate api key`() {
+        assertGetSecret(true)
+    }
+
+    @Test
+    fun `revoke secret default api key`() {
         mockDelete(secretUrl, AuthType.API_KEY_SECRET_HEADER)
-        secretObj.delete()
+        secretsNoApiKey.delete(secretId)
+        assertNull(secretsNoApiKey.apiKey)
+    }
+
+    @Test
+    fun `revoke secret alternate api key`() {
+        mockDelete(altSecretUrl, AuthType.API_KEY_SECRET_HEADER)
+        secretsWithApiKey.delete(secretId)
+        assertEquals(apiKey2, secretsWithApiKey.apiKey)
     }
 }

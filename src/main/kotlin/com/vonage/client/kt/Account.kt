@@ -26,24 +26,24 @@ class Account internal constructor(private val accountClient: AccountClient) {
     fun updateSettings(incomingSmsUrl: String? = null, deliverReceiptUrl: String? = null): SettingsResponse =
         accountClient.updateSettings(SettingsRequest(incomingSmsUrl, deliverReceiptUrl))
 
-    fun listSecrets(apiKey: String? = null): List<SecretResponse> = (
-            if (apiKey == null) accountClient.listSecrets()
-            else accountClient.listSecrets(apiKey)
-        ).secrets
+    fun secrets(apiKey: String? = null): Secrets = Secrets(apiKey)
 
-    fun secret(secretId: String, apiKey: String? = null): Secret = Secret(secretId, apiKey)
+    inner class Secrets internal constructor(val apiKey: String? = null) {
 
-    inner class Secret internal constructor(val secretId: String, val apiKey: String? = null) {
+        fun list(): List<SecretResponse> = (
+                if (apiKey == null) accountClient.listSecrets()
+                else accountClient.listSecrets(apiKey)
+            ).secrets
 
-        fun get(): SecretResponse =
+        fun create(secret: String): SecretResponse =
+            if (apiKey == null) accountClient.createSecret(secret)
+            else accountClient.createSecret(apiKey, secret)
+
+        fun get(secretId: String): SecretResponse =
             if (apiKey == null) accountClient.getSecret(secretId)
             else accountClient.getSecret(apiKey, secretId)
 
-        fun create(): SecretResponse =
-            if (apiKey == null) accountClient.createSecret(secretId)
-            else accountClient.createSecret(apiKey, secretId)
-
-        fun delete(): Unit =
+        fun delete(secretId: String): Unit =
             if (apiKey == null) accountClient.revokeSecret(secretId)
             else accountClient.revokeSecret(apiKey, secretId)
     }
