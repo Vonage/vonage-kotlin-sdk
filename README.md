@@ -131,8 +131,11 @@ If you would like to use the SDK in a multithreaded environment, create a separa
 
 _We :heart: contributions to this library!_
 
-It is a good idea to [talk to us](https://developer.vonage.com/community/slack)
-first if you plan to add any new functionality.
+It is a good idea to talk to us first if you plan to add any new functionality.
 Otherwise, [bug reports](https://github.com/Vonage/vonage-kotlin-sdk/issues),
 [bug fixes](https://github.com/Vonage/vonage-kotlin-sdk/pulls) and feedback on the
 library are always appreciated.
+
+### Contact
+[![Slack](https://img.shields.io/badge/Slack-4A154B?style=flat&logo=slack&logoColor=white)](https://developer.vonage.com/community/slack)
+[![Twitter](https://img.shields.io/badge/Twitter-000000?style=flat&logo=x&logoColor=white)](https://twitter.com/VonageDev)
