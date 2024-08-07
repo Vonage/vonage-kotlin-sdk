@@ -17,34 +17,34 @@ package com.vonage.client.kt
 
 import com.vonage.client.account.*
 
-class Account internal constructor(private val accountClient: AccountClient) {
+class Account internal constructor(private val client: AccountClient) {
 
-    fun getBalance(): BalanceResponse = accountClient.balance
+    fun getBalance(): BalanceResponse = client.balance
 
-    fun topUp(transactionId: String): Unit = accountClient.topUp(transactionId)
+    fun topUp(transactionId: String): Unit = client.topUp(transactionId)
 
     fun updateSettings(incomingSmsUrl: String? = null, deliverReceiptUrl: String? = null): SettingsResponse =
-        accountClient.updateSettings(SettingsRequest(incomingSmsUrl, deliverReceiptUrl))
+        client.updateSettings(SettingsRequest(incomingSmsUrl, deliverReceiptUrl))
 
     fun secrets(apiKey: String? = null): Secrets = Secrets(apiKey)
 
     inner class Secrets internal constructor(val apiKey: String? = null) {
 
         fun list(): List<SecretResponse> = (
-                if (apiKey == null) accountClient.listSecrets()
-                else accountClient.listSecrets(apiKey)
+                if (apiKey == null) client.listSecrets()
+                else client.listSecrets(apiKey)
             ).secrets
 
         fun create(secret: String): SecretResponse =
-            if (apiKey == null) accountClient.createSecret(secret)
-            else accountClient.createSecret(apiKey, secret)
+            if (apiKey == null) client.createSecret(secret)
+            else client.createSecret(apiKey, secret)
 
         fun get(secretId: String): SecretResponse =
-            if (apiKey == null) accountClient.getSecret(secretId)
-            else accountClient.getSecret(apiKey, secretId)
+            if (apiKey == null) client.getSecret(secretId)
+            else client.getSecret(apiKey, secretId)
 
         fun delete(secretId: String): Unit =
-            if (apiKey == null) accountClient.revokeSecret(secretId)
-            else accountClient.revokeSecret(apiKey, secretId)
+            if (apiKey == null) client.revokeSecret(secretId)
+            else client.revokeSecret(apiKey, secretId)
     }
 }

@@ -17,20 +17,20 @@ package com.vonage.client.kt
 
 import com.vonage.client.redact.*
 
-class Redact internal constructor(private val redactClient: RedactClient) {
+class Redact internal constructor(private val client: RedactClient) {
 
     fun redactSms(messageId: String, direction: RedactRequest.Type = RedactRequest.Type.OUTBOUND): Unit =
-        redactClient.redactTransaction(messageId, RedactRequest.Product.SMS, direction)
+        client.redactTransaction(messageId, RedactRequest.Product.SMS, direction)
 
     fun redactMessage(messageId: String, direction: RedactRequest.Type = RedactRequest.Type.OUTBOUND): Unit =
-        redactClient.redactTransaction(messageId, RedactRequest.Product.MESSAGES, direction)
+        client.redactTransaction(messageId, RedactRequest.Product.MESSAGES, direction)
 
     fun redactCall(callId: String, direction: RedactRequest.Type = RedactRequest.Type.OUTBOUND): Unit =
-        redactClient.redactTransaction(callId, RedactRequest.Product.VOICE, direction)
+        client.redactTransaction(callId, RedactRequest.Product.VOICE, direction)
 
     fun redactInsight(requestId: String): Unit =
-        redactClient.redactTransaction(requestId, RedactRequest.Product.NUMBER_INSIGHTS)
+        client.redactTransaction(requestId, RedactRequest.Product.NUMBER_INSIGHTS)
 
     fun redactVerification(requestId: String): Unit =
-        redactClient.redactTransaction(requestId, RedactRequest.Product.VERIFY)
+        client.redactTransaction(requestId, RedactRequest.Product.VERIFY)
 }

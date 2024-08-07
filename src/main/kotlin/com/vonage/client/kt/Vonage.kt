@@ -19,20 +19,19 @@ import com.vonage.client.HttpConfig
 import com.vonage.client.VonageClient
 
 class Vonage(init: VonageClient.Builder.() -> Unit) {
-    private val vonageClient : VonageClient = VonageClient.builder().apply(init).build()
-    val account = Account(vonageClient.accountClient)
-    val conversion = Conversion(vonageClient.conversionClient)
-    val messages = Messages(vonageClient.messagesClient)
-    val numberInsight = NumberInsight(vonageClient.insightClient)
-    val numbers = Numbers(vonageClient.numbersClient)
-    val numberVerification = NumberVerification(vonageClient.numberVerificationClient)
-    val redact = Redact(vonageClient.redactClient)
-    val simSwap = SimSwap(vonageClient.simSwapClient)
-    val sms = Sms(vonageClient.smsClient)
-    val verify = Verify(vonageClient.verify2Client)
-    val verifyLegacy = VerifyLegacy(vonageClient.verifyClient)
-    val voice = Voice(vonageClient.voiceClient)
-
+    private val client : VonageClient = VonageClient.builder().apply(init).build()
+    val account = Account(client.accountClient)
+    val conversion = Conversion(client.conversionClient)
+    val messages = Messages(client.messagesClient)
+    val numberInsight = NumberInsight(client.insightClient)
+    val numbers = Numbers(client.numbersClient)
+    val numberVerification = NumberVerification(client.numberVerificationClient)
+    val redact = Redact(client.redactClient)
+    val simSwap = SimSwap(client.simSwapClient)
+    val sms = Sms(client.smsClient)
+    val verify = Verify(client.verify2Client)
+    val verifyLegacy = VerifyLegacy(client.verifyClient)
+    val voice = Voice(client.voiceClient)
 }
 
 fun VonageClient.Builder.authFromEnv(): VonageClient.Builder {

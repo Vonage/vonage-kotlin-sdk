@@ -18,16 +18,16 @@ package com.vonage.client.kt
 import com.vonage.client.camara.numberverification.*
 import java.net.URI
 
-class NumberVerification internal constructor(private val nvClient: NumberVerificationClient) {
+class NumberVerification internal constructor(private val client: NumberVerificationClient) {
     private var redirectUri: URI? = null
 
     fun createVerificationUrl(phoneNumber: String, redirectUrl: String, state: String? = null): URI {
         redirectUri = URI.create(redirectUrl)
-        return nvClient.initiateVerification(phoneNumber, redirectUri, state)
+        return client.initiateVerification(phoneNumber, redirectUri, state)
     }
 
     fun verifyNumberWithCode(phoneNumber: String, code: String, redirectUrl: String? = null): Boolean {
         if (redirectUrl != null) redirectUri = URI.create(redirectUrl)
-        return nvClient.verifyNumber(phoneNumber, redirectUri, code)
+        return client.verifyNumber(phoneNumber, redirectUri, code)
     }
 }

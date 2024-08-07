@@ -19,11 +19,11 @@ import com.vonage.client.conversion.*
 import java.time.Instant
 import java.util.*
 
-class Conversion internal constructor(private val conversionClient: ConversionClient) {
+class Conversion internal constructor(private val client: ConversionClient) {
 
     private fun convert(type: ConversionRequest.Type,
                         messageId: String, delivered: Boolean, timestamp: Instant?): Unit =
-        conversionClient.submitConversion(type, messageId, delivered,
+        client.submitConversion(type, messageId, delivered,
             if (timestamp != null) Date.from(timestamp) else null
         )
 

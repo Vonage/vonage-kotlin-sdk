@@ -36,7 +36,7 @@ jobs:
           java-version: ${{ matrix.java }}
           cache: maven
       - name: Compile with Maven
-        run: mvn -e --batch-mode compile
+        run: mvn -e --batch-mode compile -T 1C
 
   verify:
     runs-on: ${{ matrix.os }}
@@ -62,7 +62,7 @@ jobs:
           VONAGE_SIGNATURE_SECRET: abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQR
           VONAGE_APPLICATION_ID: 00000000-0000-4000-8000-000000000000
           VONAGE_PRIVATE_KEY_PATH: src/test/resources/com/vonage/client/kt/application_key
-        run: mvn -e --batch-mode clean verify
+        run: mvn -e --batch-mode clean verify -T 1C
       - name: Run Codecov
         uses: codecov/codecov-action@v4
         with:

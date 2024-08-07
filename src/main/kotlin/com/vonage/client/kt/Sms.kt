@@ -18,7 +18,7 @@ package com.vonage.client.kt
 import com.vonage.client.sms.*
 import com.vonage.client.sms.messages.*
 
-class Sms internal constructor(private val smsClient: SmsClient) {
+class Sms internal constructor(private val client: SmsClient) {
 
     private fun send(msgObj: Message, statusReport: Boolean?, ttl: Int?,
                      messageClass: Message.MessageClass?, clientRef: String?,
@@ -31,7 +31,7 @@ class Sms internal constructor(private val smsClient: SmsClient) {
         msgObj.contentId = contentId
         msgObj.entityId = entityId
         msgObj.callbackUrl = callbackUrl
-        return smsClient.submitMessage(msgObj).messages
+        return client.submitMessage(msgObj).messages
     }
 
     fun sendText(from: String, to: String, message: String, unicode: Boolean = false,

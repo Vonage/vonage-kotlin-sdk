@@ -17,16 +17,16 @@ package com.vonage.client.kt
 
 import com.vonage.client.verify.*
 
-class VerifyLegacy internal constructor(private val verifyClient: VerifyClient) {
+class VerifyLegacy internal constructor(private val client: VerifyClient) {
 
     fun verify(number: String, brand: String, properties: (VerifyRequest.Builder.() -> Unit) = {}): VerifyResponse =
-        verifyClient.verify(VerifyRequest.builder(number, brand).apply(properties).build())
+        client.verify(VerifyRequest.builder(number, brand).apply(properties).build())
 
     fun psd2Verify(number: String, amount: Double, payee: String,
                    properties: (Psd2Request.Builder.() -> Unit) = {}): VerifyResponse =
-        verifyClient.psd2Verify(Psd2Request.builder(number, amount, payee).apply(properties).build())
+        client.psd2Verify(Psd2Request.builder(number, amount, payee).apply(properties).build())
 
-    fun search(vararg requestIds: String): SearchVerifyResponse = verifyClient.search(*requestIds)
+    fun search(vararg requestIds: String): SearchVerifyResponse = client.search(*requestIds)
 
     fun request(requestId: String): ExistingRequest = ExistingRequest(requestId)
 
@@ -34,13 +34,13 @@ class VerifyLegacy internal constructor(private val verifyClient: VerifyClient) 
 
     inner class ExistingRequest internal constructor(private val requestId: String) {
 
-        fun cancel(): ControlResponse = verifyClient.cancelVerification(requestId)
+        fun cancel(): ControlResponse = client.cancelVerification(requestId)
 
-        fun advance(): ControlResponse = verifyClient.advanceVerification(requestId)
+        fun advance(): ControlResponse = client.advanceVerification(requestId)
 
-        fun check(code: String): CheckResponse = verifyClient.check(requestId, code)
+        fun check(code: String): CheckResponse = client.check(requestId, code)
 
-        fun search(): SearchVerifyResponse = verifyClient.search(requestId)
+        fun search(): SearchVerifyResponse = client.search(requestId)
 
         @Override
         override fun equals(other: Any?): Boolean {

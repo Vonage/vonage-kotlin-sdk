@@ -18,23 +18,23 @@ package com.vonage.client.kt
 import com.vonage.client.verify2.*
 import java.util.*
 
-class Verify(private val verify2Client: Verify2Client) {
+class Verify(private val client: Verify2Client) {
 
     fun sendVerification(
         brand: String = "Vonage",
         init: VerificationRequest.Builder.() -> Unit
-    ): VerificationResponse = verify2Client.sendVerification(
+    ): VerificationResponse = client.sendVerification(
         VerificationRequest.builder().brand(brand).apply(init).build()
     )
 
     inner class ExistingRequest internal constructor(private val requestId: UUID) {
 
-        fun cancel(): Unit = verify2Client.cancelVerification(requestId)
+        fun cancel(): Unit = client.cancelVerification(requestId)
 
-        fun nextWorkflow(): Unit = verify2Client.nextWorkflow(requestId)
+        fun nextWorkflow(): Unit = client.nextWorkflow(requestId)
 
         fun checkVerificationCode(code: String): VerifyCodeResponse =
-            verify2Client.checkVerificationCode(requestId, code)
+            client.checkVerificationCode(requestId, code)
 
         fun isValidVerificationCode(code: String): Boolean {
             try {

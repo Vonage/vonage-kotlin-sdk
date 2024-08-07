@@ -17,25 +17,25 @@ package com.vonage.client.kt
 
 import com.vonage.client.numbers.*
 
-class Numbers internal constructor(private val numbersClient: NumbersClient) {
+class Numbers internal constructor(private val client: NumbersClient) {
 
     fun number(countryCode: String, msisdn: String) = ExistingNumber(countryCode, msisdn)
 
     inner class ExistingNumber internal constructor(val countryCode: String, val msisdn: String) {
 
         fun buy(targetApiKey: String? = null): Unit =
-            numbersClient.buyNumber(countryCode, msisdn, targetApiKey)
+            client.buyNumber(countryCode, msisdn, targetApiKey)
 
         fun cancel(targetApiKey: String? = null): Unit =
-            numbersClient.cancelNumber(countryCode, msisdn, targetApiKey)
+            client.cancelNumber(countryCode, msisdn, targetApiKey)
 
         fun update(properties: UpdateNumberRequest.Builder.() -> Unit): Unit =
-            numbersClient.updateNumber(UpdateNumberRequest.builder(msisdn, countryCode).apply(properties).build())
+            client.updateNumber(UpdateNumberRequest.builder(msisdn, countryCode).apply(properties).build())
     }
 
     fun listOwned(filter: ListNumbersFilter.Builder.() -> Unit = {}): ListNumbersResponse =
-        numbersClient.listNumbers(ListNumbersFilter.builder().apply(filter).build())
+        client.listNumbers(ListNumbersFilter.builder().apply(filter).build())
 
     fun searchAvailable(filter: SearchNumbersFilter.Builder.() -> Unit): SearchNumbersResponse =
-        numbersClient.searchNumbers(SearchNumbersFilter.builder().apply(filter).build())
+        client.searchNumbers(SearchNumbersFilter.builder().apply(filter).build())
 }

@@ -21,49 +21,49 @@ import java.net.URI
 import java.time.Instant
 import java.util.*
 
-class Voice(private val voiceClient: VoiceClient) {
+class Voice internal constructor(private val client: VoiceClient) {
 
     fun call(callId: String): ExistingCall = ExistingCall(callId)
 
     inner class ExistingCall internal constructor(val callId: String) {
 
-        fun info(): CallInfo = voiceClient.getCallDetails(callId)
+        fun info(): CallInfo = client.getCallDetails(callId)
 
-        fun hangup(): Unit = voiceClient.terminateCall(callId)
+        fun hangup(): Unit = client.terminateCall(callId)
 
-        fun mute(): Unit = voiceClient.muteCall(callId)
+        fun mute(): Unit = client.muteCall(callId)
 
-        fun unmute(): Unit = voiceClient.unmuteCall(callId)
+        fun unmute(): Unit = client.unmuteCall(callId)
 
-        fun earmuff(): Unit = voiceClient.earmuffCall(callId)
+        fun earmuff(): Unit = client.earmuffCall(callId)
 
-        fun unearmuff(): Unit = voiceClient.unearmuffCall(callId)
+        fun unearmuff(): Unit = client.unearmuffCall(callId)
 
-        fun transfer(vararg actions: Action): Unit = voiceClient.transferCall(callId, Ncco(actions.asList()))
+        fun transfer(vararg actions: Action): Unit = client.transferCall(callId, Ncco(actions.asList()))
 
-        fun transfer(nccoUrl: String): Unit = voiceClient.transferCall(callId, nccoUrl)
+        fun transfer(nccoUrl: String): Unit = client.transferCall(callId, nccoUrl)
 
         fun transfer(nccoUrl: URI): Unit = transfer(nccoUrl.toString())
 
-        fun sendDtmf(digits: String): DtmfResponse = voiceClient.sendDtmf(callId, digits)
+        fun sendDtmf(digits: String): DtmfResponse = client.sendDtmf(callId, digits)
 
         fun streamAudio(streamUrl: String, loop: Int = 1, level: Double = 0.0): StreamResponse =
-            voiceClient.startStream(callId, streamUrl, loop, level)
+            client.startStream(callId, streamUrl, loop, level)
 
-        fun stopStream(): StreamResponse = voiceClient.stopStream(callId)
+        fun stopStream(): StreamResponse = client.stopStream(callId)
 
         fun startTalk(text: String, properties: (TalkPayload.Builder.() -> Unit) = {}): TalkResponse =
-            voiceClient.startTalk(callId, TalkPayload.builder(text).apply(properties).build())
+            client.startTalk(callId, TalkPayload.builder(text).apply(properties).build())
 
-        fun stopTalk(): TalkResponse = voiceClient.stopTalk(callId)
+        fun stopTalk(): TalkResponse = client.stopTalk(callId)
     }
 
     fun listCalls(filter: (CallsFilter.Builder.() -> Unit)? = null): CallInfoPage =
-        if (filter == null) voiceClient.listCalls()
-        else voiceClient.listCalls(CallsFilter.builder().apply(filter).build())
+        if (filter == null) client.listCalls()
+        else client.listCalls(CallsFilter.builder().apply(filter).build())
 
     fun createCall(call: Call.Builder.() -> Unit): CallEvent =
-        voiceClient.createCall(Call.builder().apply(call).build())
+        client.createCall(Call.builder().apply(call).build())
 }
 
 fun CallsFilter.Builder.dateStart(dateStart: String): CallsFilter.Builder =
