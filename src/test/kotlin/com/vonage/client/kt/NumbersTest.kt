@@ -24,7 +24,6 @@ import kotlin.test.*
 class NumbersTest : AbstractTest() {
     private val client = vonage.numbers
     private val authType = AuthType.API_KEY_SECRET_HEADER
-    private val country = "GB"
     private val targetApiKey = "1a2345b7"
     private val moSmppSysType = "inbound"
     private val buyEndpoint = "buy"

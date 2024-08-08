@@ -55,6 +55,8 @@ abstract class AbstractTest {
     protected val altNumber = "447700900001"
     protected val brand = "Nexmo KT"
     protected val text = "Hello, World!"
+    protected val country = "GB"
+    protected val secret = "ABCDEFGH01234abc"
     protected val sipUri = "sip:rebekka@sip.example.com"
     protected val clientRef = "my-personal-reference"
     protected val textHexEncoded = "48656c6c6f2c20576f726c6421"
@@ -242,7 +244,7 @@ abstract class AbstractTest {
     protected fun mockPatch(expectedUrl: String, expectedRequestParams: Map<String, Any>? = null,
                           status: Int = 200, contentType: ContentType? = ContentType.APPLICATION_JSON,
                           authType: AuthType? = AuthType.JWT, expectedResponseParams: Map<String, Any>? = null) =
-        mockP(HttpMethod.PUT, expectedUrl, expectedRequestParams, status, authType, contentType, expectedResponseParams)
+        mockP(HttpMethod.PATCH, expectedUrl, expectedRequestParams, status, authType, contentType, expectedResponseParams)
 
     protected fun mockDelete(expectedUrl: String, authType: AuthType? = null,
                              expectedResponseParams: Map<String, Any>? = null) =

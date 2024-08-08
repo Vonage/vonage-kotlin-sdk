@@ -27,6 +27,7 @@ You'll need to have [created a Vonage account](https://dashboard.nexmo.com/sign-
 - [Redact](https://developer.vonage.com/en/redact/overview)
 - [SIM Swap](https://developer.vonage.com/en/sim-swap/overview)
 - [SMS](https://developer.vonage.com/en/messaging/sms/overview)
+- [Subaccounts](https://developer.vonage.com/en/account/subaccounts/overview)
 - [Verify](https://developer.vonage.com/en/verify/overview)
 - [Voice](https://developer.vonage.com/en/voice/voice-api/overview)
 
