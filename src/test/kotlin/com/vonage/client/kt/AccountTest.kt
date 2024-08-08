@@ -24,7 +24,6 @@ class AccountTest : AbstractTest() {
     private val account = vonage.account
     private val authType = AuthType.API_KEY_SECRET_HEADER
     private val secretId = "ad6dc56f-07b5-46e1-a527-85530e625800"
-    private val secret = "ABCDEFGH01234abc"
     private val trx = "8ef2447e69604f642ae59363aa5f781b"
     private val baseUrl = "/account"
     private val secretsUrl = "${baseUrl}s/$apiKey/secrets"

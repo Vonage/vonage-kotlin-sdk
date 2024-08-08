@@ -27,7 +27,7 @@ class Verify(private val client: Verify2Client) {
         VerificationRequest.builder().brand(brand).apply(init).build()
     )
 
-    inner class ExistingRequest internal constructor(private val requestId: UUID) {
+    inner class ExistingRequest internal constructor(val requestId: UUID) {
 
         fun cancel(): Unit = client.cancelVerification(requestId)
 
