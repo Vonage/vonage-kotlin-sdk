@@ -31,21 +31,22 @@ class Subaccounts internal constructor(private val client: SubaccountsClient) {
         return client.createSubaccount(builder.build())
     }
 
-    fun getSubaccount(subaccountKey: String): Account = client.getSubaccount(subaccountKey)
+    fun subaccount(subaccountKey: String): ExistingSubaccount = ExistingSubaccount(subaccountKey)
 
-    fun updateSubaccount(subaccountKey: String, name: String? = null,
-                         usePrimaryAccountBalance: Boolean? = null, suspend: Boolean? = null): Account {
-        val builder = UpdateSubaccountRequest.builder(subaccountKey)
-        if (name != null) {
-            builder.name(name)
+    inner class ExistingSubaccount internal constructor(val subaccountKey: String) {
+
+        fun get(): Account = client.getSubaccount(subaccountKey)
+
+        fun suspended(suspend: Boolean): Account =
+            client.updateSubaccount(UpdateSubaccountRequest.builder(subaccountKey).suspended(suspend).build())
+
+        fun update(name: String? = null, usePrimaryAccountBalance: Boolean? = null): Account {
+            val builder = UpdateSubaccountRequest.builder(subaccountKey).name(name)
+            if (usePrimaryAccountBalance != null) {
+                builder.usePrimaryAccountBalance(usePrimaryAccountBalance)
+            }
+            return client.updateSubaccount(builder.build())
         }
-        if (usePrimaryAccountBalance != null) {
-            builder.usePrimaryAccountBalance(usePrimaryAccountBalance)
-        }
-        if (suspend != null) {
-            builder.suspended(suspend)
-        }
-        return client.updateSubaccount(builder.build())
     }
 
     fun listCreditTransfers(startDate: Instant? = null, endDate: Instant? = null,

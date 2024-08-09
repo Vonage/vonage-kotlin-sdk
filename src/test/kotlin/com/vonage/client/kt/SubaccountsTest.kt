@@ -24,10 +24,11 @@ import java.time.temporal.ChronoUnit
 
 class SubaccountsTest : AbstractTest() {
     private val client = vonage.subaccounts
+    private val authType = AuthType.API_KEY_SECRET_HEADER
+    private val existingSubaccount = client.subaccount(apiKey2)
     private val baseUrl = "/accounts/$apiKey"
     private val subaccountsUrl = "$baseUrl/subaccounts"
     private val existingSubUrl = "$subaccountsUrl/$apiKey2"
-    private val authType = AuthType.API_KEY_SECRET_HEADER
     private val name = "Subaccount department A"
     private val primaryName = "Primary Account"
     private val balance = 93.26
@@ -54,7 +55,7 @@ class SubaccountsTest : AbstractTest() {
     private fun assertEqualsSampleSubaccount(parsed: Account) {
         assertNotNull(parsed)
         assertEquals(secret, parsed.secret)
-        assertEquals(apiKey2, parsed.apiKey)
+        assertEquals(existingSubaccount.subaccountKey, parsed.apiKey)
         assertEquals(name, parsed.name)
         assertEquals(apiKey, parsed.primaryAccountApiKey)
         assertEquals(usePrimary, parsed.usePrimaryAccountBalance)
@@ -246,37 +247,39 @@ class SubaccountsTest : AbstractTest() {
             expectedUrl = existingSubUrl, authType = authType,
             expectedResponseParams = sampleSubaccountMap
         )
-        assertEqualsSampleSubaccount(client.getSubaccount(apiKey2))
-        assert401ApiResponseException<SubaccountsResponseException>("$subaccountsUrl/$apiKey2", HttpMethod.GET) {
-            client.getSubaccount(apiKey2)
+        assertEqualsSampleSubaccount(existingSubaccount.get())
+        assert401ApiResponseException<SubaccountsResponseException>(existingSubUrl, HttpMethod.GET) {
+            existingSubaccount.get()
         }
     }
 
     @Test
-    fun `update subaccount all parameters`() {
+    fun `update subaccount`() {
         mockPatch(
             expectedUrl = existingSubUrl, authType = authType,
             expectedRequestParams = mapOf(
                 "name" to name,
-                "use_primary_account_balance" to usePrimary,
-                "suspended" to suspended
+                "use_primary_account_balance" to usePrimary
             ),
             expectedResponseParams = sampleSubaccountMap
         )
-        assertEqualsSampleSubaccount(client.updateSubaccount(apiKey2, name, usePrimary, suspended))
+        assertEqualsSampleSubaccount(existingSubaccount.update(name, usePrimary))
         assert401ApiResponseException<SubaccountsResponseException>(existingSubUrl, HttpMethod.PATCH) {
-            client.updateSubaccount(apiKey2, suspend = suspended)
+            existingSubaccount.update(usePrimaryAccountBalance = usePrimary)
         }
     }
 
     @Test
-    fun `update subaccount name only`() {
+    fun `suspend subaccount`() {
         mockPatch(
             expectedUrl = existingSubUrl, authType = authType,
-            expectedRequestParams = mapOf("name" to name),
+            expectedRequestParams = mapOf("suspended" to suspended),
             expectedResponseParams = sampleSubaccountMap
         )
-        assertEqualsSampleSubaccount(client.updateSubaccount(subaccountKey = apiKey2, name = name))
+        assertEqualsSampleSubaccount(existingSubaccount.suspended(suspended))
+        assert401ApiResponseException<SubaccountsResponseException>(existingSubUrl, HttpMethod.PATCH) {
+            existingSubaccount.suspended(!suspended)
+        }
     }
 
     @Test
