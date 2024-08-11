@@ -5,7 +5,7 @@
 
   <groupId>com.vonage</groupId>
   <artifactId>server-sdk-kotlin</artifactId>
-  <version>0.8.0</version>
+  <version>0.9.0</version>
 
   <name>Vonage Kotlin Server SDK</name>
   <description>Kotlin client for Vonage APIs</description>
@@ -47,15 +47,11 @@
     <kotlin.compiler.languageVersion>2.0</kotlin.compiler.languageVersion>
     <kotlin.compiler.apiVersion>2.0</kotlin.compiler.apiVersion>
     <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
+    <kotlin.lib.version>2.0.10</kotlin.lib.version>
     <java.version>8</java.version>
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-stdlib</artifactId>
-      <version>2.0.0</version>
-    </dependency>
     <dependency>
       <groupId>com.vonage</groupId>
       <artifactId>server-sdk</artifactId>
@@ -63,8 +59,13 @@
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib</artifactId>
+      <version>${kotlin.lib.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-test-junit5</artifactId>
-      <version>2.0.0</version>
+      <version>${kotlin.lib.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -206,9 +207,9 @@
         </executions>
       </plugin>
       <plugin>
-        <artifactId>kotlin-maven-plugin</artifactId>
         <groupId>org.jetbrains.kotlin</groupId>
-        <version>2.0.0</version>
+        <artifactId>kotlin-maven-plugin</artifactId>
+        <version>${kotlin.lib.version}</version>
         <extensions>true</extensions>
       </plugin>
     </plugins>
