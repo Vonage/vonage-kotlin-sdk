@@ -79,6 +79,7 @@ abstract class AbstractTest {
     protected val timestamp2: Instant = Instant.parse(timestamp2Str)
     protected val currency = "EUR"
     protected val exampleUrlBase = "https://example.com"
+    protected val eventUrl = "$exampleUrlBase/event"
     protected val callbackUrl = "$exampleUrlBase/callback"
     protected val statusCallbackUrl = "$callbackUrl/status"
     protected val moCallbackUrl = "$callbackUrl/inbound-sms"

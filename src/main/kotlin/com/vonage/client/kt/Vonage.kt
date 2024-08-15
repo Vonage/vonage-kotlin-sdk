@@ -21,6 +21,7 @@ import com.vonage.client.VonageClient
 class Vonage(init: VonageClient.Builder.() -> Unit) {
     private val client : VonageClient = VonageClient.builder().apply(init).build()
     val account = Account(client.accountClient)
+    val application = Application(client.applicationClient)
     val conversion = Conversion(client.conversionClient)
     val messages = Messages(client.messagesClient)
     val numberInsight = NumberInsight(client.insightClient)
