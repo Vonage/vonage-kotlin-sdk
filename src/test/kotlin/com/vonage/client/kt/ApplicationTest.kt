@@ -16,6 +16,7 @@
 package com.vonage.client.kt
 
 import com.vonage.client.application.Application
+import com.vonage.client.application.ApplicationResponseException
 import com.vonage.client.application.capabilities.Capability
 import com.vonage.client.application.capabilities.Region
 import com.vonage.client.common.HttpMethod
@@ -232,6 +233,8 @@ class ApplicationTest : AbstractTest() {
         assertEqualsBlankApplication(response[1])
         assertEqualsFullApplication(response[2])
         assertEqualsBasicApplication(response[3])
+
+        assert401ApiResponseException<ApplicationResponseException>(baseUrl, HttpMethod.GET, invocation)
     }
 
     @BeforeTest
@@ -245,12 +248,20 @@ class ApplicationTest : AbstractTest() {
     @Test
     fun `get application all parameters`() {
         assertEqualsFullApplication(existingApplication.get())
+
+        assert401ApiResponseException<ApplicationResponseException>(appUrl, HttpMethod.GET) {
+            existingApplication.get()
+        }
     }
 
     @Test
     fun `delete application`() {
         mockDelete(expectedUrl = appUrl, authType = authType)
         existingApplication.delete()
+
+        assert401ApiResponseException<ApplicationResponseException>(appUrl, HttpMethod.DELETE) {
+            existingApplication.delete()
+        }
     }
 
     @Test
@@ -292,6 +303,10 @@ class ApplicationTest : AbstractTest() {
             )
         }
         assertEqualsBasicApplication(response, newName)
+
+        assert401ApiResponseException<ApplicationResponseException>(appUrl, HttpMethod.PUT) {
+            existingApplication.update {}
+        }
     }
 
     @Test
@@ -352,5 +367,9 @@ class ApplicationTest : AbstractTest() {
             }
             improveAi(improveAi)
         })
+
+        assert401ApiResponseException<ApplicationResponseException>(baseUrl, HttpMethod.POST) {
+            ac.create { name(name) }
+        }
     }
 }
