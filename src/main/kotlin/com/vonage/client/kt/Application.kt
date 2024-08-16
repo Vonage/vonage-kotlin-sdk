@@ -72,10 +72,10 @@ fun Rtc.Builder.event(properties: Webhook.Builder.() -> Unit): Rtc.Builder =
 fun Verify.Builder.status(properties: Webhook.Builder.() -> Unit): Verify.Builder =
     addWebhook(Webhook.Type.STATUS, webhookBuilder(properties))
 
-fun Messages.Builder.inbound( properties: Webhook.Builder.() -> Unit): Messages.Builder =
+fun Messages.Builder.inbound(properties: Webhook.Builder.() -> Unit): Messages.Builder =
     addWebhook(Webhook.Type.INBOUND, webhookBuilder(properties))
 
-fun Messages.Builder.status( properties: Webhook.Builder.() -> Unit): Messages.Builder =
+fun Messages.Builder.status(properties: Webhook.Builder.() -> Unit): Messages.Builder =
     addWebhook(Webhook.Type.STATUS, webhookBuilder(properties))
 
 fun Application.Builder.removeCapabilities(vararg capabilities: Capability.Type): Application.Builder {
