@@ -58,6 +58,7 @@ abstract class AbstractTest {
     protected val country = "GB"
     protected val secret = "ABCDEFGH01234abc"
     protected val sipUri = "sip:rebekka@sip.example.com"
+    protected val websocketUri = "wss://example.com/socket"
     protected val clientRef = "my-personal-reference"
     protected val textHexEncoded = "48656c6c6f2c20576f726c6421"
     protected val entityId = "1101407360000017170"
@@ -84,6 +85,10 @@ abstract class AbstractTest {
     protected val statusCallbackUrl = "$callbackUrl/status"
     protected val moCallbackUrl = "$callbackUrl/inbound-sms"
     protected val drCallbackUrl = "$callbackUrl/delivery-receipt"
+    protected val imageUrl = "$exampleUrlBase/image.jpg"
+    protected val audioUrl = "$exampleUrlBase/audio.mp3"
+    protected val videoUrl = "$exampleUrlBase/video.mp4"
+    protected val fileUrl = "$exampleUrlBase/file.pdf"
 
     private val port = 8081
     private val wiremock: WireMockServer = WireMockServer(
@@ -281,7 +286,7 @@ abstract class AbstractTest {
 
     protected inline fun <reified E: VonageApiResponseException> assertApiResponseException(
             url: String, requestMethod: HttpMethod, actualCall: () -> Any, status: Int,
-            errorType: String? = null, title: String? = null,
+            errorType: String? = null, title: String? = null, code: String? = null,
             detail: String? = null, instance: String? = null): E {
 
         val responseParams = mutableMapOf<String, Any>()
@@ -289,6 +294,7 @@ abstract class AbstractTest {
         if (title != null) responseParams["title"] = title
         if (detail != null) responseParams["detail"] = detail
         if (instance != null) responseParams["instance"] = instance
+        if (code != null) responseParams["code"] = code
 
         mockRequest(requestMethod, url).mockReturn(status, responseParams)
         val exception = assertThrows<E> { actualCall.invoke() }
@@ -298,6 +304,7 @@ abstract class AbstractTest {
         assertEquals(title, exception.title)
         assertEquals(instance, exception.instance)
         assertEquals(detail, exception.detail)
+        assertEquals(code, exception.code)
         return exception
     }
 

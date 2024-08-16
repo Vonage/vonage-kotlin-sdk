@@ -42,7 +42,6 @@ class VoiceTest : AbstractTest() {
     private val vbcExt = "4321"
     private val streamUrl = "$exampleUrlBase/waiting.mp3"
     private val onAnswerUrl = "$exampleUrlBase/ncco.json"
-    private val websocketUri = "wss://example.com/socket"
     private val ringbackTone = "http://example.org/ringbackTone.wav"
     private val wsContentType = "audio/l16;rate=8000"
     private val userToUserHeader = "56a390f3d2b7310023a"

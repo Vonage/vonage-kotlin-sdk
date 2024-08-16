@@ -31,6 +31,7 @@ class Vonage(init: VonageClient.Builder.() -> Unit) {
     val simSwap = SimSwap(client.simSwapClient)
     val sms = Sms(client.smsClient)
     val subaccounts = Subaccounts(client.subaccountsClient)
+    val users = Users(client.usersClient)
     val verify = Verify(client.verify2Client)
     val verifyLegacy = VerifyLegacy(client.verifyClient)
     val voice = Voice(client.voiceClient)
