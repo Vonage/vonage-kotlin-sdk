@@ -37,10 +37,6 @@ class MessagesTest : AbstractTest() {
     private val viberChannel = "viber_service"
     private val messengerChannel = "messenger"
     private val caption = "Additional text to accompany the media"
-    private val imageUrl = "https://example.com/image.jpg"
-    private val audioUrl = "https://example.com/audio.mp3"
-    private val videoUrl = "https://example.com/video.mp4"
-    private val fileUrl = "https://example.com/file.pdf"
     private val captionMap = mapOf("caption" to caption)
 
 

@@ -38,13 +38,9 @@ class VoiceTest : AbstractTest() {
     private val recordIndex = 14
     private val dtmf = "p*123#"
     private val fromPstn = "14155550100"
-    private val user = "Sam"
-    private val vbcExt = "4321"
     private val streamUrl = "$exampleUrlBase/waiting.mp3"
     private val onAnswerUrl = "$exampleUrlBase/ncco.json"
-    private val websocketUri = "wss://example.com/socket"
     private val ringbackTone = "http://example.org/ringbackTone.wav"
-    private val wsContentType = "audio/l16;rate=8000"
     private val userToUserHeader = "56a390f3d2b7310023a"
     private val conversationName = "selective-audio Demo"
     private val customHeaders = mapOf(
@@ -429,8 +425,8 @@ class VoiceTest : AbstractTest() {
 
     @Test
     fun `create call to App`() {
-        testCreateCallToSingleEndpoint(mapOf("type" to "app", "user" to user)) {
-            toApp(user)
+        testCreateCallToSingleEndpoint(mapOf("type" to "app", "user" to userName)) {
+            toApp(userName)
         }
     }
 
@@ -486,7 +482,7 @@ class VoiceTest : AbstractTest() {
             "to" to listOf(
                 mapOf(
                     "type" to "app",
-                    "user" to user
+                    "user" to userName
                 ),
                 mapOf(
                     "type" to phoneType,
@@ -533,7 +529,7 @@ class VoiceTest : AbstractTest() {
                 behavior(amdBehaviour); beepTimeout(beepTimeout); mode(amdMode)
             }
             to(
-                com.vonage.client.voice.AppEndpoint(user),
+                com.vonage.client.voice.AppEndpoint(userName),
                 com.vonage.client.voice.PhoneEndpoint(toNumber, dtmf),
                 com.vonage.client.voice.VbcEndpoint(vbcExt),
                 com.vonage.client.voice.WebSocketEndpoint(websocketUri, wsContentType, customHeaders),
@@ -609,8 +605,8 @@ class VoiceTest : AbstractTest() {
     @Test
     fun `create call with connect to App ncco`() {
         testSingleNccoConnect(
-            mapOf("user" to user),
-            connectToApp(user)
+            mapOf("user" to userName),
+            connectToApp(userName)
         )
     }
 
