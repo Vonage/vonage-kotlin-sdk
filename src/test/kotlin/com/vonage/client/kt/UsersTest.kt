@@ -43,9 +43,8 @@ class UsersTest : AbstractTest() {
     private val navUrlMap = mapOf("href" to navUrl)
     private val baseUserRequest = mapOf("name" to userName)
     private val userIdMapOnly = mapOf("id" to userId)
-    private val baseUserResponse = userIdMapOnly + baseUserRequest
-    private val fullUserRequest = baseUserRequest + mapOf(
-        "display_name" to displayName,
+    private val displayNameMap = mapOf("display_name" to displayName)
+    private val fullUserRequest = baseUserRequest + displayNameMap + mapOf(
         "image_url" to imageUrl,
         "channels" to mapOf(
             "pstn" to listOf(mapOf(
@@ -158,10 +157,7 @@ class UsersTest : AbstractTest() {
                 "_embedded" to mapOf(
                     "users" to listOf(
                         mapOf(),
-                        mapOf(
-                            "id" to userId,
-                            "name" to userName,
-                            "display_name" to displayName,
+                        userIdMapOnly + baseUserRequest + displayNameMap + mapOf(
                             "_links" to mapOf(
                                 "self" to mapOf("href" to userHref)
                             )
@@ -198,9 +194,21 @@ class UsersTest : AbstractTest() {
         assertEquals(URI.create(navUrl), links.nextUrl)
         assertEquals(URI.create(navUrl), links.prevUrl)
 
+        assertEquals(existingUser.userId, client.user(idOnlyUser).userId)
+
         assert401ApiResponseException<UsersResponseException>(baseUrl, HttpMethod.GET) {
             invocation.invoke(client)
         }
+    }
+
+    @Test
+    fun `existing user equals and hashCode`() {
+        val differentUser = client.user("USR-$testUuidStr")
+        assertEquals(existingUser, existingUser)
+        assertFalse(existingUser.equals(userId))
+        assertEquals(userId.hashCode(), existingUser.hashCode())
+        assertEquals(existingUser, client.user(userId))
+        assertNotEquals(existingUser, differentUser)
     }
 
     @Test
