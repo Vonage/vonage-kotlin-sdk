@@ -17,6 +17,7 @@ package com.vonage.client.kt
 
 import com.vonage.client.common.HttpMethod
 import com.vonage.client.users.*
+import com.vonage.client.users.channels.*
 import java.net.URI
 import kotlin.test.*
 
@@ -27,47 +28,113 @@ class UsersTest : AbstractTest() {
     private val userId = "USR-82e028d9-5201-4f1e-8188-604b2d3471ec"
     private val userUrl = "$baseUrl/$userId"
     private val existingUser = client.user(userId)
-    private val name = "my_user_name"
     private val displayName = "Test User"
-    private val ttl = 3600
+    private val ttl = 3600 // TODO support
     private val pageSize = 10
     private val customData = mapOf("custom_key" to "custom_value")
     private val sipUser = "sip_user"
     private val sipPassword = "Passw0rd1234"
     private val messengerId = "12345abcd"
-    private val baseUserRequest = mapOf("name" to name)
+    private val href = "https://api.nexmo.com/users"
+    private val order = "desc"
+    private val firstHref = "$href?order=$order&page_size=$pageSize"
+    private val navUrl = "$firstHref&cursor=$cursor"
+    private val userHref = "https://api.nexmo.com$userUrl"
+    private val navUrlMap = mapOf("href" to navUrl)
+    private val baseUserRequest = mapOf("name" to userName)
     private val userIdMapOnly = mapOf("id" to userId)
     private val baseUserResponse = userIdMapOnly + baseUserRequest
     private val fullUserRequest = baseUserRequest + mapOf(
         "display_name" to displayName,
         "image_url" to imageUrl,
-        "properties" to mapOf(
-            "custom_data" to customData,
-            "ttl" to ttl
-        ),
-        "custom_data" to customData,
         "channels" to mapOf(
+            "pstn" to listOf(mapOf(
+                "number" to toNumber
+            )),
             "sip" to listOf(mapOf(
                 "uri" to sipUri,
                 "username" to sipUser,
                 "password" to sipPassword
             )),
+            "vbc" to listOf(mapOf(
+                "extension" to vbcExt
+            )),
+            "websocket" to listOf(mapOf(
+                "uri" to websocketUri,
+                "content-type" to wsContentType,
+                "headers" to customData
+            )),
+            "mms" to listOf(mapOf(
+                "number" to toNumber
+            )),
+            "whatsapp" to listOf(mapOf(
+                "number" to altNumber
+            )),
+            "viber" to listOf(mapOf(
+                "number" to altNumber
+            )),
             "messenger" to listOf(mapOf(
                 "id" to messengerId
             ))
+        ),
+        "properties" to mapOf(
+            "custom_data" to customData
         )
     )
     private val fullUserResponse = userIdMapOnly + fullUserRequest
 
     private fun assertEqualsUser(parsed: User) {
         assertEquals(userId, parsed.id)
-        assertEquals(name, parsed.name)
+        assertEquals(userName, parsed.name)
         assertEquals(displayName, parsed.displayName)
         assertEquals(URI.create(imageUrl), parsed.imageUrl)
         assertEquals(customData, parsed.customData)
         val channels = parsed.channels
         assertNotNull(channels)
-        // TODO the rest
+
+        val pstn = channels.pstn
+        assertNotNull(pstn)
+        assertEquals(1, pstn.size)
+        assertEquals(toNumber, pstn[0].number)
+
+        val mms = channels.mms
+        assertNotNull(mms)
+        assertEquals(1, mms.size)
+        assertEquals(toNumber, mms[0].number)
+
+        val whatsapp = channels.whatsapp
+        assertNotNull(whatsapp)
+        assertEquals(1, whatsapp.size)
+        assertEquals(altNumber, whatsapp[0].number)
+
+        val viber = channels.viber
+        assertNotNull(viber)
+        assertEquals(1, viber.size)
+        assertEquals(altNumber, viber[0].number)
+
+        val messenger = channels.messenger
+        assertNotNull(messenger)
+        assertEquals(1, messenger.size)
+        assertEquals(messengerId, messenger[0].id)
+
+        val websocket = channels.websocket
+        assertNotNull(websocket)
+        assertEquals(1, websocket.size)
+        assertEquals(URI.create(websocketUri), websocket[0].uri)
+        assertEquals(Websocket.ContentType.fromString(wsContentType), websocket[0].contentType)
+        assertEquals(customData, websocket[0].headers)
+
+        val sip = channels.sip
+        assertNotNull(sip)
+        assertEquals(1, sip.size)
+        assertEquals(URI.create(sipUri), sip[0].uri)
+        assertEquals(sipUser, sip[0].username)
+        assertEquals(sipPassword, sip[0].password)
+
+        val vbc = channels.vbc
+        assertNotNull(vbc)
+        assertEquals(1, vbc.size)
+        assertEquals(vbcExt, vbc[0].extension)
     }
 
     private fun assertUserNotFoundException(method: HttpMethod, invocation: Users.ExistingUser.() -> Any) =
@@ -93,30 +160,20 @@ class UsersTest : AbstractTest() {
                         mapOf(),
                         mapOf(
                             "id" to userId,
-                            "name" to name,
+                            "name" to userName,
                             "display_name" to displayName,
                             "_links" to mapOf(
-                                "self" to mapOf(
-                                    "href" to "https://api.nexmo.com$userUrl"
-                                )
+                                "self" to mapOf("href" to userHref)
                             )
                         ),
                         userIdMapOnly
                     )
                 ),
                 "_links" to mapOf(
-                    "first" to mapOf(
-                        "href" to "https://api.nexmo.com/v1/users?order=desc&page_size=10"
-                    ),
-                    "self" to mapOf(
-                        "href" to "https://api.nexmo.com/v1/users?order=desc&page_size=10&cursor=7EjDNQrAcipmOnc0HCzpQRkhBULzY44ljGUX4lXKyUIVfiZay5pv9wg%3D"
-                    ),
-                    "next" to mapOf(
-                        "href" to "https://api.nexmo.com/v1/users?order=desc&page_size=10&cursor=7EjDNQrAcipmOnc0HCzpQRkhBULzY44ljGUX4lXKyUIVfiZay5pv9wg%3D"
-                    ),
-                    "prev" to mapOf(
-                        "href" to "https://api.nexmo.com/v1/users?order=desc&page_size=10&cursor=7EjDNQrAcipmOnc0HCzpQRkhBULzY44ljGUX4lXKyUIVfiZay5pv9wg%3D"
-                    )
+                    "first" to mapOf("href" to firstHref),
+                    "self" to navUrlMap,
+                    "next" to navUrlMap,
+                    "prev" to navUrlMap
                 )
             )
         )
@@ -125,7 +182,25 @@ class UsersTest : AbstractTest() {
         val users = response.users
         assertNotNull(users)
         assertEquals(3, users.size)
-        // TODO remaining assertions
+        val emptyUser = users[0]
+        assertNull(emptyUser.id)
+        assertNull(emptyUser.name)
+        val mainUser = users[1]
+        assertEquals(userId, mainUser.id)
+        assertEquals(userName, mainUser.name)
+        val idOnlyUser = users[2]
+        assertEquals(userId, idOnlyUser.id)
+        assertNull(idOnlyUser.name)
+        val links = response.links
+        assertNotNull(links)
+        assertEquals(URI.create(firstHref), links.firstUrl)
+        assertEquals(URI.create(navUrl), links.selfUrl)
+        assertEquals(URI.create(navUrl), links.nextUrl)
+        assertEquals(URI.create(navUrl), links.prevUrl)
+
+        assert401ApiResponseException<UsersResponseException>(baseUrl, HttpMethod.GET) {
+            invocation.invoke(client)
+        }
     }
 
     @Test
@@ -177,18 +252,23 @@ class UsersTest : AbstractTest() {
     }
 
     @Test
-    fun `create user all parameters`() {
+    fun `create user all parameters and channels`() {
         mockPost(
             expectedUrl = baseUrl, authType = authType,
             expectedRequestParams = fullUserRequest,
             expectedResponseParams = fullUserResponse
         )
         assertEqualsUser(client.create {
-            name(name)
+            name(userName)
             displayName(displayName)
             imageUrl(imageUrl)
             customData(customData)
-            // TODO channels
+            channels(
+                Pstn(toNumber), Sip(sipUri, sipUser, sipPassword),
+                Websocket(websocketUri, Websocket.ContentType.fromString(wsContentType), customData),
+                Vbc(vbcExt.toInt()), Mms(toNumber), Whatsapp(altNumber),
+                Viber(altNumber), Messenger(messengerId)
+            )
         })
     }
 
@@ -201,13 +281,14 @@ class UsersTest : AbstractTest() {
     @Test
     fun `list users all filters`() {
         assertListUsers(mapOf(
+            "page_size" to pageSize,
             "order" to "desc",
-            "page_size" to pageSize
-            // TODO remaining filters
+            "cursor" to cursor,
+            "name" to userName
         )) {
             list {
-                order(ListUsersRequest.SortOrder.DESC)
-                pageSize(pageSize)
+                order(ListUsersRequest.SortOrder.DESC); name(userName)
+                pageSize(pageSize); cursor(URI.create(navUrl))
             }
         }
     }
