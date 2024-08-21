@@ -18,7 +18,6 @@ package com.vonage.client.kt
 import com.vonage.client.common.HttpMethod
 import com.vonage.client.verify2.Channel
 import com.vonage.client.verify2.VerifyResponseException
-import org.junit.jupiter.api.Test
 import java.net.URI
 import java.util.UUID
 import kotlin.test.*

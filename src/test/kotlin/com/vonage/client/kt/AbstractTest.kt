@@ -51,6 +51,8 @@ abstract class AbstractTest {
     private val accessTokenBearer = "Bearer $accessToken"
     protected val testUuidStr = "aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab"
     protected val testUuid: UUID = UUID.fromString(testUuidStr)
+    protected val randomUuid: UUID = UUID.randomUUID()
+    protected val randomUuidStr = randomUuid.toString()
     protected val toNumber = "447712345689"
     protected val altNumber = "447700900001"
     protected val brand = "Nexmo KT"
