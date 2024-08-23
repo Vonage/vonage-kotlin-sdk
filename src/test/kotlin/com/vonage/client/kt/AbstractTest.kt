@@ -45,6 +45,7 @@ abstract class AbstractTest {
     private val signatureSecretName = "sig"
     private val apiSecretName = "api_secret"
     private val apiKeyName = "api_key"
+    private val contentTypeHeaderName = "Content-Type"
     private val authHeaderName = "Authorization"
     private val basicSecretEncodedHeader = "Basic $apiKeySecretEncoded"
     private val jwtBearerPattern = "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9(\\..+){2}"
@@ -62,6 +63,7 @@ abstract class AbstractTest {
     protected val cursor = "7EjDNQrAcipmOnc0HCzpQRkhBULzY44ljGUX4lXKyUIVfiZay5pv9wg="
     protected val vbcExt = "4321"
     protected val userName = "Sam_username"
+    protected val dtmf = "p*123#"
     protected val sipUri = "sip:rebekka@sip.example.com"
     protected val websocketUri = "wss://example.com/socket"
     protected val wsContentType = "audio/l16;rate=8000"
@@ -156,13 +158,18 @@ abstract class AbstractTest {
         }
     }
 
-    private fun Map<String, Any>.toJson(): String = ObjectMapper().writeValueAsString(this)
+    private fun Any.toJson(): String = ObjectMapper().writeValueAsString(this)
 
     protected fun mockPostQueryParams(expectedUrl: String, expectedRequestParams: Map<String, Any>,
                                       authType: AuthType? = AuthType.API_KEY_SECRET_QUERY_PARAMS,
-                                      status: Int = 200, expectedResponseParams: Map<String, Any>? = null) {
+                                      contentType: Boolean = false, status: Int = 200,
+                                      expectedResponseParams: Any? = null) {
 
         val stub = post(urlPathEqualTo(expectedUrl))
+        if (contentType) {
+            stub.withHeader(contentTypeHeaderName, equalTo(ContentType.FORM_URLENCODED.mime))
+        }
+
         when (authType) {
             AuthType.API_KEY_SECRET_QUERY_PARAMS -> {
                 stub.withFormParam(apiKeyName, equalTo(apiKey))
@@ -196,7 +203,7 @@ abstract class AbstractTest {
                 urlPath equalTo expectedUrl
                 headers contains "User-Agent" like "vonage-java-sdk\\/.+ java\\/.+"
                 if (contentType != null) {
-                    headers contains "Content-Type" equalTo contentType.mime
+                    headers contains contentTypeHeaderName equalTo contentType.mime
                 }
                 if (accept != null) {
                     headers contains "Accept" equalTo accept.mime

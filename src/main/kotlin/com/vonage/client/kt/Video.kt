@@ -16,6 +16,7 @@
 package com.vonage.client.kt
 
 import com.vonage.client.video.*
+import java.util.*
 
 class Video(private val client: VideoClient) {
 
@@ -52,6 +53,11 @@ class Video(private val client: VideoClient) {
             fun sendDtmf(digits: String): Unit = client.sendDtmf(sessionId, connectionId, digits)
         }
 
+        fun muteStreams(active: Boolean = true, vararg excludedStreamIds: String): ProjectDetails =
+            client.muteSession(sessionId, active,
+                if (excludedStreamIds.isNotEmpty()) excludedStreamIds.toList() else null
+            )
+
         fun listStreams(): List<GetStreamResponse> = client.listStreams(sessionId)
 
         fun listArchives(count: Int = 1000, offset: Int = 0): List<Archive> =
@@ -65,10 +71,10 @@ class Video(private val client: VideoClient) {
 
         fun sendDtmf(digits: String): Unit = client.sendDtmf(sessionId, digits)
 
-        fun startCaptions(token: String, properties: CaptionsRequest.Builder.() -> Unit): CaptionsResponse =
+        fun startCaptions(token: String, properties: CaptionsRequest.Builder.() -> Unit): UUID =
             client.startCaptions(CaptionsRequest.builder()
                 .apply(properties).sessionId(sessionId).token(token).build()
-            )
+            ).captionsId
 
         fun stopCaptions(captionsId: String): Unit = client.stopCaptions(captionsId)
 
@@ -150,7 +156,7 @@ class Video(private val client: VideoClient) {
     fun listRenders(count: Int = 1000, offset: Int = 0): List<RenderResponse> =
         client.listRenders(ListStreamCompositionsRequest.builder().count(count).offset(offset).build())
 
-    fun experienceComposer(renderId: String): ExistingRender = ExistingRender(renderId)
+    fun render(renderId: String): ExistingRender = ExistingRender(renderId)
 
     inner class ExistingRender internal constructor(val renderId: String) {
 
