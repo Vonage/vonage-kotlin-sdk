@@ -168,7 +168,7 @@ class Video(private val client: VideoClient) {
 
 private fun listCompositionsFilter(count: Int, offset: Int, sessionId: String? = null):
         ListStreamCompositionsRequest = ListStreamCompositionsRequest.builder()
-    .count(count).offset(offset).sessionId(sessionId).build()
+            .count(count).offset(offset).sessionId(sessionId).build()
 
 private fun signalRequest(type: String, data: String): SignalRequest =
     SignalRequest.builder().type(type).data(data).build()

@@ -22,6 +22,7 @@ import kotlin.test.*
 
 class VideoTest : AbstractTest() {
     private val client = vonage.video
+    private val authType = AuthType.JWT
     private val baseUrl = "/v2/project/$applicationId"
     private val sessionId = "flR1ZSBPY3QgMjkgMTI6MTM6MjMgUERUIDIwMTN"
     private val connectionId = "e9f8c166-6c67-440d-994a-04fb6dfed007"
@@ -34,13 +35,15 @@ class VideoTest : AbstractTest() {
     private val sipCallId = "b0a5a8c7-dc38-459f-a48d-a7f2008da853"
     private val token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2OTkwNDMxMTEsImV4cCI6MTY5OTA2NDcxMSwianRpIjoiMW1pODlqRk9meVpRIiwiYXBwbGljYXRpb25faWQiOiIxMjMxMjMxMi0zODExLTQ3MjYtYjUwOC1lNDFhMGY5NmM2OGYiLCJzdWIiOiJ2aWRlbyIsImFjbCI6IiJ9.o3U506EejsS8D5Tob90FG1NC1cR69fh3pFOpxnyTHVFfgqI6NWuuN8lEwrS3Zb8bGxE_A9LyyUZ2y4uqLpyXRw"
     private val createdAtLong = 1414642898000L
-    private val sessionBaseUrl = "$baseUrl/session/$sessionId"
-    private val connectionBaseUrl = "$sessionBaseUrl/connection/$connectionId"
-    private val streamBaseUrl = "$sessionBaseUrl/stream"
+    private val updatedAtLong = 1437676551029L
+    private val sessionUrl = "$baseUrl/session/$sessionId"
+    private val connectionBaseUrl = "$sessionUrl/connection/$connectionId"
+    private val streamBaseUrl = "$sessionUrl/stream"
     private val streamUrl = "$streamBaseUrl/$streamId"
-    private val archiveBaseUrl = "$sessionBaseUrl/archive/$archiveId"
-    private val broadcastBaseUrl = "$sessionBaseUrl/broadcast/$broadcastId"
-    private val renderBaseUrl = "$sessionBaseUrl/render/$renderId"
+    private val archiveBaseUrl = "$sessionUrl/archive/$archiveId"
+    private val broadcastBaseUrl = "$sessionUrl/broadcast/$broadcastId"
+    private val renderBaseUrl = "$baseUrl/render"
+    private val renderUrl = "$renderBaseUrl/$renderId"
     private val existingSession = client.session(sessionId)
     private val existingConnection = existingSession.connection(connectionId)
     private val existingStream = existingSession.stream(streamId)
@@ -51,14 +54,34 @@ class VideoTest : AbstractTest() {
     private val data = "Text of the chat message"
     private val signalRequestMap = mapOf("type" to type, "data" to data)
     private val headers = mapOf("k1" to "Value 1", "Key 2" to "2 Val")
+    private val mediaUrl = "$exampleUrlBase/media"
+    private val maxDuration = 1800
     private val videoType = VideoType.CAMERA
     private val streamName = "My Stream"
+    private val renderName = "Composed stream for Live event #1337"
+    private val offset = 16
+    private val count = 450
+    private val customOffsetCountMap = mapOf("offset" to offset, "count" to count)
+    private val defaultOffsetCountMap = mapOf("offset" to 0, "count" to 1000)
     private val layoutClasses = listOf("full", "no-border")
     private val streamLayoutMap = mapOf(
         "id" to streamId,
         "videoType" to videoType.name.lowercase(),
         "name" to streamName,
         "layoutClassList" to layoutClasses
+    )
+    private val renderResponseMap = mapOf(
+        "id" to renderId,
+        "sessionId" to sessionId,
+        "applicationId" to applicationId,
+        "createdAt" to createdAtLong,
+        "callbackUrl" to statusCallbackUrl,
+        "updatedAt" to updatedAtLong,
+        "name" to renderName,
+        "url" to mediaUrl,
+        "resolution" to "480x640",
+        "status" to "starting",
+        "streamId" to streamId
     )
 
     private fun assertEqualsSampleStream(response: GetStreamResponse) {
@@ -67,6 +90,20 @@ class VideoTest : AbstractTest() {
         assertEquals(videoType, response.videoType)
         assertEquals(streamName, response.name)
         assertEquals(layoutClasses, response.layoutClassList)
+    }
+
+    private fun assertEqualsSampleRender(response: RenderResponse) {
+        assertNotNull(response)
+        assertEquals(UUID.fromString(renderId), response.id)
+        assertEquals(sessionId, response.sessionId)
+        assertEquals(UUID.fromString(applicationId), response.applicationId)
+        assertEquals(createdAtLong, response.createdAt)
+        assertEquals(URI.create(statusCallbackUrl), response.callbackUrl)
+        assertEquals(updatedAtLong, response.updatedAt)
+        assertEquals(URI.create(mediaUrl), response.url)
+        assertEquals(Resolution.SD_PORTRAIT, response.resolution)
+        assertEquals(RenderStatus.STARTING, response.status)
+        assertEquals(UUID.fromString(streamId), response.streamId)
     }
 
     @Test
@@ -116,7 +153,6 @@ class VideoTest : AbstractTest() {
 
     @Test
     fun `start live captions all parameters`() {
-        val maxDuration = 1800
         val partialCaptions = true
         mockPost(expectedUrl = "$baseUrl/captions", status = 202,
             expectedRequestParams = mapOf(
@@ -143,7 +179,7 @@ class VideoTest : AbstractTest() {
 
     @Test
     fun `play DTMF into SIP call`() {
-        mockPost(expectedUrl = "$sessionBaseUrl/play-dtmf", expectedRequestParams = mapOf("digits" to dtmf))
+        mockPost(expectedUrl = "$sessionUrl/play-dtmf", expectedRequestParams = mapOf("digits" to dtmf))
         existingSession.sendDtmf(dtmf)
     }
 
@@ -198,7 +234,7 @@ class VideoTest : AbstractTest() {
 
     @Test
     fun `signal all participants`() {
-        mockPost(expectedUrl = "$sessionBaseUrl/signal", expectedRequestParams = signalRequestMap, status = 204)
+        mockPost(expectedUrl = "$sessionUrl/signal", expectedRequestParams = signalRequestMap, status = 204)
         existingSession.signalAll(type, data)
     }
 
@@ -222,7 +258,7 @@ class VideoTest : AbstractTest() {
 
     @Test
     fun `mute all streams empty response`() {
-        mockPost(expectedUrl = "$sessionBaseUrl/mute",
+        mockPost(expectedUrl = "$sessionUrl/mute",
             expectedRequestParams = mapOf("active" to true),
             expectedResponseParams = mapOf()
         )
@@ -242,7 +278,7 @@ class VideoTest : AbstractTest() {
         val name = "Project Name"
         val environment = ProjectEnvironment.STANDARD
 
-        mockPost(expectedUrl = "$sessionBaseUrl/mute",
+        mockPost(expectedUrl = "$sessionUrl/mute",
             expectedRequestParams = mapOf(
                 "active" to active,
                 "excludedStreamIds" to listOf(streamId, randomUuidStr)
@@ -272,9 +308,8 @@ class VideoTest : AbstractTest() {
 
     @Test
     fun `get all stream layouts`() {
-        val count = 4
         mockGet(expectedUrl = streamBaseUrl, expectedResponseParams = mapOf(
-            "count" to count,
+            "count" to 4,
             "items" to listOf(
                 mapOf(),
                 streamLayoutMap,
@@ -283,7 +318,7 @@ class VideoTest : AbstractTest() {
             )
         ))
         val response = existingSession.listStreams()
-        assertEquals(count, response.size)
+        assertEquals(4, response.size)
         val empty = response[0]
         assertNotNull(empty)
         assertNull(empty.id)
@@ -317,7 +352,7 @@ class VideoTest : AbstractTest() {
     fun `create session no parameters`() {
         mockPostQueryParams(
             expectedUrl = "/session/create",
-            authType = AuthType.JWT,
+            authType = authType,
             expectedRequestParams = mapOf(),
             expectedResponseParams = listOf(mapOf<String, Any>())
         )
@@ -331,13 +366,12 @@ class VideoTest : AbstractTest() {
 
     @Test
     fun `create session all parameters`() {
-        val mediaServerUrl = "$exampleUrlBase/media"
         val location = "127.0.0.1"
         val archiveMode = ArchiveMode.ALWAYS
 
         mockPostQueryParams(
             expectedUrl = "/session/create",
-            authType = AuthType.JWT,
+            authType = authType,
             expectedRequestParams = mapOf(
                 "archiveMode" to archiveMode.name.lowercase(),
                 "location" to location,
@@ -347,7 +381,7 @@ class VideoTest : AbstractTest() {
                 "session_id" to sessionId,
                 "application_id" to applicationId,
                 "create_dt" to createdAtLong,
-                "media_server_url" to mediaServerUrl
+                "media_server_url" to mediaUrl
             ))
         )
         val response = client.createSession {
@@ -359,6 +393,78 @@ class VideoTest : AbstractTest() {
         assertEquals(sessionId, response.sessionId)
         assertEquals(UUID.fromString(applicationId), response.applicationId)
         assertEquals(createdAtLong.toString(), response.createDt)
-        assertEquals(URI.create(mediaServerUrl), response.mediaServerUrl)
+        assertEquals(URI.create(mediaUrl), response.mediaServerUrl)
+    }
+
+    @Test
+    fun `stop experience composer`() {
+        mockDelete(expectedUrl = renderUrl, authType = authType)
+        existingRender.stop()
+    }
+
+    @Test
+    fun `get experience composer`() {
+        mockGet(expectedUrl = renderUrl, expectedResponseParams = renderResponseMap)
+        assertEqualsSampleRender(existingRender.info())
+    }
+
+    @Test
+    fun `list experience composers no parameters`() {
+        mockGet(expectedUrl = renderBaseUrl,
+            expectedQueryParams = defaultOffsetCountMap,
+            expectedResponseParams = mapOf(
+                "count" to count,
+                "items" to listOf<Map<String, Any>>()
+            )
+        )
+        val response = client.listRenders()
+        assertNotNull(response)
+        assertEquals(0, response.size)
+    }
+
+    @Test
+    fun `list experience composers both parameters`() {
+        mockGet(expectedUrl = renderBaseUrl,
+            expectedQueryParams = customOffsetCountMap,
+            expectedResponseParams = mapOf(
+                "count" to 2,
+                "items" to listOf(renderResponseMap, mapOf())
+            )
+        )
+        val response = client.listRenders(count, offset)
+        assertNotNull(response)
+        assertEquals(2, response.size)
+        assertEqualsSampleRender(response[0])
+        val empty = response[1]
+        assertNotNull(empty)
+        assertNull(empty.id)
+        assertNull(empty.sessionId)
+        assertNull(empty.applicationId)
+        assertNull(empty.createdAt)
+        assertNull(empty.callbackUrl)
+        assertNull(empty.updatedAt)
+        assertNull(empty.url)
+        assertNull(empty.resolution)
+        assertNull(empty.status)
+        assertNull(empty.streamId)
+    }
+
+    @Test
+    fun `start experience composer all parameters`() {
+        mockPost(expectedUrl = renderBaseUrl, expectedRequestParams = mapOf(
+                "sessionId" to sessionId,
+                "token" to token,
+                "url" to mediaUrl,
+                "maxDuration" to maxDuration,
+                "resolution" to "1280x720",
+                "properties" to mapOf("name" to renderName)
+            ),
+            expectedResponseParams = renderResponseMap
+        )
+        assertEqualsSampleRender(client.startRender {
+            url(mediaUrl); maxDuration(maxDuration)
+            resolution(Resolution.HD_LANDSCAPE)
+            sessionId(sessionId); token(token); name(renderName)
+        })
     }
 }
