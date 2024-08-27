@@ -4,7 +4,7 @@
 [![Build Status](https://github.com/Vonage/vonage-kotlin-sdk/actions/workflows/build.yml/badge.svg)](https://github.com/Vonage/vonage-kotlin-sdk/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/Vonage/vonage-kotlin-sdk/graph/badge.svg?token=YNBJUD8OUT)](https://codecov.io/gh/Vonage/vonage-kotlin-sdk)
 ![SLOC](https://sloc.xyz/github/vonage/vonage-kotlin-sdk/)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.txt)
 
 
