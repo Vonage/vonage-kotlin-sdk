@@ -55,21 +55,18 @@ Release notes can be found in the [changelog](CHANGELOG.md).
 
 ### Build It Yourself
 
+**Note**: We *strongly recommend* that you use a tool that supports dependency management,
+such as [Maven](https://maven.apache.org/), [Gradle](https://gradle.org/) or [Ivy](http://ant.apache.org/ivy/).
+
 Alternatively you can clone the repo and build the JAR file yourself:
 
 ```bash
 git clone git@github.com:vonage/vonage-kotlin-sdk.git
-mvn install
+mvn install -P uberjar
 ```
 
-### Download everything in a ZIP file
-
-**Note**: We *strongly recommend* that you use a tool that supports dependency management,
-such as [Maven](https://maven.apache.org/), [Gradle](https://gradle.org/) or [Ivy](http://ant.apache.org/ivy/).
-
-We provide a [ZIP file for each release](https://github.com/Vonage/vonage-kotlin-sdk/releases/),
-containing the Kotlin Server SDK JAR, along with all the dependencies. Download the file, unzip it, and add the JAR files
-to your project's classpath.
+The `uberjar` profile will create a JAR file with all dependencies included in the `target`
+directory at the root of the repo. You can then include this in your project's classpath.
 
 ## Configuration
 

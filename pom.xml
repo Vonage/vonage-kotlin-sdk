@@ -263,7 +263,7 @@
     </profile>
 
     <profile>
-      <id>fat-jar</id>
+      <id>uberjar</id>
       <build>
         <plugins>
           <plugin>
