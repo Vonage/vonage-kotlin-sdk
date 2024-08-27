@@ -21,8 +21,6 @@ import java.net.URI
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.time.temporal.Temporal
-import java.time.temporal.TemporalUnit
 import java.util.*
 import kotlin.test.*
 
@@ -110,6 +108,48 @@ class VideoTest : AbstractTest() {
         assertEquals(Resolution.SD_PORTRAIT, response.resolution)
         assertEquals(RenderStatus.STARTING, response.status)
         assertEquals(UUID.fromString(streamId), response.streamId)
+    }
+
+    private fun assertEqualsJwt(encoded: String, role: Role = Role.PUBLISHER,
+                                ttl: Duration = Duration.ofHours(24), assertions: Map<String, String>? = null) {
+        val decoded = JWT.decode(encoded)
+        assertNotNull(decoded)
+        assertNotNull(decoded.id)
+        assertNotNull(decoded.signature)
+        assertNotNull(decoded.issuedAt)
+        val iat = decoded.issuedAtAsInstant
+        assertTrue(Instant.now().isBefore(iat.plusSeconds(15)))
+        val expectedExpires = iat.plus(ttl).truncatedTo(ChronoUnit.SECONDS)
+        assertEquals(expectedExpires, decoded.expiresAtAsInstant?.truncatedTo(ChronoUnit.SECONDS))
+        val claims = decoded.claims
+        assertNotNull(claims)
+        assertEquals(applicationId, claims["application_id"]?.asString())
+        assertEquals("session.connect", claims["scope"]?.asString())
+        assertEquals(sessionId, claims["session_id"]?.asString())
+        assertEquals(role.name.lowercase(), claims["role"]?.asString())
+        assertions?.forEach { (key, value) -> assertEquals(value, claims[key]?.asString()) }
+    }
+
+    @Test
+    fun `generate token default parameters`() {
+        assertEqualsJwt(existingSession.generateToken())
+    }
+
+    @Test
+    fun `generate token all parameters`() {
+        val data = userName
+        val role = Role.SUBSCRIBER
+        val ttl = Duration.ofHours(8)
+
+        val encoded = existingSession.generateToken {
+            data(data); role(role); expiryLength(ttl)
+            initialLayoutClassList(layoutClasses)
+        }
+
+        assertEqualsJwt(encoded, role, ttl, mapOf(
+            "connection_data" to data,
+            "initial_layout_class_list" to layoutClasses.joinToString(separator = " ")
+        ))
     }
 
     @Test
@@ -472,52 +512,5 @@ class VideoTest : AbstractTest() {
             resolution(Resolution.HD_LANDSCAPE)
             sessionId(sessionId); token(token); name(renderName)
         })
-    }
-
-    @Test
-    fun `generate token all parameters`() {
-        val data = userName
-        val role = Role.SUBSCRIBER
-        val ttl = Duration.ofHours(8)
-        val encoded = existingSession.generateToken {
-            data(data); role(role); expiryLength(ttl)
-            initialLayoutClassList(layoutClasses)
-        }
-        val decoded = JWT.decode(encoded)
-        assertNotNull(decoded)
-        assertNotNull(decoded.id)
-        assertNotNull(decoded.signature)
-        val iat = decoded.issuedAtAsInstant
-        assertTrue(Instant.now().isBefore(iat.plusSeconds(15)))
-        assertEquals(
-            iat.plus(ttl).truncatedTo(ChronoUnit.SECONDS),
-            decoded.expiresAtAsInstant.truncatedTo(ChronoUnit.SECONDS)
-        )
-        val claims = decoded.claims
-        assertNotNull(claims)
-        assertEquals(applicationId, claims["application_id"]?.asString())
-        assertEquals("session.connect", claims["scope"]?.asString())
-        assertEquals(sessionId, claims["session_id"]?.asString())
-        assertEquals(data, claims["connection_data"]?.asString())
-        assertEquals(role.name.lowercase(), claims["role"]?.asString())
-        assertEquals(layoutClasses.joinToString(separator = " "), claims["initial_layout_class_list"]?.asString())
-    }
-
-    @Test
-    fun `generate token default parameters`() {
-        val encoded = existingSession.generateToken()
-        val decoded = JWT.decode(encoded)
-        assertNotNull(decoded)
-        assertNotNull(decoded.id)
-        assertNotNull(decoded.signature)
-        assertNotNull(decoded.issuedAt)
-        val expectedExpires = decoded.issuedAtAsInstant.plusSeconds(86400).truncatedTo(ChronoUnit.SECONDS)
-        assertEquals(expectedExpires, decoded.expiresAtAsInstant?.truncatedTo(ChronoUnit.SECONDS))
-        val claims = decoded.claims
-        assertNotNull(claims)
-        assertEquals(applicationId, claims["application_id"]?.asString())
-        assertEquals("session.connect", claims["scope"]?.asString())
-        assertEquals(sessionId, claims["session_id"]?.asString())
-        assertEquals(Role.PUBLISHER.toString(), claims["role"]?.asString())
     }
 }
