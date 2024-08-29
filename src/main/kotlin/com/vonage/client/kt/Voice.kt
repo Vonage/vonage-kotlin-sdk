@@ -25,37 +25,37 @@ class Voice internal constructor(private val client: VoiceClient) {
 
     fun call(callId: String): ExistingCall = ExistingCall(callId)
 
-    inner class ExistingCall internal constructor(val callId: String) {
+    inner class ExistingCall internal constructor(val id: String) {
 
-        fun info(): CallInfo = client.getCallDetails(callId)
+        fun info(): CallInfo = client.getCallDetails(id)
 
-        fun hangup(): Unit = client.terminateCall(callId)
+        fun hangup(): Unit = client.terminateCall(id)
 
-        fun mute(): Unit = client.muteCall(callId)
+        fun mute(): Unit = client.muteCall(id)
 
-        fun unmute(): Unit = client.unmuteCall(callId)
+        fun unmute(): Unit = client.unmuteCall(id)
 
-        fun earmuff(): Unit = client.earmuffCall(callId)
+        fun earmuff(): Unit = client.earmuffCall(id)
 
-        fun unearmuff(): Unit = client.unearmuffCall(callId)
+        fun unearmuff(): Unit = client.unearmuffCall(id)
 
-        fun transfer(vararg actions: Action): Unit = client.transferCall(callId, Ncco(actions.asList()))
+        fun transfer(vararg actions: Action): Unit = client.transferCall(id, Ncco(actions.asList()))
 
-        fun transfer(nccoUrl: String): Unit = client.transferCall(callId, nccoUrl)
+        fun transfer(nccoUrl: String): Unit = client.transferCall(id, nccoUrl)
 
         fun transfer(nccoUrl: URI): Unit = transfer(nccoUrl.toString())
 
-        fun sendDtmf(digits: String): DtmfResponse = client.sendDtmf(callId, digits)
+        fun sendDtmf(digits: String): DtmfResponse = client.sendDtmf(id, digits)
 
         fun streamAudio(streamUrl: String, loop: Int = 1, level: Double = 0.0): StreamResponse =
-            client.startStream(callId, streamUrl, loop, level)
+            client.startStream(id, streamUrl, loop, level)
 
-        fun stopStream(): StreamResponse = client.stopStream(callId)
+        fun stopStream(): StreamResponse = client.stopStream(id)
 
         fun startTalk(text: String, properties: (TalkPayload.Builder.() -> Unit) = {}): TalkResponse =
-            client.startTalk(callId, TalkPayload.builder(text).apply(properties).build())
+            client.startTalk(id, TalkPayload.builder(text).apply(properties).build())
 
-        fun stopTalk(): TalkResponse = client.stopTalk(callId)
+        fun stopTalk(): TalkResponse = client.stopTalk(id)
     }
 
     fun listCalls(filter: (CallsFilter.Builder.() -> Unit)? = null): CallInfoPage =

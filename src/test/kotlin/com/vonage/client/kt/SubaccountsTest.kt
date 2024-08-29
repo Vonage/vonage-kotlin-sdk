@@ -55,7 +55,7 @@ class SubaccountsTest : AbstractTest() {
     private fun assertEqualsSampleSubaccount(parsed: Account) {
         assertNotNull(parsed)
         assertEquals(secret, parsed.secret)
-        assertEquals(existingSubaccount.subaccountKey, parsed.apiKey)
+        assertEquals(existingSubaccount.key, parsed.apiKey)
         assertEquals(name, parsed.name)
         assertEquals(apiKey, parsed.primaryAccountApiKey)
         assertEquals(usePrimary, parsed.usePrimaryAccountBalance)

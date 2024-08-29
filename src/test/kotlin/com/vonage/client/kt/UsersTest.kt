@@ -194,7 +194,7 @@ class UsersTest : AbstractTest() {
         assertEquals(URI.create(navUrl), links.nextUrl)
         assertEquals(URI.create(navUrl), links.prevUrl)
 
-        assertEquals(existingUser.userId, client.user(idOnlyUser).userId)
+        assertEquals(existingUser.id, client.user(idOnlyUser).id)
 
         assert401ApiResponseException<UsersResponseException>(baseUrl, HttpMethod.GET) {
             invocation.invoke(client)

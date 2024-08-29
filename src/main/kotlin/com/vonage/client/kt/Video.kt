@@ -25,67 +25,67 @@ class Video(private val client: VideoClient) {
 
     fun session(sessionId: String): ExistingSession = ExistingSession(sessionId)
 
-    inner class ExistingSession internal constructor(val sessionId: String) {
+    inner class ExistingSession internal constructor(val id: String) {
 
         fun stream(streamId: String): ExistingStream = ExistingStream(streamId)
 
         inner class ExistingStream internal constructor(val streamId: String) {
 
-            fun info(): GetStreamResponse = client.getStream(sessionId, streamId)
+            fun info(): GetStreamResponse = client.getStream(id, streamId)
 
-            fun mute(): Unit = client.muteStream(sessionId, streamId)
+            fun mute(): Unit = client.muteStream(id, streamId)
 
             fun setLayout(vararg layoutClasses: String): Unit =
-                client.setStreamLayout(sessionId,
+                client.setStreamLayout(id,
                     SessionStream.builder(streamId).layoutClassList(layoutClasses.toList()).build()
                 )
         }
 
         fun connection(connectionId: String): ExistingConnection = ExistingConnection(connectionId)
 
-        inner class ExistingConnection internal constructor(val connectionId: String) {
+        inner class ExistingConnection internal constructor(val id: String) {
 
-            fun disconnect(): Unit = client.forceDisconnect(sessionId, connectionId)
+            fun disconnect(): Unit = client.forceDisconnect(this@ExistingSession.id, id)
 
             fun signal(type: String, data: String): Unit =
-                client.signal(sessionId, connectionId, signalRequest(type, data))
+                client.signal(this@ExistingSession.id, id, signalRequest(type, data))
 
-            fun sendDtmf(digits: String): Unit = client.sendDtmf(sessionId, connectionId, digits)
+            fun sendDtmf(digits: String): Unit = client.sendDtmf(this@ExistingSession.id, id, digits)
         }
 
         fun muteStreams(active: Boolean = true, vararg excludedStreamIds: String): ProjectDetails =
-            client.muteSession(sessionId, active,
+            client.muteSession(id, active,
                 if (excludedStreamIds.isNotEmpty()) excludedStreamIds.toList() else null
             )
 
-        fun listStreams(): List<GetStreamResponse> = client.listStreams(sessionId)
+        fun listStreams(): List<GetStreamResponse> = client.listStreams(id)
 
         fun listArchives(count: Int = 1000, offset: Int = 0): List<Archive> =
-            client.listArchives(listCompositionsFilter(count, offset, sessionId))
+            client.listArchives(listCompositionsFilter(count, offset, id))
 
         fun listBroadcasts(count: Int = 1000, offset: Int = 0): List<Broadcast> =
-            client.listBroadcasts(listCompositionsFilter(count, offset, sessionId))
+            client.listBroadcasts(listCompositionsFilter(count, offset, id))
 
         fun signalAll(type: String, data: String): Unit =
-            client.signalAll(sessionId, signalRequest(type, data))
+            client.signalAll(id, signalRequest(type, data))
 
-        fun sendDtmf(digits: String): Unit = client.sendDtmf(sessionId, digits)
+        fun sendDtmf(digits: String): Unit = client.sendDtmf(id, digits)
 
         fun startCaptions(token: String, properties: CaptionsRequest.Builder.() -> Unit): UUID =
             client.startCaptions(CaptionsRequest.builder()
-                .apply(properties).sessionId(sessionId).token(token).build()
+                .apply(properties).sessionId(id).token(token).build()
             ).captionsId
 
         fun stopCaptions(captionsId: String): Unit = client.stopCaptions(captionsId)
 
         fun createArchive(properties: Archive.Builder.() -> Unit): Archive =
-            client.createArchive(Archive.builder(sessionId).apply(properties).build())
+            client.createArchive(Archive.builder(id).apply(properties).build())
 
         fun startBroadcast(properties: Broadcast.Builder.() -> Unit): Broadcast =
-            client.createBroadcast(Broadcast.builder(sessionId).apply(properties).build())
+            client.createBroadcast(Broadcast.builder(id).apply(properties).build())
 
         fun generateToken(options: TokenOptions.Builder.() -> Unit = {}): String =
-            client.generateToken(sessionId, TokenOptions.builder().apply(options).build())
+            client.generateToken(id, TokenOptions.builder().apply(options).build())
     }
 
     fun sipDial(properties: SipDialRequest.Builder.() -> Unit): SipDialResponse =
@@ -99,18 +99,18 @@ class Video(private val client: VideoClient) {
 
     fun archive(archiveId: String): ExistingArchive = ExistingArchive(archiveId)
 
-    inner class ExistingArchive internal constructor(val archiveId: String) {
+    inner class ExistingArchive internal constructor(val id: String) {
 
-        fun info(): Archive = client.getArchive(archiveId)
+        fun info(): Archive = client.getArchive(id)
 
-        fun stop(): Archive = client.stopArchive(archiveId)
+        fun stop(): Archive = client.stopArchive(id)
 
-        fun delete(): Unit = client.deleteArchive(archiveId)
+        fun delete(): Unit = client.deleteArchive(id)
 
         fun setLayout(initialLayout: ScreenLayoutType,
                       screenshareType: ScreenLayoutType? = null,
                       stylesheet: String? = null): Unit =
-            client.updateArchiveLayout(archiveId,
+            client.updateArchiveLayout(id,
                 StreamCompositionLayout.builder(initialLayout)
                     .screenshareType(screenshareType)
                     .stylesheet(stylesheet)
@@ -118,9 +118,9 @@ class Video(private val client: VideoClient) {
             )
 
         fun addStream(streamId: String, audio: Boolean = true, video: Boolean = true) =
-            client.addArchiveStream(archiveId, streamId, audio, video)
+            client.addArchiveStream(id, streamId, audio, video)
 
-        fun removeStream(streamId: String): Unit = client.removeArchiveStream(archiveId, streamId)
+        fun removeStream(streamId: String): Unit = client.removeArchiveStream(id, streamId)
     }
 
     fun listBroadcasts(count: Int = 1000, offset: Int = 0): List<Broadcast> =
@@ -128,16 +128,16 @@ class Video(private val client: VideoClient) {
 
     fun broadcast(broadcastId: String): ExistingBroadcast = ExistingBroadcast(broadcastId)
 
-    inner class ExistingBroadcast internal constructor(val broadcastId: String) {
+    inner class ExistingBroadcast internal constructor(val id: String) {
 
-        fun info(): Broadcast = client.getBroadcast(broadcastId)
+        fun info(): Broadcast = client.getBroadcast(id)
 
-        fun stop(): Broadcast = client.stopBroadcast(broadcastId)
+        fun stop(): Broadcast = client.stopBroadcast(id)
 
         fun setLayout(initialLayout: ScreenLayoutType,
                       screenshareType: ScreenLayoutType? = null,
                       stylesheet: String? = null): Unit =
-            client.updateBroadcastLayout(broadcastId,
+            client.updateBroadcastLayout(id,
                 StreamCompositionLayout.builder(initialLayout)
                     .screenshareType(screenshareType)
                     .stylesheet(stylesheet)
@@ -145,9 +145,9 @@ class Video(private val client: VideoClient) {
             )
 
         fun addStream(streamId: String, audio: Boolean = true, video: Boolean = true) =
-            client.addBroadcastStream(broadcastId, streamId, audio, video)
+            client.addBroadcastStream(id, streamId, audio, video)
 
-        fun removeStream(streamId: String): Unit = client.removeBroadcastStream(broadcastId, streamId)
+        fun removeStream(streamId: String): Unit = client.removeBroadcastStream(id, streamId)
     }
 
     fun startRender(properties: RenderRequest.Builder.() -> Unit): RenderResponse =
@@ -158,11 +158,11 @@ class Video(private val client: VideoClient) {
 
     fun render(renderId: String): ExistingRender = ExistingRender(renderId)
 
-    inner class ExistingRender internal constructor(val renderId: String) {
+    inner class ExistingRender internal constructor(val id: String) {
 
-        fun info(): RenderResponse = client.getRender(renderId)
+        fun info(): RenderResponse = client.getRender(id)
 
-        fun stop(): Unit = client.stopRender(renderId)
+        fun stop(): Unit = client.stopRender(id)
     }
 }
 
