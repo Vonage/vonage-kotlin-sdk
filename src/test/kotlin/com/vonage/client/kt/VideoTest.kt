@@ -46,8 +46,8 @@ class VideoTest : AbstractTest() {
     private val connectionBaseUrl = "$sessionUrl/connection/$connectionId"
     private val streamBaseUrl = "$sessionUrl/stream"
     private val streamUrl = "$streamBaseUrl/$streamId"
-    private val archiveBaseUrl = "$sessionUrl/archive/$archiveId"
-    private val broadcastBaseUrl = "$sessionUrl/broadcast/$broadcastId"
+    private val archiveBaseUrl = "$baseUrl/archive/$archiveId"
+    private val broadcastBaseUrl = "$baseUrl/broadcast/$broadcastId"
     private val renderBaseUrl = "$baseUrl/render"
     private val renderUrl = "$renderBaseUrl/$renderId"
     private val existingSession = client.session(sessionId)
@@ -122,10 +122,10 @@ class VideoTest : AbstractTest() {
     private val archiveStreamMode = StreamMode.AUTO
     private val streamIdOnly = mapOf("streamId" to streamId)
     private val streamAudioAndVideo = streamIdOnly + mapOf("hasAudio" to true, "hasVideo" to true)
-    private val streamAudioOnly = mapOf("streamId" to randomUuidStr, "hasAudio" to true, "hasVideo" to false)
-    private val streamVideoOnly = mapOf("streamId" to randomUuidStr, "hasAudio" to false, "hasVideo" to true)
-    private val streamsList = listOf(streamIdOnly, streamAudioAndVideo, streamAudioOnly, streamVideoOnly)
-    private val archiveUrl = "https://tokbox.com.archive2.s3.amazonaws.com/123456/$archiveId/archive.mp4"
+    private val streamAudioNoVideo = mapOf("streamId" to randomUuidStr, "hasAudio" to true, "hasVideo" to false)
+    private val streamVideoNoAudio = mapOf("streamId" to randomUuidStr, "hasAudio" to false, "hasVideo" to true)
+    private val streamsList = listOf(streamIdOnly, streamAudioAndVideo, streamAudioNoVideo, streamVideoNoAudio)
+    private val archiveVideoUrl = "https://tokbox.com.archive2.s3.amazonaws.com/123456/$archiveId/archive.mp4"
     private val broadcastResponseMap = mapOf(
         "id" to broadcastId,
         "sessionId" to sessionId,
@@ -164,7 +164,7 @@ class VideoTest : AbstractTest() {
         "status" to archiveStatus.name.lowercase(),
         "streamMode" to archiveStreamMode.name.lowercase(),
         "resolution" to archiveResolutionStr,
-        "url" to archiveUrl,
+        "url" to archiveVideoUrl,
         "hasAudio" to archiveHasAudio,
         "hasVideo" to archiveHasVideo,
         "streams" to streamsList
@@ -195,26 +195,26 @@ class VideoTest : AbstractTest() {
     private fun assertEqualsVideoStreams(streams: List<VideoStream>) {
         assertNotNull(streams)
         assertEquals(4, streams.size)
-        val stream1 = streams[0]
-        assertNotNull(stream1)
-        assertEquals(UUID.fromString(streamId), stream1.streamId)
-        assertTrue(stream1.hasAudio())
-        assertTrue(stream1.hasVideo())
-        val stream2 = streams[1]
-        assertNotNull(stream2)
-        assertEquals(UUID.fromString(streamId), stream2.streamId)
-        assertTrue(stream2.hasAudio())
-        assertTrue(stream2.hasVideo())
-        val stream3 = streams[2]
-        assertNotNull(stream3)
-        assertEquals(randomUuid, stream3.streamId)
-        assertTrue(stream3.hasAudio())
-        assertFalse(stream3.hasVideo())
-        val stream4 = streams[3]
-        assertNotNull(stream4)
-        assertEquals(randomUuid, stream4.streamId)
-        assertFalse(stream4.hasAudio())
-        assertTrue(stream4.hasVideo())
+        val idOnly = streams[0]
+        assertNotNull(idOnly)
+        assertEquals(UUID.fromString(streamId), idOnly.streamId)
+        assertNull(idOnly.hasAudio())
+        assertNull(idOnly.hasVideo())
+        val audioAndVideo = streams[1]
+        assertNotNull(audioAndVideo)
+        assertEquals(UUID.fromString(streamId), audioAndVideo.streamId)
+        assertTrue(audioAndVideo.hasAudio())
+        assertTrue(audioAndVideo.hasVideo())
+        val audioNoVideo = streams[2]
+        assertNotNull(audioNoVideo)
+        assertEquals(randomUuid, audioNoVideo.streamId)
+        assertTrue(audioNoVideo.hasAudio())
+        assertFalse(audioNoVideo.hasVideo())
+        val videoNoAudio = streams[3]
+        assertNotNull(videoNoAudio)
+        assertEquals(randomUuid, videoNoAudio.streamId)
+        assertFalse(videoNoAudio.hasAudio())
+        assertTrue(videoNoAudio.hasVideo())
     }
 
     private fun assertEqualsSampleArchive(response: Archive) {
@@ -230,7 +230,7 @@ class VideoTest : AbstractTest() {
         assertEquals(archiveStatus, response.status)
         assertEquals(archiveStreamMode, response.streamMode)
         assertEquals(archiveResoltion, response.resolution)
-        assertEquals(URI.create(archiveUrl), response.url)
+        assertEquals(URI.create(archiveVideoUrl), response.url)
         assertTrue(response.hasVideo())
         assertFalse(response.hasAudio())
         assertEqualsVideoStreams(response.streams)
