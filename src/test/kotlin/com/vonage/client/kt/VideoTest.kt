@@ -48,6 +48,10 @@ class VideoTest : AbstractTest() {
     private val streamUrl = "$streamBaseUrl/$streamId"
     private val archiveBaseUrl = "$baseUrl/archive/$archiveId"
     private val broadcastBaseUrl = "$baseUrl/broadcast/$broadcastId"
+    private val broadcastLayoutUrl = "$broadcastBaseUrl/layout"
+    private val broadcastStreamsUrl = "$broadcastBaseUrl/streams"
+    private val archiveLayoutUrl = "$archiveBaseUrl/layout"
+    private val archiveStreamsUrl = "$archiveBaseUrl/streams"
     private val renderBaseUrl = "$baseUrl/render"
     private val renderUrl = "$renderBaseUrl/$renderId"
     private val existingSession = client.session(sessionId)
@@ -125,6 +129,15 @@ class VideoTest : AbstractTest() {
     private val streamAudioNoVideo = mapOf("streamId" to randomUuidStr, "hasAudio" to true, "hasVideo" to false)
     private val streamVideoNoAudio = mapOf("streamId" to randomUuidStr, "hasAudio" to false, "hasVideo" to true)
     private val streamsList = listOf(streamIdOnly, streamAudioAndVideo, streamAudioNoVideo, streamVideoNoAudio)
+    private val removeStreamMap = mapOf("removeStream" to streamId)
+    private val pipLayoutMap = mapOf(
+        "type" to "bestFit",
+        "screenshareType" to "pip"
+    )
+    private val customLayoutMap = mapOf(
+        "type" to "custom",
+        "stylesheet" to stylesheet
+    )
     private val archiveVideoUrl = "https://tokbox.com.archive2.s3.amazonaws.com/123456/$archiveId/archive.mp4"
     private val broadcastResponseMap = mapOf(
         "id" to broadcastId,
@@ -169,6 +182,9 @@ class VideoTest : AbstractTest() {
         "hasVideo" to archiveHasVideo,
         "streams" to streamsList
     )
+
+    private fun addStreamMap(audio: Boolean = true, video: Boolean = true): Map<String, Any> =
+        mapOf("addStream" to streamId, "hasAudio" to audio, "hasVideo" to video)
 
     private fun assertEqualsSampleStream(response: GetStreamResponse) {
         assertNotNull(response)
@@ -657,18 +673,52 @@ class VideoTest : AbstractTest() {
     }
 
     @Test
-    fun `add archive stream`() {
+    fun `add archive stream id only`() {
+        mockPatch(
+            expectedUrl = archiveStreamsUrl,
+            expectedRequestParams = addStreamMap(),
+            authType = authType, status = 204
+        )
+        existingArchive.addStream(streamId)
+    }
 
+    @Test
+    fun `add archive stream audio and video`() {
+        val audio = true; val video = false
+        mockPatch(
+            expectedUrl = archiveStreamsUrl,
+            expectedRequestParams = addStreamMap(audio = audio, video = video),
+            authType = authType, status = 204
+        )
+        existingArchive.addStream(streamId, audio = audio, video = video)
     }
 
     @Test
     fun `remove archive stream`() {
-
+        mockPatch(
+            expectedUrl = archiveStreamsUrl,
+            expectedRequestParams = removeStreamMap,
+            authType = authType, status = 204
+        )
+        existingArchive.removeStream(streamId)
     }
 
     @Test
-    fun `change archive layout`() {
+    fun `change archive layout vertical`() {
+        mockPut(expectedUrl = archiveLayoutUrl, expectedRequestParams = mapOf("type" to "verticalPresentation"))
+        existingArchive.setLayout(ScreenLayoutType.VERTICAL)
+    }
 
+    @Test
+    fun `change archive layout pip`() {
+        mockPut(expectedUrl = archiveLayoutUrl, expectedRequestParams = pipLayoutMap)
+        existingArchive.setLayout(ScreenLayoutType.BEST_FIT, ScreenLayoutType.PIP)
+    }
+
+    @Test
+    fun `change archive layout stylesheet`() {
+        mockPut(expectedUrl = archiveLayoutUrl, expectedRequestParams = customLayoutMap)
+        existingArchive.setLayout(ScreenLayoutType.CUSTOM, stylesheet = stylesheet)
     }
 
     @Test
@@ -684,18 +734,52 @@ class VideoTest : AbstractTest() {
     }
 
     @Test
-    fun `add broadcast stream`() {
+    fun `add broadcast stream id only`() {
+        mockPatch(
+            expectedUrl = broadcastStreamsUrl,
+            expectedRequestParams = addStreamMap(),
+            authType = authType, status = 204
+        )
+        existingBroadcast.addStream(streamId)
+    }
 
+    @Test
+    fun `add broadcast stream audio and video`() {
+        val audio = false; val video = true
+        mockPatch(
+            expectedUrl = broadcastStreamsUrl,
+            expectedRequestParams = addStreamMap(audio = audio, video = video),
+            authType = authType, status = 204
+        )
+        existingBroadcast.addStream(streamId, audio = audio, video = video)
     }
 
     @Test
     fun `remove broadcast stream`() {
-
+        mockPatch(
+            expectedUrl = broadcastStreamsUrl,
+            expectedRequestParams = removeStreamMap,
+            authType = authType, status = 204
+        )
+        existingBroadcast.removeStream(streamId)
     }
 
     @Test
-    fun `change broadcast layout`() {
+    fun `change broadcast layout horizontal`() {
+        mockPut(expectedUrl = broadcastLayoutUrl, expectedRequestParams = mapOf("type" to "horizontalPresentation"))
+        existingBroadcast.setLayout(ScreenLayoutType.HORIZONTAL)
+    }
 
+    @Test
+    fun `change broadcast layout pip`() {
+        mockPut(expectedUrl = broadcastLayoutUrl, expectedRequestParams = pipLayoutMap)
+        existingBroadcast.setLayout(ScreenLayoutType.BEST_FIT, ScreenLayoutType.PIP)
+    }
+
+    @Test
+    fun `change broadcast layout stylesheet`() {
+        mockPut(expectedUrl = broadcastLayoutUrl, expectedRequestParams = customLayoutMap)
+        existingBroadcast.setLayout(ScreenLayoutType.CUSTOM, stylesheet = stylesheet)
     }
 
     @Test
