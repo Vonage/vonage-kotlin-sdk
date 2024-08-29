@@ -40,6 +40,8 @@ class VideoTest : AbstractTest() {
     private val token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2OTkwNDMxMTEsImV4cCI6MTY5OTA2NDcxMSwianRpIjoiMW1pODlqRk9meVpRIiwiYXBwbGljYXRpb25faWQiOiIxMjMxMjMxMi0zODExLTQ3MjYtYjUwOC1lNDFhMGY5NmM2OGYiLCJzdWIiOiJ2aWRlbyIsImFjbCI6IiJ9.o3U506EejsS8D5Tob90FG1NC1cR69fh3pFOpxnyTHVFfgqI6NWuuN8lEwrS3Zb8bGxE_A9LyyUZ2y4uqLpyXRw"
     private val createdAtLong = 1414642898000L
     private val updatedAtLong = 1437676551029L
+    private val createdAtInstant = Instant.ofEpochMilli(createdAtLong)
+    private val updatedAtInstant = Instant.ofEpochMilli(updatedAtLong)
     private val sessionUrl = "$baseUrl/session/$sessionId"
     private val connectionBaseUrl = "$sessionUrl/connection/$connectionId"
     private val streamBaseUrl = "$sessionUrl/stream"
@@ -60,9 +62,15 @@ class VideoTest : AbstractTest() {
     private val headers = mapOf("k1" to "Value 1", "Key 2" to "2 Val")
     private val mediaUrl = "$exampleUrlBase/media"
     private val maxDuration = 1800
+    private val maxBitrate = 2000000
+    private val archiveDuration = 5049L
+    private val archiveSize = 247748791L
     private val videoType = VideoType.CAMERA
     private val streamName = "My Stream"
+    private val archiveName = "Test Archive"
     private val renderName = "Composed stream for Live event #1337"
+    private val multiBroadcastTag = "broadcast_tag_provided"
+    private val multiArchiveTag = "my-multi-archive"
     private val offset = 16
     private val count = 450
     private val customOffsetCountMap = mapOf("offset" to offset, "count" to count)
@@ -87,6 +95,80 @@ class VideoTest : AbstractTest() {
         "status" to "starting",
         "streamId" to streamId
     )
+    private val stylesheet = "stream.instructor {position: relative; width: 90%;  height:45%;}"
+    private val rtmpId = randomUuidStr
+    private val rtmpServerUrl = "https://rtmp.example.org/server"
+    private val rtmpStatus = RtmpStatus.CONNECTING
+    private val archiveStatus = ArchiveStatus.UPLOADED
+    private val broadcastStatus = BroadcastStatus.STARTED
+    private val broadcastResolutionStr = "640x480"
+    private val broadcastResolution = Resolution.SD_LANDSCAPE
+    private val archiveResolutionStr = "1920x1080"
+    private val archiveResoltion = Resolution.FHD_LANDSCAPE
+    private val rtmpMap = mapOf(
+        "id" to rtmpId,
+        "serverUrl" to rtmpServerUrl,
+        "status" to rtmpStatus.name.lowercase(),
+        "streamName" to streamName
+    )
+    private val dvr = false
+    private val lowLatency = true
+    private val hlsUrl = "https://hls.example.com/stream.m3u8"
+    private val broadcastAudio = true
+    private val broadcastVideo = false
+    private val archiveHasAudio = false
+    private val archiveHasVideo = true
+    private val broadcastStreamMode = StreamMode.MANUAL
+    private val archiveStreamMode = StreamMode.AUTO
+    private val streamIdOnly = mapOf("streamId" to streamId)
+    private val streamAudioAndVideo = streamIdOnly + mapOf("hasAudio" to true, "hasVideo" to true)
+    private val streamAudioOnly = mapOf("streamId" to randomUuidStr, "hasAudio" to true, "hasVideo" to false)
+    private val streamVideoOnly = mapOf("streamId" to randomUuidStr, "hasAudio" to false, "hasVideo" to true)
+    private val streamsList = listOf(streamIdOnly, streamAudioAndVideo, streamAudioOnly, streamVideoOnly)
+    private val archiveUrl = "https://tokbox.com.archive2.s3.amazonaws.com/123456/$archiveId/archive.mp4"
+    private val broadcastResponseMap = mapOf(
+        "id" to broadcastId,
+        "sessionId" to sessionId,
+        "applicationId" to applicationId,
+        "multiBroadcastTag" to multiBroadcastTag,
+        "createdAt" to createdAtLong,
+        "updatedAt" to updatedAtLong,
+        "maxDuration" to maxDuration,
+        "maxBitrate" to maxBitrate,
+        "broadcastUrls" to mapOf(
+            "hls" to hlsUrl,
+            "rtmp" to listOf(rtmpMap, emptyMap())
+        ),
+        "settings" to mapOf(
+            "hls" to mapOf(
+                "dvr" to dvr,
+                "lowLatency" to lowLatency
+            )
+        ),
+        "resolution" to broadcastResolutionStr,
+        "hasAudio" to broadcastAudio,
+        "hasVideo" to broadcastVideo,
+        "streamMode" to broadcastStreamMode.name.lowercase(),
+        "status" to broadcastStatus.name.lowercase(),
+        "streams" to streamsList
+    )
+    private val archiveResponseMap = mapOf(
+        "id" to archiveId,
+        "sessionId" to sessionId,
+        "applicationId" to applicationId,
+        "multiArchiveTag" to multiArchiveTag,
+        "name" to archiveName,
+        "createdAt" to createdAtLong,
+        "duration" to archiveDuration,
+        "size" to archiveSize,
+        "status" to archiveStatus.name.lowercase(),
+        "streamMode" to archiveStreamMode.name.lowercase(),
+        "resolution" to archiveResolutionStr,
+        "url" to archiveUrl,
+        "hasAudio" to archiveHasAudio,
+        "hasVideo" to archiveHasVideo,
+        "streams" to streamsList
+    )
 
     private fun assertEqualsSampleStream(response: GetStreamResponse) {
         assertNotNull(response)
@@ -108,6 +190,90 @@ class VideoTest : AbstractTest() {
         assertEquals(Resolution.SD_PORTRAIT, response.resolution)
         assertEquals(RenderStatus.STARTING, response.status)
         assertEquals(UUID.fromString(streamId), response.streamId)
+    }
+    
+    private fun assertEqualsVideoStreams(streams: List<VideoStream>) {
+        assertNotNull(streams)
+        assertEquals(4, streams.size)
+        val stream1 = streams[0]
+        assertNotNull(stream1)
+        assertEquals(UUID.fromString(streamId), stream1.streamId)
+        assertTrue(stream1.hasAudio())
+        assertTrue(stream1.hasVideo())
+        val stream2 = streams[1]
+        assertNotNull(stream2)
+        assertEquals(UUID.fromString(streamId), stream2.streamId)
+        assertTrue(stream2.hasAudio())
+        assertTrue(stream2.hasVideo())
+        val stream3 = streams[2]
+        assertNotNull(stream3)
+        assertEquals(randomUuid, stream3.streamId)
+        assertTrue(stream3.hasAudio())
+        assertFalse(stream3.hasVideo())
+        val stream4 = streams[3]
+        assertNotNull(stream4)
+        assertEquals(randomUuid, stream4.streamId)
+        assertFalse(stream4.hasAudio())
+        assertTrue(stream4.hasVideo())
+    }
+
+    private fun assertEqualsSampleArchive(response: Archive) {
+        assertNotNull(response)
+        assertEquals(UUID.fromString(archiveId), response.id)
+        assertEquals(sessionId, response.sessionId)
+        assertEquals(UUID.fromString(applicationId), response.applicationId)
+        assertEquals(multiArchiveTag, response.multiArchiveTag)
+        assertEquals(archiveName, response.name)
+        assertEquals(createdAtInstant, response.createdAt)
+        assertEquals(Duration.ofSeconds(archiveDuration), response.duration)
+        assertEquals(archiveSize, response.size)
+        assertEquals(archiveStatus, response.status)
+        assertEquals(archiveStreamMode, response.streamMode)
+        assertEquals(archiveResoltion, response.resolution)
+        assertEquals(URI.create(archiveUrl), response.url)
+        assertTrue(response.hasVideo())
+        assertFalse(response.hasAudio())
+        assertEqualsVideoStreams(response.streams)
+    }
+
+    private fun assertEqualsSampleBroadcast(response: Broadcast) {
+        assertNotNull(response)
+        assertEquals(UUID.fromString(broadcastId), response.id)
+        assertEquals(sessionId, response.sessionId)
+        assertEquals(UUID.fromString(applicationId), response.applicationId)
+        assertEquals(multiBroadcastTag, response.multiBroadcastTag)
+        assertEquals(createdAtInstant, response.createdAt)
+        assertEquals(updatedAtInstant, response.updatedAt)
+        assertEquals(Duration.ofSeconds(maxDuration.toLong()), response.maxDuration)
+        assertEquals(maxBitrate, response.maxBitrate)
+        val broadcastUrls = response.broadcastUrls
+        assertNotNull(broadcastUrls)
+        assertEquals(URI.create(hlsUrl), broadcastUrls.hls)
+        val rtmps = broadcastUrls.rtmps
+        assertNotNull(rtmps)
+        assertEquals(2, rtmps.size)
+        val mainRtmp = rtmps[0]
+        assertNotNull(mainRtmp)
+        assertEquals(rtmpId, mainRtmp.id)
+        assertEquals(URI.create(rtmpServerUrl), mainRtmp.serverUrl)
+        assertEquals(rtmpStatus, mainRtmp.status)
+        assertEquals(streamName, mainRtmp.streamName)
+        val emptyRtmp = rtmps[1]
+        assertNotNull(emptyRtmp)
+        assertNull(emptyRtmp.id)
+        assertNull(emptyRtmp.serverUrl)
+        assertNull(emptyRtmp.status)
+        assertNull(emptyRtmp.streamName)
+        val hls = response.hlsSettings
+        assertNotNull(hls)
+        assertEquals(dvr, hls.dvr())
+        assertEquals(lowLatency, hls.lowLatency())
+        assertEquals(broadcastResolution, response.resolution)
+        assertEquals(broadcastAudio, response.hasAudio())
+        assertEquals(broadcastVideo, response.hasVideo())
+        assertEquals(broadcastStreamMode, response.streamMode)
+        assertEquals(broadcastStatus, response.status)
+        assertEqualsVideoStreams(response.streams)
     }
 
     private fun assertEqualsJwt(encoded: String, role: Role = Role.PUBLISHER,
@@ -440,6 +606,96 @@ class VideoTest : AbstractTest() {
         assertEquals(UUID.fromString(applicationId), response.applicationId)
         assertEquals(createdAtLong.toString(), response.createDt)
         assertEquals(URI.create(mediaUrl), response.mediaServerUrl)
+    }
+
+    @Test
+    fun `create archive all parameters`() {
+
+    }
+
+    @Test
+    fun `create broadcast all parameters`() {
+
+    }
+
+    @Test
+    fun `list archives both parameters`() {
+
+    }
+
+    @Test
+    fun `list archives no parameters`() {
+
+    }
+
+    @Test
+    fun `list broadcasts both parameters`() {
+
+    }
+
+    @Test
+    fun `list broadcasts no parameters`() {
+
+    }
+
+    @Test
+    fun `get archive`() {
+        mockGet(expectedUrl = archiveBaseUrl, expectedResponseParams = archiveResponseMap)
+        assertEqualsSampleArchive(existingArchive.info())
+    }
+
+    @Test
+    fun `stop archive`() {
+        mockPost(expectedUrl = "$archiveBaseUrl/stop", expectedResponseParams = archiveResponseMap)
+        assertEqualsSampleArchive(existingArchive.stop())
+    }
+
+    @Test
+    fun `delete archive`() {
+        mockDelete(expectedUrl = archiveBaseUrl, authType = authType)
+        existingArchive.delete()
+    }
+
+    @Test
+    fun `add archive stream`() {
+
+    }
+
+    @Test
+    fun `remove archive stream`() {
+
+    }
+
+    @Test
+    fun `change archive layout`() {
+
+    }
+
+    @Test
+    fun `get broadcast`() {
+        mockGet(expectedUrl = broadcastBaseUrl, expectedResponseParams = broadcastResponseMap)
+        assertEqualsSampleBroadcast(existingBroadcast.info())
+    }
+
+    @Test
+    fun `stop broadcast`() {
+        mockPost(expectedUrl = "$broadcastBaseUrl/stop", expectedResponseParams = broadcastResponseMap)
+        assertEqualsSampleBroadcast(existingBroadcast.stop())
+    }
+
+    @Test
+    fun `add broadcast stream`() {
+
+    }
+
+    @Test
+    fun `remove broadcast stream`() {
+
+    }
+
+    @Test
+    fun `change broadcast layout`() {
+
     }
 
     @Test
