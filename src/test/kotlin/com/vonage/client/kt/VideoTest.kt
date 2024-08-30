@@ -16,6 +16,7 @@
 package com.vonage.client.kt
 
 import com.auth0.jwt.JWT
+import com.vonage.client.common.HttpMethod
 import com.vonage.client.video.*
 import java.net.URI
 import java.time.Duration
@@ -42,18 +43,25 @@ class VideoTest : AbstractTest() {
     private val updatedAtLong = 1437676551029L
     private val createdAtInstant = Instant.ofEpochMilli(createdAtLong)
     private val updatedAtInstant = Instant.ofEpochMilli(updatedAtLong)
+    private val createSessionUrl = "/session/create"
     private val sessionUrl = "$baseUrl/session/$sessionId"
     private val connectionBaseUrl = "$sessionUrl/connection/$connectionId"
     private val streamBaseUrl = "$sessionUrl/stream"
     private val streamUrl = "$streamBaseUrl/$streamId"
-    private val archiveBaseUrl = "$baseUrl/archive/$archiveId"
-    private val broadcastBaseUrl = "$baseUrl/broadcast/$broadcastId"
-    private val broadcastLayoutUrl = "$broadcastBaseUrl/layout"
-    private val broadcastStreamsUrl = "$broadcastBaseUrl/streams"
-    private val archiveLayoutUrl = "$archiveBaseUrl/layout"
-    private val archiveStreamsUrl = "$archiveBaseUrl/streams"
+    private val archiveBaseUrl = "$baseUrl/archive"
+    private val archiveUrl = "$archiveBaseUrl/$archiveId"
+    private val broadcastBaseUrl = "$baseUrl/broadcast"
+    private val broadcastUrl = "$broadcastBaseUrl/$broadcastId"
+    private val broadcastLayoutUrl = "$broadcastUrl/layout"
+    private val broadcastStreamsUrl = "$broadcastUrl/streams"
+    private val archiveLayoutUrl = "$archiveUrl/layout"
+    private val archiveStreamsUrl = "$archiveUrl/streams"
+    private val audioConnectorUrl = "$baseUrl/connect"
+    private val captionsBaseUrl = "$baseUrl/captions"
     private val renderBaseUrl = "$baseUrl/render"
     private val renderUrl = "$renderBaseUrl/$renderId"
+    private val sipDialUrl = "$baseUrl/dial"
+    private val muteSessionUrl = "$sessionUrl/mute"
     private val existingSession = client.session(sessionId)
     private val existingConnection = existingSession.connection(connectionId)
     private val existingStream = existingSession.stream(streamId)
@@ -80,9 +88,11 @@ class VideoTest : AbstractTest() {
     private val customOffsetCountMap = mapOf("offset" to offset, "count" to count)
     private val defaultOffsetCountMap = mapOf("offset" to 0, "count" to 1000)
     private val sessionIdMap = mapOf("sessionId" to sessionId)
+    private val sessionIdTokenMap = sessionIdMap + mapOf("token" to token)
     private val customSessionOffsetCountMap = sessionIdMap + customOffsetCountMap
     private val defaultSessionOffsetCountMap = sessionIdMap + defaultOffsetCountMap
     private val layoutClasses = listOf("full", "no-border")
+    private val dtmfMap = mapOf("digits" to dtmf)
     private val streamLayoutMap = mapOf(
         "id" to streamId,
         "videoType" to videoType.name.lowercase(),
@@ -196,6 +206,10 @@ class VideoTest : AbstractTest() {
         "status" to broadcastStatus.name.lowercase(),
         "streams" to streamsList
     )
+    private val renderRequestMap = sessionIdTokenMap + mapOf(
+        "url" to mediaUrl,
+        "properties" to mapOf("name" to renderName)
+    )
 
     private fun addStreamMap(audio: Boolean = true, video: Boolean = true): Map<String, Any> =
         mapOf("addStream" to streamId, "hasAudio" to audio, "hasVideo" to video)
@@ -208,18 +222,32 @@ class VideoTest : AbstractTest() {
         assertEquals(layoutClasses, response.layoutClassList)
     }
 
-    private fun assertEqualsSampleRender(response: RenderResponse) {
-        assertNotNull(response)
-        assertEquals(UUID.fromString(renderId), response.id)
-        assertEquals(sessionId, response.sessionId)
-        assertEquals(UUID.fromString(applicationId), response.applicationId)
-        assertEquals(createdAtLong, response.createdAt)
-        assertEquals(URI.create(statusCallbackUrl), response.callbackUrl)
-        assertEquals(updatedAtLong, response.updatedAt)
-        assertEquals(URI.create(mediaUrl), response.url)
-        assertEquals(Resolution.SD_PORTRAIT, response.resolution)
-        assertEquals(RenderStatus.STARTING, response.status)
-        assertEquals(UUID.fromString(streamId), response.streamId)
+    private fun assertEqualsSampleRender(render: RenderResponse) {
+        assertNotNull(render)
+        assertEquals(UUID.fromString(renderId), render.id)
+        assertEquals(sessionId, render.sessionId)
+        assertEquals(UUID.fromString(applicationId), render.applicationId)
+        assertEquals(createdAtLong, render.createdAt)
+        assertEquals(URI.create(statusCallbackUrl), render.callbackUrl)
+        assertEquals(updatedAtLong, render.updatedAt)
+        assertEquals(URI.create(mediaUrl), render.url)
+        assertEquals(Resolution.SD_PORTRAIT, render.resolution)
+        assertEquals(RenderStatus.STARTING, render.status)
+        assertEquals(UUID.fromString(streamId), render.streamId)
+    }
+
+    private fun assertEqualsEmptyRender(render: RenderResponse) {
+        assertNotNull(render)
+        assertNull(render.id)
+        assertNull(render.sessionId)
+        assertNull(render.applicationId)
+        assertNull(render.createdAt)
+        assertNull(render.callbackUrl)
+        assertNull(render.updatedAt)
+        assertNull(render.url)
+        assertNull(render.resolution)
+        assertNull(render.status)
+        assertNull(render.streamId)
     }
     
     private fun assertEqualsVideoStreams(streams: List<VideoStream>) {
@@ -346,7 +374,7 @@ class VideoTest : AbstractTest() {
     }
 
     private fun assertListArchives(params: Map<String, Any>, invocation: () -> List<Archive>) {
-        mockGet(expectedUrl = "$baseUrl/archive", authType = authType,
+        mockGet(expectedUrl = archiveBaseUrl, authType = authType,
             expectedQueryParams = params, expectedResponseParams = mapOf(
                 "count" to count,
                 "items" to listOf(archiveResponseMap, mapOf())
@@ -356,10 +384,11 @@ class VideoTest : AbstractTest() {
         assertEquals(2, response.size)
         assertEqualsSampleArchive(response[0])
         assertEqualsEmptyArchive(response[1])
+        assertApiResponseException<VideoResponseException>(archiveBaseUrl, HttpMethod.GET, invocation)
     }
 
     private fun assertListBroadcasts(params: Map<String, Any>, invocation: () -> List<Broadcast>) {
-        mockGet(expectedUrl = "$baseUrl/broadcast", authType = authType,
+        mockGet(expectedUrl = broadcastBaseUrl, authType = authType,
             expectedQueryParams = params, expectedResponseParams = mapOf(
                 "count" to count,
                 "items" to listOf(broadcastResponseMap, mapOf())
@@ -369,6 +398,7 @@ class VideoTest : AbstractTest() {
         assertEquals(2, response.size)
         assertEqualsSampleBroadcast(response[0])
         assertEqualsEmptyBroadcast(response[1])
+        assertApiResponseException<VideoResponseException>(broadcastBaseUrl, HttpMethod.GET, invocation)
     }
 
     private fun assertEqualsJwt(encoded: String, role: Role = Role.PUBLISHER,
@@ -415,9 +445,8 @@ class VideoTest : AbstractTest() {
 
     @Test
     fun `start audio connector all fields`() {
-        mockPost(expectedUrl = "$baseUrl/connect", expectedRequestParams = mapOf(
-                "sessionId" to sessionId,
-                "token" to token,
+        mockPost(expectedUrl = audioConnectorUrl, authType = authType,
+            expectedRequestParams = sessionIdTokenMap + mapOf(
                 "websocket" to mapOf(
                     "uri" to websocketUri,
                     "streams" to listOf(streamId, randomUuidStr),
@@ -444,27 +473,29 @@ class VideoTest : AbstractTest() {
 
     @Test
     fun `start audio connector required fields`() {
-        mockPost(expectedUrl = "$baseUrl/connect", expectedRequestParams = mapOf(
-            "sessionId" to sessionId, "token" to token,
-            "websocket" to mapOf("uri" to websocketUri)
-        ),
-        expectedResponseParams = mapOf("id" to audioConnectorId))
+        mockPost(expectedUrl = audioConnectorUrl, authType = authType,
+            expectedRequestParams = sessionIdTokenMap + mapOf(
+                "websocket" to mapOf("uri" to websocketUri)
+            ),
+            expectedResponseParams = mapOf("id" to audioConnectorId)
+        )
 
-        val response = client.connectToWebsocket {
+        val invocation = { client.connectToWebsocket {
             uri(websocketUri); sessionId(sessionId); token(token)
-        }
+        }}
+        val response = invocation()
         assertNotNull(response)
         assertEquals(UUID.fromString(audioConnectorId), response.id)
         assertNull(response.connectionId)
+
+        assertApiResponseException<VideoResponseException>(audioConnectorUrl, HttpMethod.POST, invocation)
     }
 
     @Test
     fun `start live captions all parameters`() {
         val partialCaptions = true
-        mockPost(expectedUrl = "$baseUrl/captions", status = 202,
-            expectedRequestParams = mapOf(
-                "sessionId" to sessionId,
-                "token" to token,
+        mockPost(expectedUrl = captionsBaseUrl, status = 202, authType = authType,
+            expectedRequestParams = sessionIdTokenMap + mapOf(
                 "languageCode" to "en-US",
                 "maxDuration" to maxDuration,
                 "partialCaptions" to partialCaptions,
@@ -479,33 +510,53 @@ class VideoTest : AbstractTest() {
     }
 
     @Test
+    fun `start live captions required parameters`() {
+        mockPost(expectedUrl = captionsBaseUrl, status = 202, authType = authType,
+            expectedRequestParams = sessionIdTokenMap,
+            expectedResponseParams = mapOf("captionsId" to captionsId)
+        )
+        val invocation = { existingSession.startCaptions(token) }
+        assertEquals(UUID.fromString(captionsId), invocation())
+        assertApiResponseException<VideoResponseException>(captionsBaseUrl, HttpMethod.POST, invocation)
+    }
+
+    @Test
     fun `stop live captions`() {
-        mockPost(expectedUrl = "$baseUrl/captions/$captionsId/stop", status = 202)
-        existingSession.stopCaptions(captionsId)
+        val url = "$captionsBaseUrl/$captionsId/stop"
+        mockPost(expectedUrl = url, status = 202, authType = authType)
+        val invocation = { existingSession.stopCaptions(captionsId) }
+        invocation()
+        assertApiResponseException<VideoResponseException>(url, HttpMethod.POST, invocation)
     }
 
     @Test
     fun `play DTMF into SIP call`() {
-        mockPost(expectedUrl = "$sessionUrl/play-dtmf", expectedRequestParams = mapOf("digits" to dtmf))
-        existingSession.sendDtmf(dtmf)
+        val url = "$sessionUrl/play-dtmf"
+        mockPost(expectedUrl = url, expectedRequestParams = dtmfMap, authType = authType)
+        val invocation = { existingSession.sendDtmf(dtmf) }
+        invocation()
+        assertApiResponseException<VideoResponseException>(url, HttpMethod.POST, invocation)
     }
 
     @Test
     fun `send DTMF to specific participant`() {
-        mockPost(expectedUrl = "$connectionBaseUrl/play-dtmf", expectedRequestParams = mapOf("digits" to dtmf))
-        existingConnection.sendDtmf(dtmf)
+        val url = "$connectionBaseUrl/play-dtmf"
+        mockPost(expectedUrl = url, expectedRequestParams = dtmfMap, authType = authType)
+        val invocation = { existingConnection.sendDtmf(dtmf) }
+        invocation()
+        assertApiResponseException<VideoResponseException>(url, HttpMethod.POST, invocation)
     }
 
     @Test
-    fun `initiate outbound SIP call all parameters`() {
+    fun `sip dial all parameters`() {
         val from = "from@example.com"
         val secure = true
         val video = false
         val observeForceMute = true
         val password = "P@s5w0rd123"
 
-        mockPost(expectedUrl = "$baseUrl/dial", expectedRequestParams = mapOf(
-                "sessionId" to sessionId, "token" to token,
+        mockPost(expectedUrl = sipDialUrl, authType = authType,
+            expectedRequestParams = sessionIdTokenMap + mapOf(
                 "sip" to mapOf(
                     "uri" to "$sipUri;transport=tls",
                     "from" to from,
@@ -540,32 +591,65 @@ class VideoTest : AbstractTest() {
     }
 
     @Test
+    fun `sip dial required parameters`() {
+        mockPost(
+            expectedUrl = sipDialUrl, authType = authType,
+            expectedRequestParams = sessionIdTokenMap + mapOf(
+                "sip" to mapOf("uri" to sipUri)
+            ),
+            expectedResponseParams = mapOf("id" to sipCallId)
+        )
+        val invocation = { client.sipDial {
+            sessionId(sessionId); token(token); uri(URI.create(sipUri), false)
+        } }
+        val response = invocation()
+        assertNotNull(response)
+        assertEquals(sipCallId, response.id)
+        assertNull(response.connectionId)
+        assertNull(response.streamId)
+        assertApiResponseException<VideoResponseException>(sipDialUrl, HttpMethod.POST, invocation)
+    }
+
+    @Test
     fun `signal all participants`() {
-        mockPost(expectedUrl = "$sessionUrl/signal", expectedRequestParams = signalRequestMap, status = 204)
-        existingSession.signalAll(type, data)
+        val url = "$sessionUrl/signal"
+        mockPost(expectedUrl = url, expectedRequestParams = signalRequestMap, status = 204, authType = authType)
+        val invocation = { existingSession.signalAll(type, data) }
+        invocation()
+        assertApiResponseException<VideoResponseException>(url, HttpMethod.POST, invocation)
     }
 
     @Test
     fun `signal single participant`() {
-        mockPost(expectedUrl = "$connectionBaseUrl/signal", expectedRequestParams = signalRequestMap, status = 204)
-        existingConnection.signal(type, data)
+        val url = "$connectionBaseUrl/signal"
+        mockPost(expectedUrl = url, expectedRequestParams = signalRequestMap, status = 204, authType = authType)
+        val invocation = { existingConnection.signal(type, data) }
+        invocation()
+        assertApiResponseException<VideoResponseException>(url, HttpMethod.POST, invocation)
     }
 
     @Test
     fun `force disconnect`() {
-        mockDelete(expectedUrl = connectionBaseUrl)
+        mockDelete(expectedUrl = connectionBaseUrl, authType = authType)
         existingConnection.disconnect()
+        assertApiResponseException<VideoResponseException>(
+            connectionBaseUrl, HttpMethod.DELETE, existingConnection::disconnect
+        )
     }
 
     @Test
     fun `mute participant stream`() {
-        mockPost(expectedUrl = "$streamUrl/mute")
+        val url = "$streamUrl/mute"
+        mockPost(expectedUrl = url, authType = authType)
         existingStream.mute()
+        assertApiResponseException<VideoResponseException>(
+            url, HttpMethod.POST, existingStream::mute
+        )
     }
 
     @Test
     fun `mute all streams empty response`() {
-        mockPost(expectedUrl = "$sessionUrl/mute",
+        mockPost(expectedUrl = muteSessionUrl, authType = authType,
             expectedRequestParams = mapOf("active" to true),
             expectedResponseParams = mapOf()
         )
@@ -576,6 +660,9 @@ class VideoTest : AbstractTest() {
         assertNull(response.name)
         assertNull(response.environment)
         assertNull(response.createdAt)
+        assertApiResponseException<VideoResponseException>(
+            muteSessionUrl, HttpMethod.POST, existingSession::muteStreams
+        )
     }
 
     @Test
@@ -585,7 +672,7 @@ class VideoTest : AbstractTest() {
         val name = "Project Name"
         val environment = ProjectEnvironment.STANDARD
 
-        mockPost(expectedUrl = "$sessionUrl/mute",
+        mockPost(expectedUrl = muteSessionUrl, authType = authType,
             expectedRequestParams = mapOf(
                 "active" to active,
                 "excludedStreamIds" to listOf(streamId, randomUuidStr)
@@ -598,32 +685,38 @@ class VideoTest : AbstractTest() {
                 "createdAt" to createdAtLong
             )
         )
-        val response = existingSession.muteStreams(active, streamId, randomUuidStr)
+        val invocation = { existingSession.muteStreams(active, streamId, randomUuidStr) }
+        val response = invocation()
         assertNotNull(response)
         assertEquals(applicationId, response.applicationId)
         assertEquals(status, response.status)
         assertEquals(name, response.name)
         assertEquals(environment, response.environment)
         assertEquals(createdAtLong, response.createdAt)
+
+        assertApiResponseException<VideoResponseException>(muteSessionUrl, HttpMethod.POST, invocation)
     }
 
     @Test
     fun `get single stream layout`() {
-        mockGet(expectedUrl = streamUrl, expectedResponseParams = streamLayoutMap)
+        mockGet(expectedUrl = streamUrl, expectedResponseParams = streamLayoutMap, authType = authType)
         assertEqualsSampleStream(existingStream.info())
+        assertApiResponseException<VideoResponseException>(streamUrl, HttpMethod.GET, existingStream::info)
     }
 
     @Test
     fun `get all stream layouts`() {
-        mockGet(expectedUrl = streamBaseUrl, expectedResponseParams = mapOf(
-            "count" to 4,
-            "items" to listOf(
-                mapOf(),
-                streamLayoutMap,
-                mapOf("id" to randomUuidStr),
-                mapOf("layoutClassList" to listOf<String>())
+        mockGet(expectedUrl = streamBaseUrl, authType = authType,
+            expectedResponseParams = mapOf(
+                "count" to 4,
+                "items" to listOf(
+                    mapOf(),
+                    streamLayoutMap,
+                    mapOf("id" to randomUuidStr),
+                    mapOf("layoutClassList" to listOf<String>())
+                )
             )
-        ))
+        )
         val response = existingSession.listStreams()
         assertEquals(4, response.size)
         val empty = response[0]
@@ -642,24 +735,30 @@ class VideoTest : AbstractTest() {
         val emptyLayout = response[3]
         assertNotNull(emptyLayout)
         assertEquals(0, emptyLayout.layoutClassList.size)
+
+        assertApiResponseException<VideoResponseException>(
+            streamBaseUrl, HttpMethod.GET, existingSession::listStreams
+        )
     }
 
     @Test
     fun `change stream layout`() {
-        mockPut(expectedUrl = streamBaseUrl, expectedRequestParams = mapOf(
-            "items" to listOf(mapOf(
-                "id" to streamId,
-                "layoutClassList" to layoutClasses
-            ))
-        ))
-        existingStream.setLayout(*layoutClasses.toTypedArray())
+        mockPut(expectedUrl = streamBaseUrl, authType = authType,
+            expectedRequestParams = mapOf(
+                "items" to listOf(mapOf(
+                    "id" to streamId,
+                    "layoutClassList" to layoutClasses
+                ))
+            )
+        )
+        val invocation = { existingStream.setLayout(*layoutClasses.toTypedArray()) }
+        invocation()
+        assertApiResponseException<VideoResponseException>(streamBaseUrl, HttpMethod.PUT, invocation)
     }
 
     @Test
     fun `create session no parameters`() {
-        mockPostQueryParams(
-            expectedUrl = "/session/create",
-            authType = authType,
+        mockPostQueryParams(expectedUrl = createSessionUrl, authType = authType,
             expectedRequestParams = mapOf(),
             expectedResponseParams = listOf(mapOf<String, Any>())
         )
@@ -669,6 +768,10 @@ class VideoTest : AbstractTest() {
         assertNull(response.applicationId)
         assertNull(response.createDt)
         assertNull(response.mediaServerUrl)
+
+        assertApiResponseException<VideoResponseException>(
+            createSessionUrl, HttpMethod.POST, client::createSession
+        )
     }
 
     @Test
@@ -753,13 +856,17 @@ class VideoTest : AbstractTest() {
 
     @Test
     fun `create archive required parameters`() {
-        mockPost(expectedUrl = "$baseUrl/archive", authType = authType,
+        mockPost(expectedUrl = archiveBaseUrl, authType = authType,
             expectedRequestParams = sessionIdMap,
             expectedResponseParams = sessionIdMap
         )
         val response = existingSession.createArchive()
         assertNotNull(response)
         assertEquals(sessionId, response.sessionId)
+
+        assertApiResponseException<VideoResponseException>(
+            archiveBaseUrl, HttpMethod.POST, existingSession::createArchive
+        )
     }
 
     @Test
@@ -780,20 +887,21 @@ class VideoTest : AbstractTest() {
 
     @Test
     fun `create broadcast required parameters`() {
-        mockPost(expectedUrl = "$baseUrl/broadcast", authType = authType,
+        mockPost(expectedUrl = broadcastBaseUrl, authType = authType,
             expectedRequestParams = sessionIdMap + mapOf(
                 "outputs" to mapOf("hls" to emptyMap<String, Any>())
             ),
             expectedResponseParams = sessionIdMap + mapOf("broadcastUrls" to mapOf("hls" to hlsUrl))
         )
-        val response = existingSession.startBroadcast {
-            hls()
-        }
+        val invocation =  { existingSession.startBroadcast { hls() } }
+        val response = invocation()
         assertNotNull(response)
         assertEquals(sessionId, response.sessionId)
         assertNull(response.hlsSettings)
         assertNotNull(response.broadcastUrls)
         assertEquals(URI.create(hlsUrl), response.broadcastUrls.hls)
+
+        assertApiResponseException<VideoResponseException>(broadcastBaseUrl, HttpMethod.POST, invocation)
     }
 
     @Test
@@ -819,20 +927,28 @@ class VideoTest : AbstractTest() {
 
     @Test
     fun `get archive`() {
-        mockGet(expectedUrl = archiveBaseUrl, expectedResponseParams = archiveResponseMap)
+        mockGet(expectedUrl = archiveUrl, expectedResponseParams = archiveResponseMap, authType = authType)
         assertEqualsSampleArchive(existingArchive.info())
+        assertApiResponseException<VideoResponseException>(archiveUrl, HttpMethod.GET, existingArchive::info)
     }
 
     @Test
     fun `stop archive`() {
-        mockPost(expectedUrl = "$archiveBaseUrl/stop", expectedResponseParams = archiveResponseMap)
+        val url = "$archiveUrl/stop"
+        mockPost(expectedUrl = url, expectedResponseParams = archiveResponseMap, authType = authType)
         assertEqualsSampleArchive(existingArchive.stop())
+        assertApiResponseException<VideoResponseException>(
+            url, HttpMethod.POST, existingArchive::stop
+        )
     }
 
     @Test
     fun `delete archive`() {
-        mockDelete(expectedUrl = archiveBaseUrl, authType = authType)
+        mockDelete(expectedUrl = archiveUrl, authType = authType)
         existingArchive.delete()
+        assertApiResponseException<VideoResponseException>(
+            archiveUrl, HttpMethod.DELETE, existingArchive::delete
+        )
     }
 
     @Test
@@ -842,7 +958,9 @@ class VideoTest : AbstractTest() {
             expectedRequestParams = addStreamMap(),
             authType = authType, status = 204
         )
-        existingArchive.addStream(streamId)
+        val invocation = { existingArchive.addStream(streamId) }
+        invocation()
+        assertApiResponseException<VideoResponseException>(archiveStreamsUrl, HttpMethod.PATCH, invocation)
     }
 
     @Test
@@ -863,19 +981,24 @@ class VideoTest : AbstractTest() {
             expectedRequestParams = removeStreamMap,
             authType = authType, status = 204
         )
-        existingArchive.removeStream(streamId)
+        val invocation = { existingArchive.removeStream(streamId) }
+        invocation()
+        assertApiResponseException<VideoResponseException>(archiveStreamsUrl, HttpMethod.PATCH, invocation)
     }
 
     @Test
     fun `change archive layout vertical`() {
-        mockPut(expectedUrl = archiveLayoutUrl, expectedRequestParams = mapOf("type" to "verticalPresentation"))
-        existingArchive.setLayout(ScreenLayoutType.VERTICAL)
+        mockPut(expectedUrl = archiveLayoutUrl, authType = authType,
+            expectedRequestParams = mapOf("type" to "verticalPresentation")
+        )
+        val invocation = { existingArchive.setLayout(ScreenLayoutType.VERTICAL) }
+        invocation()
+        assertApiResponseException<VideoResponseException>(archiveLayoutUrl, HttpMethod.PUT, invocation)
     }
 
     @Test
     fun `change archive layout pip`() {
-        mockPut(expectedUrl = archiveLayoutUrl, expectedRequestParams = pipLayoutMap)
-        existingArchive.setLayout(ScreenLayoutType.BEST_FIT, ScreenLayoutType.PIP)
+        mockPut(expectedUrl = archiveLayoutUrl, expectedRequestParams = pipLayoutMap, authType = authType)
     }
 
     @Test
@@ -886,14 +1009,19 @@ class VideoTest : AbstractTest() {
 
     @Test
     fun `get broadcast`() {
-        mockGet(expectedUrl = broadcastBaseUrl, expectedResponseParams = broadcastResponseMap)
+        mockGet(expectedUrl = broadcastUrl, expectedResponseParams = broadcastResponseMap, authType = authType)
         assertEqualsSampleBroadcast(existingBroadcast.info())
+        assertApiResponseException<VideoResponseException>(
+            broadcastUrl, HttpMethod.GET, existingBroadcast::info
+        )
     }
 
     @Test
     fun `stop broadcast`() {
-        mockPost(expectedUrl = "$broadcastBaseUrl/stop", expectedResponseParams = broadcastResponseMap)
+        val url = "$broadcastUrl/stop"
+        mockPost(expectedUrl = url, expectedResponseParams = broadcastResponseMap)
         assertEqualsSampleBroadcast(existingBroadcast.stop())
+        assertApiResponseException<VideoResponseException>(url, HttpMethod.POST, existingBroadcast::stop)
     }
 
     @Test
@@ -903,7 +1031,9 @@ class VideoTest : AbstractTest() {
             expectedRequestParams = addStreamMap(),
             authType = authType, status = 204
         )
-        existingBroadcast.addStream(streamId)
+        val invocation = { existingBroadcast.addStream(streamId) }
+        invocation()
+        assertApiResponseException<VideoResponseException>(broadcastStreamsUrl, HttpMethod.PATCH, invocation)
     }
 
     @Test
@@ -924,13 +1054,19 @@ class VideoTest : AbstractTest() {
             expectedRequestParams = removeStreamMap,
             authType = authType, status = 204
         )
-        existingBroadcast.removeStream(streamId)
+        val invocation = { existingBroadcast.removeStream(streamId) }
+        invocation()
+        assertApiResponseException<VideoResponseException>(broadcastStreamsUrl, HttpMethod.PATCH, invocation)
     }
 
     @Test
     fun `change broadcast layout horizontal`() {
-        mockPut(expectedUrl = broadcastLayoutUrl, expectedRequestParams = mapOf("type" to "horizontalPresentation"))
-        existingBroadcast.setLayout(ScreenLayoutType.HORIZONTAL)
+        mockPut(expectedUrl = broadcastLayoutUrl, authType = authType,
+            expectedRequestParams = mapOf("type" to "horizontalPresentation")
+        )
+        val invocation = { existingBroadcast.setLayout(ScreenLayoutType.HORIZONTAL) }
+        invocation()
+        assertApiResponseException<VideoResponseException>(broadcastLayoutUrl, HttpMethod.PUT, invocation)
     }
 
     @Test
@@ -949,12 +1085,18 @@ class VideoTest : AbstractTest() {
     fun `stop experience composer`() {
         mockDelete(expectedUrl = renderUrl, authType = authType)
         existingRender.stop()
+        assertApiResponseException<VideoResponseException>(
+            renderUrl, HttpMethod.DELETE, existingRender::stop
+        )
     }
 
     @Test
     fun `get experience composer`() {
         mockGet(expectedUrl = renderUrl, expectedResponseParams = renderResponseMap)
         assertEqualsSampleRender(existingRender.info())
+        assertApiResponseException<VideoResponseException>(
+            renderUrl, HttpMethod.GET, existingRender::info
+        )
     }
 
     @Test
@@ -969,6 +1111,10 @@ class VideoTest : AbstractTest() {
         val response = client.listRenders()
         assertNotNull(response)
         assertEquals(0, response.size)
+
+        assertApiResponseException<VideoResponseException>(
+            renderBaseUrl, HttpMethod.GET, client::listRenders
+        )
     }
 
     @Test
@@ -984,29 +1130,29 @@ class VideoTest : AbstractTest() {
         assertNotNull(response)
         assertEquals(2, response.size)
         assertEqualsSampleRender(response[0])
-        val empty = response[1]
-        assertNotNull(empty)
-        assertNull(empty.id)
-        assertNull(empty.sessionId)
-        assertNull(empty.applicationId)
-        assertNull(empty.createdAt)
-        assertNull(empty.callbackUrl)
-        assertNull(empty.updatedAt)
-        assertNull(empty.url)
-        assertNull(empty.resolution)
-        assertNull(empty.status)
-        assertNull(empty.streamId)
+        assertEqualsEmptyRender(response[1])
+    }
+
+    @Test
+    fun `start experience composer required parameters`() {
+        mockPost(expectedUrl = renderBaseUrl, authType = authType,
+            expectedRequestParams = renderRequestMap,
+            expectedResponseParams = mapOf()
+        )
+        val invocation = { client.startRender {
+            sessionId(sessionId); token(token)
+            url(mediaUrl); name(renderName)
+        } }
+        assertEqualsEmptyRender(invocation())
+        assertApiResponseException<VideoResponseException>(renderBaseUrl, HttpMethod.POST, invocation)
     }
 
     @Test
     fun `start experience composer all parameters`() {
-        mockPost(expectedUrl = renderBaseUrl, expectedRequestParams = mapOf(
-                "sessionId" to sessionId,
-                "token" to token,
-                "url" to mediaUrl,
+        mockPost(expectedUrl = renderBaseUrl, authType = authType,
+            expectedRequestParams = renderRequestMap + mapOf(
                 "maxDuration" to maxDuration,
                 "resolution" to "1280x720",
-                "properties" to mapOf("name" to renderName)
             ),
             expectedResponseParams = renderResponseMap
         )

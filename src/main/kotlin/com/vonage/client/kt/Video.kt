@@ -71,7 +71,7 @@ class Video(private val client: VideoClient) {
 
         fun sendDtmf(digits: String): Unit = client.sendDtmf(id, digits)
 
-        fun startCaptions(token: String, properties: CaptionsRequest.Builder.() -> Unit): UUID =
+        fun startCaptions(token: String, properties: CaptionsRequest.Builder.() -> Unit = {}): UUID =
             client.startCaptions(CaptionsRequest.builder()
                 .apply(properties).sessionId(id).token(token).build()
             ).captionsId

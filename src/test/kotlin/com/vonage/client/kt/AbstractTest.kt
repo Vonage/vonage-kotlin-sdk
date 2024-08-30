@@ -294,6 +294,7 @@ abstract class AbstractTest {
 
         assert401ApiResponseException<E>(url, requestMethod, actualCall)
         assert402ApiResponseException<E>(url, requestMethod, actualCall)
+        assert403ApiResponseException<E>(url, requestMethod, actualCall)
         assert429ApiResponseException<E>(url, requestMethod, actualCall)
     }
 
@@ -339,6 +340,14 @@ abstract class AbstractTest {
             "Low balance",
             "This request could not be performed due to your account balance being low.",
             "bf0ca0bf927b3b52e3cb03217e1a1ddf"
+        )
+
+    protected inline fun <reified E: VonageApiResponseException> assert403ApiResponseException(
+        url: String, requestMethod: HttpMethod, actualCall: () -> Any): E =
+        assertApiResponseException(url, requestMethod, actualCall, 403,
+            title = "Forbidden",
+            code = "10001",
+            detail = "Invalid token format or signature."
         )
 
     protected inline fun <reified E: VonageApiResponseException> assert429ApiResponseException(
