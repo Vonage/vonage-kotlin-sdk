@@ -173,6 +173,12 @@ private fun listCompositionsFilter(count: Int, offset: Int, sessionId: String? =
 private fun signalRequest(type: String, data: String): SignalRequest =
     SignalRequest.builder().type(type).data(data).build()
 
+private fun streamCompositionLayout(initialLayout: ScreenLayoutType,
+                                    screenshareType: ScreenLayoutType? = null,
+                                    stylesheet: String? = null): StreamCompositionLayout =
+    StreamCompositionLayout.builder(initialLayout)
+        .screenshareType(screenshareType).stylesheet(stylesheet).build()
+
 fun rtmp(properties: Rtmp.Builder.() -> Unit): Rtmp = Rtmp.builder().apply(properties).build()
 
 fun Broadcast.Builder.addRtmpStream(properties: Rtmp.Builder.() -> Unit): Broadcast.Builder =
@@ -180,3 +186,13 @@ fun Broadcast.Builder.addRtmpStream(properties: Rtmp.Builder.() -> Unit): Broadc
 
 fun Broadcast.Builder.hls(hls: Hls.Builder.() -> Unit = {}): Broadcast.Builder =
     hls(Hls.builder().apply(hls).build())
+
+fun Archive.Builder.layout(initialLayout: ScreenLayoutType,
+                           screenshareType: ScreenLayoutType? = null,
+                           stylesheet: String? = null): Archive.Builder =
+    layout(streamCompositionLayout(initialLayout, screenshareType, stylesheet))
+
+fun Broadcast.Builder.layout(initialLayout: ScreenLayoutType,
+                           screenshareType: ScreenLayoutType? = null,
+                           stylesheet: String? = null): Broadcast.Builder =
+    layout(streamCompositionLayout(initialLayout, screenshareType, stylesheet))

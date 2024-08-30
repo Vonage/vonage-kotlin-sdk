@@ -79,6 +79,9 @@ class VideoTest : AbstractTest() {
     private val count = 450
     private val customOffsetCountMap = mapOf("offset" to offset, "count" to count)
     private val defaultOffsetCountMap = mapOf("offset" to 0, "count" to 1000)
+    private val sessionIdMap = mapOf("sessionId" to sessionId)
+    private val customSessionOffsetCountMap = sessionIdMap + customOffsetCountMap
+    private val defaultSessionOffsetCountMap = sessionIdMap + defaultOffsetCountMap
     private val layoutClasses = listOf("full", "no-border")
     private val streamLayoutMap = mapOf(
         "id" to streamId,
@@ -86,9 +89,8 @@ class VideoTest : AbstractTest() {
         "name" to streamName,
         "layoutClassList" to layoutClasses
     )
-    private val renderResponseMap = mapOf(
+    private val renderResponseMap = sessionIdMap + mapOf(
         "id" to renderId,
-        "sessionId" to sessionId,
         "applicationId" to applicationId,
         "createdAt" to createdAtLong,
         "callbackUrl" to statusCallbackUrl,
@@ -139,9 +141,8 @@ class VideoTest : AbstractTest() {
         "stylesheet" to stylesheet
     )
     private val archiveVideoUrl = "https://tokbox.com.archive2.s3.amazonaws.com/123456/$archiveId/archive.mp4"
-    private val broadcastResponseMap = mapOf(
+    private val broadcastResponseMap = sessionIdMap + mapOf(
         "id" to broadcastId,
-        "sessionId" to sessionId,
         "applicationId" to applicationId,
         "multiBroadcastTag" to multiBroadcastTag,
         "createdAt" to createdAtLong,
@@ -165,9 +166,8 @@ class VideoTest : AbstractTest() {
         "status" to broadcastStatus.name.lowercase(),
         "streams" to streamsList
     )
-    private val archiveResponseMap = mapOf(
+    private val archiveResponseMap = sessionIdMap + mapOf(
         "id" to archiveId,
-        "sessionId" to sessionId,
         "applicationId" to applicationId,
         "multiArchiveTag" to multiArchiveTag,
         "name" to archiveName,
@@ -233,36 +233,36 @@ class VideoTest : AbstractTest() {
         assertTrue(videoNoAudio.hasVideo())
     }
 
-    private fun assertEqualsSampleArchive(response: Archive) {
-        assertNotNull(response)
-        assertEquals(UUID.fromString(archiveId), response.id)
-        assertEquals(sessionId, response.sessionId)
-        assertEquals(UUID.fromString(applicationId), response.applicationId)
-        assertEquals(multiArchiveTag, response.multiArchiveTag)
-        assertEquals(archiveName, response.name)
-        assertEquals(createdAtInstant, response.createdAt)
-        assertEquals(Duration.ofSeconds(archiveDuration), response.duration)
-        assertEquals(archiveSize, response.size)
-        assertEquals(archiveStatus, response.status)
-        assertEquals(archiveStreamMode, response.streamMode)
-        assertEquals(archiveResoltion, response.resolution)
-        assertEquals(URI.create(archiveVideoUrl), response.url)
-        assertTrue(response.hasVideo())
-        assertFalse(response.hasAudio())
-        assertEqualsVideoStreams(response.streams)
+    private fun assertEqualsSampleArchive(archive: Archive) {
+        assertNotNull(archive)
+        assertEquals(UUID.fromString(archiveId), archive.id)
+        assertEquals(sessionId, archive.sessionId)
+        assertEquals(UUID.fromString(applicationId), archive.applicationId)
+        assertEquals(multiArchiveTag, archive.multiArchiveTag)
+        assertEquals(archiveName, archive.name)
+        assertEquals(createdAtInstant, archive.createdAt)
+        assertEquals(Duration.ofSeconds(archiveDuration), archive.duration)
+        assertEquals(archiveSize, archive.size)
+        assertEquals(archiveStatus, archive.status)
+        assertEquals(archiveStreamMode, archive.streamMode)
+        assertEquals(archiveResoltion, archive.resolution)
+        assertEquals(URI.create(archiveVideoUrl), archive.url)
+        assertTrue(archive.hasVideo())
+        assertFalse(archive.hasAudio())
+        assertEqualsVideoStreams(archive.streams)
     }
 
-    private fun assertEqualsSampleBroadcast(response: Broadcast) {
-        assertNotNull(response)
-        assertEquals(UUID.fromString(broadcastId), response.id)
-        assertEquals(sessionId, response.sessionId)
-        assertEquals(UUID.fromString(applicationId), response.applicationId)
-        assertEquals(multiBroadcastTag, response.multiBroadcastTag)
-        assertEquals(createdAtInstant, response.createdAt)
-        assertEquals(updatedAtInstant, response.updatedAt)
-        assertEquals(Duration.ofSeconds(maxDuration.toLong()), response.maxDuration)
-        assertEquals(maxBitrate, response.maxBitrate)
-        val broadcastUrls = response.broadcastUrls
+    private fun assertEqualsSampleBroadcast(broadcast: Broadcast) {
+        assertNotNull(broadcast)
+        assertEquals(UUID.fromString(broadcastId), broadcast.id)
+        assertEquals(sessionId, broadcast.sessionId)
+        assertEquals(UUID.fromString(applicationId), broadcast.applicationId)
+        assertEquals(multiBroadcastTag, broadcast.multiBroadcastTag)
+        assertEquals(createdAtInstant, broadcast.createdAt)
+        assertEquals(updatedAtInstant, broadcast.updatedAt)
+        assertEquals(Duration.ofSeconds(maxDuration.toLong()), broadcast.maxDuration)
+        assertEquals(maxBitrate, broadcast.maxBitrate)
+        val broadcastUrls = broadcast.broadcastUrls
         assertNotNull(broadcastUrls)
         assertEquals(URI.create(hlsUrl), broadcastUrls.hls)
         val rtmps = broadcastUrls.rtmps
@@ -280,16 +280,81 @@ class VideoTest : AbstractTest() {
         assertNull(emptyRtmp.serverUrl)
         assertNull(emptyRtmp.status)
         assertNull(emptyRtmp.streamName)
-        val hls = response.hlsSettings
+        val hls = broadcast.hlsSettings
         assertNotNull(hls)
         assertEquals(dvr, hls.dvr())
         assertEquals(lowLatency, hls.lowLatency())
-        assertEquals(broadcastResolution, response.resolution)
-        assertEquals(broadcastAudio, response.hasAudio())
-        assertEquals(broadcastVideo, response.hasVideo())
-        assertEquals(broadcastStreamMode, response.streamMode)
-        assertEquals(broadcastStatus, response.status)
-        assertEqualsVideoStreams(response.streams)
+        assertEquals(broadcastResolution, broadcast.resolution)
+        assertEquals(broadcastAudio, broadcast.hasAudio())
+        assertEquals(broadcastVideo, broadcast.hasVideo())
+        assertEquals(broadcastStreamMode, broadcast.streamMode)
+        assertEquals(broadcastStatus, broadcast.status)
+        assertEqualsVideoStreams(broadcast.streams)
+    }
+
+    private fun assertEqualsEmptyArchive(archive: Archive) {
+        assertNotNull(archive)
+        assertNull(archive.id)
+        assertNull(archive.sessionId)
+        assertNull(archive.applicationId)
+        assertNull(archive.createdAt)
+        assertNull(archive.multiArchiveTag)
+        assertNull(archive.name)
+        assertNull(archive.duration)
+        assertNull(archive.size)
+        assertNull(archive.status)
+        assertNull(archive.streamMode)
+        assertNull(archive.resolution)
+        assertNull(archive.url)
+        assertNull(archive.hasAudio())
+        assertNull(archive.hasVideo())
+        assertNull(archive.streams)
+    }
+
+    private fun assertEqualsEmptyBroadcast(broadcast: Broadcast) {
+        assertNotNull(broadcast)
+        assertNull(broadcast.id)
+        assertNull(broadcast.sessionId)
+        assertNull(broadcast.applicationId)
+        assertNull(broadcast.multiBroadcastTag)
+        assertNull(broadcast.createdAt)
+        assertNull(broadcast.updatedAt)
+        assertNull(broadcast.maxDuration)
+        assertNull(broadcast.maxBitrate)
+        assertNull(broadcast.broadcastUrls)
+        assertNull(broadcast.hlsSettings)
+        assertNull(broadcast.resolution)
+        assertNull(broadcast.hasAudio())
+        assertNull(broadcast.hasVideo())
+        assertNull(broadcast.streamMode)
+        assertNull(broadcast.status)
+        assertNull(broadcast.streams)
+    }
+
+    private fun assertListArchives(params: Map<String, Any>, invocation: () -> List<Archive>) {
+        mockGet(expectedUrl = "$baseUrl/archive", authType = authType,
+            expectedQueryParams = params, expectedResponseParams = mapOf(
+                "count" to count,
+                "items" to listOf(archiveResponseMap, mapOf())
+            )
+        )
+        val response = invocation()
+        assertEquals(2, response.size)
+        assertEqualsSampleArchive(response[0])
+        assertEqualsEmptyArchive(response[1])
+    }
+
+    private fun assertListBroadcasts(params: Map<String, Any>, invocation: () -> List<Broadcast>) {
+        mockGet(expectedUrl = "$baseUrl/broadcast", authType = authType,
+            expectedQueryParams = params, expectedResponseParams = mapOf(
+                "count" to count,
+                "items" to listOf(broadcastResponseMap, mapOf())
+            )
+        )
+        val response = invocation()
+        assertEquals(2, response.size)
+        assertEqualsSampleBroadcast(response[0])
+        assertEqualsEmptyBroadcast(response[1])
     }
 
     private fun assertEqualsJwt(encoded: String, role: Role = Role.PUBLISHER,
@@ -625,32 +690,60 @@ class VideoTest : AbstractTest() {
     }
 
     @Test
+    fun `list archives for session no parameters`() {
+        assertListArchives(defaultSessionOffsetCountMap, existingSession::listArchives)
+    }
+
+    @Test
+    fun `list archives for session both parameters`() {
+        assertListArchives(customSessionOffsetCountMap) {
+            existingSession.listArchives(count, offset)
+        }
+    }
+
+    @Test
+    fun `list archives both parameters`() {
+        assertListArchives(customOffsetCountMap) {
+            client.listArchives(count, offset)
+        }
+    }
+
+    @Test
+    fun `list archives default parameters`() {
+        assertListArchives(defaultOffsetCountMap, client::listArchives)
+    }
+
+    @Test
+    fun `list broadcasts for session no parameters`() {
+        assertListBroadcasts(defaultSessionOffsetCountMap, existingSession::listBroadcasts)
+    }
+
+    @Test
+    fun `list broadcasts for session both parameters`() {
+        assertListBroadcasts(customSessionOffsetCountMap) {
+            existingSession.listBroadcasts(count, offset)
+        }
+    }
+
+    @Test
+    fun `list broadcasts both parameters`() {
+        assertListBroadcasts(customOffsetCountMap) {
+            client.listBroadcasts(count, offset)
+        }
+    }
+
+    @Test
+    fun `list broadcasts default parameters`() {
+        assertListBroadcasts(defaultOffsetCountMap, client::listBroadcasts)
+    }
+
+    @Test
     fun `create archive all parameters`() {
 
     }
 
     @Test
     fun `create broadcast all parameters`() {
-
-    }
-
-    @Test
-    fun `list archives both parameters`() {
-
-    }
-
-    @Test
-    fun `list archives no parameters`() {
-
-    }
-
-    @Test
-    fun `list broadcasts both parameters`() {
-
-    }
-
-    @Test
-    fun `list broadcasts no parameters`() {
 
     }
 
