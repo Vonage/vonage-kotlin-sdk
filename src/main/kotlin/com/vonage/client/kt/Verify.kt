@@ -27,14 +27,14 @@ class Verify(private val client: Verify2Client) {
         VerificationRequest.builder().brand(brand).apply(init).build()
     )
 
-    inner class ExistingRequest internal constructor(val requestId: UUID) {
+    inner class ExistingRequest internal constructor(val id: UUID) {
 
-        fun cancel(): Unit = client.cancelVerification(requestId)
+        fun cancel(): Unit = client.cancelVerification(id)
 
-        fun nextWorkflow(): Unit = client.nextWorkflow(requestId)
+        fun nextWorkflow(): Unit = client.nextWorkflow(id)
 
         fun checkVerificationCode(code: String): VerifyCodeResponse =
-            client.checkVerificationCode(requestId, code)
+            client.checkVerificationCode(id, code)
 
         fun isValidVerificationCode(code: String): Boolean {
             try {

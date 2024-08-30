@@ -34,6 +34,7 @@ class Vonage(init: VonageClient.Builder.() -> Unit) {
     val users = Users(client.usersClient)
     val verify = Verify(client.verify2Client)
     val verifyLegacy = VerifyLegacy(client.verifyClient)
+    val video = Video(client.videoClient)
     val voice = Voice(client.voiceClient)
 }
 

@@ -31,6 +31,7 @@ You'll need to have [created a Vonage account](https://dashboard.nexmo.com/sign-
 - [SMS](https://developer.vonage.com/en/messaging/sms/overview)
 - [Subaccounts](https://developer.vonage.com/en/account/subaccounts/overview)
 - [Verify](https://developer.vonage.com/en/verify/overview)
+- [Video](https://developer.vonage.com/en/video/overview)
 - [Voice](https://developer.vonage.com/en/voice/voice-api/overview)
 
 ## Other SDKs

@@ -20,7 +20,6 @@ import com.vonage.client.voice.*
 import com.vonage.client.voice.ncco.*
 import java.net.URI
 import java.util.*
-import kotlin.test.Test
 import kotlin.test.*
 
 class VoiceTest : AbstractTest() {
@@ -36,7 +35,6 @@ class VoiceTest : AbstractTest() {
     private val count = 89
     private val pageSize = 25
     private val recordIndex = 14
-    private val dtmf = "p*123#"
     private val fromPstn = "14155550100"
     private val streamUrl = "$exampleUrlBase/waiting.mp3"
     private val onAnswerUrl = "$exampleUrlBase/ncco.json"
