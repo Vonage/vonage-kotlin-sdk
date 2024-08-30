@@ -110,13 +110,7 @@ class VideoTest : AbstractTest() {
     private val broadcastResolutionStr = "640x480"
     private val broadcastResolution = Resolution.SD_LANDSCAPE
     private val archiveResolutionStr = "1920x1080"
-    private val archiveResoltion = Resolution.FHD_LANDSCAPE
-    private val rtmpMap = mapOf(
-        "id" to rtmpId,
-        "serverUrl" to rtmpServerUrl,
-        "status" to rtmpStatus.name.lowercase(),
-        "streamName" to streamName
-    )
+    private val archiveResolution = Resolution.FHD_LANDSCAPE
     private val dvr = false
     private val lowLatency = true
     private val hlsUrl = "https://hls.example.com/stream.m3u8"
@@ -126,6 +120,7 @@ class VideoTest : AbstractTest() {
     private val archiveHasVideo = true
     private val broadcastStreamMode = StreamMode.MANUAL
     private val archiveStreamMode = StreamMode.AUTO
+    private val archiveOutputMode = OutputMode.COMPOSED
     private val streamIdOnly = mapOf("streamId" to streamId)
     private val streamAudioAndVideo = streamIdOnly + mapOf("hasAudio" to true, "hasVideo" to true)
     private val streamAudioNoVideo = mapOf("streamId" to randomUuidStr, "hasAudio" to true, "hasVideo" to false)
@@ -140,46 +135,65 @@ class VideoTest : AbstractTest() {
         "type" to "custom",
         "stylesheet" to stylesheet
     )
-    private val archiveVideoUrl = "https://tokbox.com.archive2.s3.amazonaws.com/123456/$archiveId/archive.mp4"
-    private val broadcastResponseMap = sessionIdMap + mapOf(
-        "id" to broadcastId,
-        "applicationId" to applicationId,
-        "multiBroadcastTag" to multiBroadcastTag,
-        "createdAt" to createdAtLong,
-        "updatedAt" to updatedAtLong,
-        "maxDuration" to maxDuration,
-        "maxBitrate" to maxBitrate,
-        "broadcastUrls" to mapOf(
-            "hls" to hlsUrl,
-            "rtmp" to listOf(rtmpMap, emptyMap())
-        ),
-        "settings" to mapOf(
-            "hls" to mapOf(
-                "dvr" to dvr,
-                "lowLatency" to lowLatency
-            )
-        ),
-        "resolution" to broadcastResolutionStr,
-        "hasAudio" to broadcastAudio,
-        "hasVideo" to broadcastVideo,
-        "streamMode" to broadcastStreamMode.name.lowercase(),
-        "status" to broadcastStatus.name.lowercase(),
-        "streams" to streamsList
+    private val hlsMap = "hls" to mapOf(
+        "dvr" to dvr,
+        "lowLatency" to lowLatency
     )
-    private val archiveResponseMap = sessionIdMap + mapOf(
+    private val rtmpRequestMap = mapOf(
+        "id" to rtmpId,
+        "serverUrl" to rtmpServerUrl,
+        "streamName" to streamName
+    )
+    private val rtmpResponseMap = rtmpRequestMap + mapOf("status" to rtmpStatus.name.lowercase())
+    private val archiveVideoUrl = "https://tokbox.com.archive2.s3.amazonaws.com/123456/$archiveId/archive.mp4"
+    private val archiveBaseMap = sessionIdMap + mapOf(
+        "name" to archiveName,
+        "hasAudio" to archiveHasAudio,
+        "hasVideo" to archiveHasVideo,
+        "multiArchiveTag" to multiArchiveTag,
+        "resolution" to archiveResolutionStr,
+        "streamMode" to archiveStreamMode.name.lowercase()
+    )
+    private val archiveRequestMap = archiveBaseMap + mapOf(
+        "outputMode" to archiveOutputMode.name.lowercase(),
+        "layout" to customLayoutMap
+    )
+    private val archiveResponseMap = archiveBaseMap + mapOf(
         "id" to archiveId,
         "applicationId" to applicationId,
-        "multiArchiveTag" to multiArchiveTag,
-        "name" to archiveName,
         "createdAt" to createdAtLong,
         "duration" to archiveDuration,
         "size" to archiveSize,
         "status" to archiveStatus.name.lowercase(),
-        "streamMode" to archiveStreamMode.name.lowercase(),
-        "resolution" to archiveResolutionStr,
         "url" to archiveVideoUrl,
-        "hasAudio" to archiveHasAudio,
-        "hasVideo" to archiveHasVideo,
+        "streams" to streamsList
+    )
+    private val broadcastBaseMap = sessionIdMap + mapOf(
+        "multiBroadcastTag" to multiBroadcastTag,
+        "maxDuration" to maxDuration,
+        "maxBitrate" to maxBitrate,
+        "resolution" to broadcastResolutionStr,
+        "streamMode" to broadcastStreamMode.name.lowercase()
+    )
+    private val broadcastRequestMap = broadcastBaseMap + mapOf(
+        "layout" to pipLayoutMap,
+        "outputs" to mapOf(
+            hlsMap, "rtmp" to listOf(rtmpRequestMap)
+        )
+    )
+    private val broadcastResponseMap = broadcastBaseMap + mapOf(
+        "id" to broadcastId,
+        "applicationId" to applicationId,
+        "createdAt" to createdAtLong,
+        "updatedAt" to updatedAtLong,
+        "broadcastUrls" to mapOf(
+            "hls" to hlsUrl,
+            "rtmp" to listOf(rtmpResponseMap, emptyMap())
+        ),
+        "settings" to mapOf(hlsMap),
+        "hasAudio" to broadcastAudio,
+        "hasVideo" to broadcastVideo,
+        "status" to broadcastStatus.name.lowercase(),
         "streams" to streamsList
     )
 
@@ -245,7 +259,7 @@ class VideoTest : AbstractTest() {
         assertEquals(archiveSize, archive.size)
         assertEquals(archiveStatus, archive.status)
         assertEquals(archiveStreamMode, archive.streamMode)
-        assertEquals(archiveResoltion, archive.resolution)
+        assertEquals(archiveResolution, archive.resolution)
         assertEquals(URI.create(archiveVideoUrl), archive.url)
         assertTrue(archive.hasVideo())
         assertFalse(archive.hasAudio())
@@ -738,13 +752,69 @@ class VideoTest : AbstractTest() {
     }
 
     @Test
-    fun `create archive all parameters`() {
+    fun `create archive required parameters`() {
+        mockPost(expectedUrl = "$baseUrl/archive", authType = authType,
+            expectedRequestParams = sessionIdMap,
+            expectedResponseParams = sessionIdMap
+        )
+        val response = existingSession.createArchive()
+        assertNotNull(response)
+        assertEquals(sessionId, response.sessionId)
+    }
 
+    @Test
+    fun `create archive all parameters`() {
+        mockPost(expectedUrl = "$baseUrl/archive", authType = authType,
+            expectedRequestParams = archiveRequestMap,
+            expectedResponseParams = archiveResponseMap
+        )
+        assertEqualsSampleArchive(existingSession.createArchive {
+            name(archiveName); resolution(archiveResolution)
+            multiArchiveTag(multiArchiveTag)
+            hasVideo(archiveHasVideo); hasAudio(archiveHasAudio)
+            streamMode(archiveStreamMode); outputMode(archiveOutputMode)
+            layout(ScreenLayoutType.HORIZONTAL) // This is to get 100% coverage; override below
+            layout(ScreenLayoutType.CUSTOM, stylesheet = stylesheet)
+        })
+    }
+
+    @Test
+    fun `create broadcast required parameters`() {
+        mockPost(expectedUrl = "$baseUrl/broadcast", authType = authType,
+            expectedRequestParams = sessionIdMap + mapOf(
+                "outputs" to mapOf("hls" to emptyMap<String, Any>())
+            ),
+            expectedResponseParams = sessionIdMap + mapOf("broadcastUrls" to mapOf("hls" to hlsUrl))
+        )
+        val response = existingSession.startBroadcast {
+            hls()
+        }
+        assertNotNull(response)
+        assertEquals(sessionId, response.sessionId)
+        assertNull(response.hlsSettings)
+        assertNotNull(response.broadcastUrls)
+        assertEquals(URI.create(hlsUrl), response.broadcastUrls.hls)
     }
 
     @Test
     fun `create broadcast all parameters`() {
-
+        mockPost(expectedUrl = "$baseUrl/broadcast", authType = authType,
+            expectedRequestParams = broadcastRequestMap,
+            expectedResponseParams = broadcastResponseMap
+        )
+        assertEqualsSampleBroadcast(existingSession.startBroadcast {
+            multiBroadcastTag(multiBroadcastTag)
+            maxDuration(maxDuration); maxBitrate(maxBitrate)
+            resolution(broadcastResolution); streamMode(broadcastStreamMode)
+            layout(ScreenLayoutType.VERTICAL) // This is to get 100% coverage; override below
+            layout(ScreenLayoutType.BEST_FIT, ScreenLayoutType.PIP)
+            hls {
+                dvr(dvr); lowLatency(lowLatency)
+            }
+            addRtmpStream {
+                id(rtmpId); serverUrl(rtmpServerUrl); streamName(streamName)
+            }
+        })
     }
 
     @Test

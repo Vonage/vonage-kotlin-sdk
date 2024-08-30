@@ -78,7 +78,7 @@ class Video(private val client: VideoClient) {
 
         fun stopCaptions(captionsId: String): Unit = client.stopCaptions(captionsId)
 
-        fun createArchive(properties: Archive.Builder.() -> Unit): Archive =
+        fun createArchive(properties: Archive.Builder.() -> Unit = {}): Archive =
             client.createArchive(Archive.builder(id).apply(properties).build())
 
         fun startBroadcast(properties: Broadcast.Builder.() -> Unit): Broadcast =
@@ -174,15 +174,13 @@ private fun signalRequest(type: String, data: String): SignalRequest =
     SignalRequest.builder().type(type).data(data).build()
 
 private fun streamCompositionLayout(initialLayout: ScreenLayoutType,
-                                    screenshareType: ScreenLayoutType? = null,
-                                    stylesheet: String? = null): StreamCompositionLayout =
+                                    screenshareType: ScreenLayoutType?,
+                                    stylesheet: String?): StreamCompositionLayout =
     StreamCompositionLayout.builder(initialLayout)
         .screenshareType(screenshareType).stylesheet(stylesheet).build()
 
-fun rtmp(properties: Rtmp.Builder.() -> Unit): Rtmp = Rtmp.builder().apply(properties).build()
-
 fun Broadcast.Builder.addRtmpStream(properties: Rtmp.Builder.() -> Unit): Broadcast.Builder =
-    addRtmpStream(rtmp(properties))
+    addRtmpStream(Rtmp.builder().apply(properties).build())
 
 fun Broadcast.Builder.hls(hls: Hls.Builder.() -> Unit = {}): Broadcast.Builder =
     hls(Hls.builder().apply(hls).build())
