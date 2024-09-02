@@ -23,9 +23,42 @@ import java.time.Instant
  */
 class SimSwap internal constructor(private val client: SimSwapClient) {
 
+    /**
+     * Check if a SIM swap has been performed during the specified past period for the given phone number.
+     *
+     * @param phoneNumber Subscriber number in E.164 format (starting with country code). Optionally prefixed with '+'.
+     *
+     * @param maxAgeHours Period in hours to be checked for SIM swap. Must be between 1 and 2400.
+     * Default is 10 days (240 hours).
+     *
+     * @return `true` if the SIM card has been swapped during the period within the provided age.
+     *
+     * @throws CamaraResponseException If the request was unsuccessful. This could be for the following reasons:
+     * - **400**: Invalid request arguments.
+     * - **401**: Request not authenticated due to missing, invalid, or expired credentials.
+     * - **403**: Client does not have sufficient permissions to perform this action.
+     * - **404**: SIM Swap can't be checked because the phone number is unknown.
+     * - **409**: Another request is created for the same MSISDN.
+     * - **502**: Bad gateway.
+     */
     fun checkSimSwap(phoneNumber: String, maxAgeHours: Int = 240): Boolean =
         client.checkSimSwap(phoneNumber, maxAgeHours)
 
+    /**
+     * Get timestamp of last MSISDN to IMSI pairing change for a mobile user account.
+     *
+     * @param phoneNumber Subscriber number in E.164 format (starting with country code). Optionally prefixed with '+'.
+     *
+     * @return Time of the latest SIM swap performed as an Instant, or `null` if unknown / not applicable.
+     *
+     * @throws CamaraResponseException If the request was unsuccessful. This could be for the following reasons:
+     * - **400**: Invalid request arguments.
+     * - **401**: Request not authenticated due to missing, invalid, or expired credentials.
+     * - **403**: Client does not have sufficient permissions to perform this action.
+     * - **404**: SIM Swap can't be checked because the phone number is unknown.
+     * - **409**: Another request is created for the same MSISDN.
+     * - **502**: Bad gateway.
+     */
     fun retrieveSimSwapDate(phoneNumber: String): Instant? =
         client.retrieveSimSwapDate(phoneNumber)
 }
