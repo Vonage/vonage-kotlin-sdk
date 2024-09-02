@@ -30,9 +30,23 @@ class Conversion internal constructor(private val client: ConversionClient) {
             if (timestamp != null) Date.from(timestamp) else null
         )
 
+    /**
+     * Submit conversion for an SMS message.
+     *
+     * @param messageId The message ID.
+     * @param delivered `true` if the message was delivered, `false` otherwise.
+     * @param timestamp (Optional) Timestamp of the conversion.
+     */
     fun convertSms(messageId: String, delivered: Boolean, timestamp: Instant? = null): Unit =
         convert(ConversionRequest.Type.SMS, messageId, delivered, timestamp)
 
+    /**
+     * Submit conversion for a voice call.
+     *
+     * @param callId The call UUID.
+     * @param delivered `true` if the call was received, `false` otherwise.
+     * @param timestamp (Optional) Timestamp of the conversion.
+     */
     fun convertVoice(callId: String, delivered: Boolean, timestamp: Instant? = null): Unit =
         convert(ConversionRequest.Type.VOICE, callId, delivered, timestamp)
 }
