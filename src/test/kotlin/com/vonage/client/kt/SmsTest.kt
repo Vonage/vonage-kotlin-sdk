@@ -57,7 +57,7 @@ class SmsTest : AbstractTest() {
             )
         )
 
-        val response = invocation.invoke()
+        val response = invocation()
         assertNotNull(response)
         assertEquals(1, response.size)
         val first = response.first()

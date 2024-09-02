@@ -66,7 +66,7 @@ class SimSwapTest : AbstractTest() {
                 expectedRequestParams = phoneNumberMap + mapOf("maxAge" to maxAge),
                 expectedResponseParams = if (result != null) mapOf("swapped" to result) else mapOf()
             )
-            assertEquals(result ?: false, invocation.invoke(simSwapClient))
+            assertEquals(result == true, invocation(simSwapClient))
         }
     }
 

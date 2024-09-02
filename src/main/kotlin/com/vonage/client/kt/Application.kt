@@ -30,7 +30,7 @@ class Application internal constructor(private val client: ApplicationClient) {
 
     fun application(applicationId: UUID) = application(applicationId.toString())
 
-    inner class ExistingApplication internal constructor(val id: String) {
+    inner class ExistingApplication internal constructor(id: String): ExistingResource(id) {
         fun get(): Application = client.getApplication(id)
 
         fun update(properties: Application.Builder.() -> Unit): Application =

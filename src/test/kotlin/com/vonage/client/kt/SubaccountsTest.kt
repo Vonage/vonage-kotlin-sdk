@@ -55,7 +55,7 @@ class SubaccountsTest : AbstractTest() {
     private fun assertEqualsSampleSubaccount(parsed: Account) {
         assertNotNull(parsed)
         assertEquals(secret, parsed.secret)
-        assertEquals(existingSubaccount.key, parsed.apiKey)
+        assertEquals(existingSubaccount.id, parsed.apiKey)
         assertEquals(name, parsed.name)
         assertEquals(apiKey, parsed.primaryAccountApiKey)
         assertEquals(usePrimary, parsed.usePrimaryAccountBalance)
@@ -71,9 +71,9 @@ class SubaccountsTest : AbstractTest() {
             expectedRequestParams = mapOf("name" to name) + additionalParams,
             expectedResponseParams = sampleSubaccountMap
         )
-        assertEqualsSampleSubaccount(invocation.invoke(client))
+        assertEqualsSampleSubaccount(invocation(client))
         assert401ApiResponseException<SubaccountsResponseException>(subaccountsUrl, HttpMethod.POST) {
-            invocation.invoke(client)
+            invocation(client)
         }
     }
 
@@ -110,7 +110,7 @@ class SubaccountsTest : AbstractTest() {
             )
         )
 
-        val response = invocation.invoke(client)
+        val response = invocation(client)
         assertNotNull(response)
         assertEquals(BigDecimal.valueOf(amount), response.amount)
         assertEquals(transferFrom, response.from)
@@ -120,7 +120,7 @@ class SubaccountsTest : AbstractTest() {
         assertEquals(reference, response.reference)
 
         assert401ApiResponseException<SubaccountsResponseException>(url, HttpMethod.POST) {
-            invocation.invoke(client)
+            invocation(client)
         }
     }
 
@@ -149,7 +149,7 @@ class SubaccountsTest : AbstractTest() {
                 )
             )
         )
-        val response = invocation.invoke(client)
+        val response = invocation(client)
         assertNotNull(response)
         assertEquals(2, response.size)
         val main = response[0]
@@ -168,7 +168,7 @@ class SubaccountsTest : AbstractTest() {
         assertNull(blank.createdAt)
 
         assert401ApiResponseException<SubaccountsResponseException>(url, HttpMethod.GET) {
-            invocation.invoke(client)
+            invocation(client)
         }
     }
 

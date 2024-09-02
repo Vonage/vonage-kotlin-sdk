@@ -45,7 +45,7 @@ class VerifyLegacyTest : AbstractTest() {
             "request_id" to requestId,
             "status" to "0"
         ))
-        val successParsed = invocation.invoke(verifyClient)
+        val successParsed = invocation(verifyClient)
         assertNotNull(successParsed)
         assertEquals(requestId, successParsed.requestId)
         assertEquals(VerifyStatus.OK, successParsed.status)
@@ -58,7 +58,7 @@ class VerifyLegacyTest : AbstractTest() {
             "error_text" to errorText,
             "network" to networkCode
         ))
-        val failureParsed = invocation.invoke(verifyClient)
+        val failureParsed = invocation(verifyClient)
         assertNotNull(failureParsed)
         assertEquals(requestId, failureParsed.requestId)
         assertEquals(VerifyStatus.MISSING_PARAMS, failureParsed.status)

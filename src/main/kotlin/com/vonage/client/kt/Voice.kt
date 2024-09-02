@@ -25,7 +25,7 @@ class Voice internal constructor(private val client: VoiceClient) {
 
     fun call(callId: String): ExistingCall = ExistingCall(callId)
 
-    inner class ExistingCall internal constructor(val id: String) {
+    inner class ExistingCall internal constructor(id: String): ExistingResource(id) {
 
         fun info(): CallInfo = client.getCallDetails(id)
 

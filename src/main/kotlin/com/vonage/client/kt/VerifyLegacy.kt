@@ -32,7 +32,7 @@ class VerifyLegacy internal constructor(private val client: VerifyClient) {
 
     fun request(response: VerifyResponse): ExistingRequest = request(response.requestId)
 
-    inner class ExistingRequest internal constructor(val id: String) {
+    inner class ExistingRequest internal constructor(id: String): ExistingResource(id) {
 
         fun cancel(): ControlResponse = client.cancelVerification(id)
 
@@ -42,18 +42,6 @@ class VerifyLegacy internal constructor(private val client: VerifyClient) {
 
         fun search(): SearchVerifyResponse = client.search(id)
 
-        @Override
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-            other as ExistingRequest
-            return id == other.id
-        }
-
-        @Override
-        override fun hashCode(): Int {
-            return id.hashCode()
-        }
     }
 
 }

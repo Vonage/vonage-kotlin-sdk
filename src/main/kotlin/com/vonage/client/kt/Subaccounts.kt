@@ -33,15 +33,15 @@ class Subaccounts internal constructor(private val client: SubaccountsClient) {
 
     fun subaccount(subaccountKey: String): ExistingSubaccount = ExistingSubaccount(subaccountKey)
 
-    inner class ExistingSubaccount internal constructor(val key: String) {
+    inner class ExistingSubaccount internal constructor(key: String): ExistingResource(key) {
 
-        fun get(): Account = client.getSubaccount(key)
+        fun get(): Account = client.getSubaccount(id)
 
         fun suspended(suspend: Boolean): Account =
-            client.updateSubaccount(UpdateSubaccountRequest.builder(key).suspended(suspend).build())
+            client.updateSubaccount(UpdateSubaccountRequest.builder(id).suspended(suspend).build())
 
         fun update(name: String? = null, usePrimaryAccountBalance: Boolean? = null): Account {
-            val builder = UpdateSubaccountRequest.builder(key).name(name)
+            val builder = UpdateSubaccountRequest.builder(id).name(name)
             if (usePrimaryAccountBalance != null) {
                 builder.usePrimaryAccountBalance(usePrimaryAccountBalance)
             }

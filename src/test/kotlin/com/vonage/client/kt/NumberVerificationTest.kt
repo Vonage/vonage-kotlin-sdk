@@ -50,7 +50,7 @@ class NumberVerificationTest : AbstractTest() {
                 expectedResponseParams = if (result != null)
                     mapOf("devicePhoneNumberVerified" to result) else mapOf()
             )
-            assertEquals(result ?: false, invocation.invoke(nvClient))
+            assertEquals(result ?: false, invocation(nvClient))
         }
     }
 

@@ -23,26 +23,13 @@ class Users internal constructor(private val client: UsersClient) {
 
     fun user(user: BaseUser): ExistingUser = ExistingUser(user.id)
 
-    inner class ExistingUser internal constructor(val id: String) {
+    inner class ExistingUser internal constructor(id: String): ExistingResource(id) {
         fun get(): User = client.getUser(id)
 
         fun update(properties: User.Builder.() -> Unit): User =
             client.updateUser(id, User.builder().apply(properties).build())
 
         fun delete(): Unit = client.deleteUser(id)
-
-        @Override
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-            other as ExistingUser
-            return id == other.id
-        }
-
-        @Override
-        override fun hashCode(): Int {
-            return id.hashCode()
-        }
     }
 
     fun create(properties: User.Builder.() -> Unit): User =

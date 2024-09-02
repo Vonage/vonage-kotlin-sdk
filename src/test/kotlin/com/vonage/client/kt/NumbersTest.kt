@@ -55,7 +55,7 @@ class NumbersTest : AbstractTest() {
             status = errorCode, authType = authType,
             expectedResponseParams = errorResponse
         )
-        assertThrows<NumbersResponseException> { invocation.invoke(client) }
+        assertThrows<NumbersResponseException> { invocation(client) }
     }
 
     private fun assertThrowsPost(endpoint: String, invocation: Numbers.ExistingNumber.() -> Any) {
@@ -63,7 +63,7 @@ class NumbersTest : AbstractTest() {
             status = errorCode, authType = authType,
             expectedResponseParams = errorResponse
         )
-        assertThrows<NumbersResponseException> { invocation.invoke(existingNumber) }
+        assertThrows<NumbersResponseException> { invocation(existingNumber) }
     }
 
     private fun mockAction(endpoint: String, additionalParams: Map<String, String> = mapOf()) {
@@ -101,7 +101,7 @@ class NumbersTest : AbstractTest() {
             )
         )
 
-        val response = invocation.invoke(client)
+        val response = invocation(client)
         assertNotNull(response)
         assertEquals(count, response.count)
         val numbers = response.numbers
@@ -159,7 +159,7 @@ class NumbersTest : AbstractTest() {
             )
         )
 
-        val response = invocation.invoke(client)
+        val response = invocation(client)
         assertNotNull(response)
         assertEquals(count, response.count)
         val numbers = response.numbers

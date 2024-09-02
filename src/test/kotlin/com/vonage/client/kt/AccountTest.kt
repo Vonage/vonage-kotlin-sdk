@@ -60,7 +60,7 @@ class AccountTest : AbstractTest() {
             )
         )
 
-        val response = invocation.invoke(account)
+        val response = invocation(account)
         assertNotNull(response)
         assertEquals(moCallbackUrl, response.incomingSmsUrl)
         assertEquals(drCallbackUrl, response.deliveryReceiptUrl)
@@ -98,7 +98,7 @@ class AccountTest : AbstractTest() {
         )
         val invocation = { getSecretsObj(withApiKey).list() }
 
-        val response = invocation.invoke()
+        val response = invocation()
         assertNotNull(response)
         assertEquals(2, response.size)
         assertSecretResponse(response[0])
@@ -118,7 +118,7 @@ class AccountTest : AbstractTest() {
             expectedRequestParams = secretRequest,
             status = 201, expectedResponseParams = secretResponse
         )
-        assertSecretResponse(invocation.invoke())
+        assertSecretResponse(invocation())
         assert401ApiResponseException<AccountResponseException>(url, HttpMethod.POST, invocation)
     }
 
@@ -129,7 +129,7 @@ class AccountTest : AbstractTest() {
             expectedResponseParams = secretResponse
         )
         val invocation = { getSecretsObj(withApiKey).get(secretId) }
-        assertSecretResponse(invocation.invoke())
+        assertSecretResponse(invocation())
         assert401ApiResponseException<AccountResponseException>(url, HttpMethod.GET, invocation)
     }
 
@@ -137,7 +137,7 @@ class AccountTest : AbstractTest() {
         val url = getSecretUrl(withApiKey)
         val invocation = { getSecretsObj(withApiKey).delete(secretId) }
         mockDelete(url, authType)
-        invocation.invoke()
+        invocation()
 
         mockRequest(HttpMethod.DELETE, expectedUrl = url, authType = authType)
             .mockReturn(status = errorCode, errorResponse)

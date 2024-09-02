@@ -226,7 +226,7 @@ class ApplicationTest : AbstractTest() {
                 )
             )
         )
-        val response = invocation.invoke()
+        val response = invocation()
         assertNotNull(response)
         assertEquals(4, response.size)
         assertEqualsIdOnlyApplication(response[0])

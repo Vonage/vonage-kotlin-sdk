@@ -25,25 +25,25 @@ class Video(private val client: VideoClient) {
 
     fun session(sessionId: String): ExistingSession = ExistingSession(sessionId)
 
-    inner class ExistingSession internal constructor(val id: String) {
+    inner class ExistingSession internal constructor(id: String): ExistingResource(id) {
 
         fun stream(streamId: String): ExistingStream = ExistingStream(streamId)
 
-        inner class ExistingStream internal constructor(val streamId: String) {
+        inner class ExistingStream internal constructor(id: String): ExistingResource(id) {
 
-            fun info(): GetStreamResponse = client.getStream(id, streamId)
+            fun info(): GetStreamResponse = client.getStream(this@ExistingSession.id, id)
 
-            fun mute(): Unit = client.muteStream(id, streamId)
+            fun mute(): Unit = client.muteStream(this@ExistingSession.id, id)
 
             fun setLayout(vararg layoutClasses: String): Unit =
-                client.setStreamLayout(id,
-                    SessionStream.builder(streamId).layoutClassList(layoutClasses.toList()).build()
+                client.setStreamLayout(this@ExistingSession.id,
+                    SessionStream.builder(id).layoutClassList(layoutClasses.toList()).build()
                 )
         }
 
         fun connection(connectionId: String): ExistingConnection = ExistingConnection(connectionId)
 
-        inner class ExistingConnection internal constructor(val id: String) {
+        inner class ExistingConnection internal constructor(id: String): ExistingResource(id) {
 
             fun disconnect(): Unit = client.forceDisconnect(this@ExistingSession.id, id)
 
@@ -99,7 +99,7 @@ class Video(private val client: VideoClient) {
 
     fun archive(archiveId: String): ExistingArchive = ExistingArchive(archiveId)
 
-    inner class ExistingArchive internal constructor(val id: String) {
+    inner class ExistingArchive internal constructor(id: String): ExistingResource(id) {
 
         fun info(): Archive = client.getArchive(id)
 
@@ -128,7 +128,7 @@ class Video(private val client: VideoClient) {
 
     fun broadcast(broadcastId: String): ExistingBroadcast = ExistingBroadcast(broadcastId)
 
-    inner class ExistingBroadcast internal constructor(val id: String) {
+    inner class ExistingBroadcast internal constructor(id: String): ExistingResource(id) {
 
         fun info(): Broadcast = client.getBroadcast(id)
 
@@ -158,7 +158,7 @@ class Video(private val client: VideoClient) {
 
     fun render(renderId: String): ExistingRender = ExistingRender(renderId)
 
-    inner class ExistingRender internal constructor(val id: String) {
+    inner class ExistingRender internal constructor(id: String): ExistingResource(id) {
 
         fun info(): RenderResponse = client.getRender(id)
 

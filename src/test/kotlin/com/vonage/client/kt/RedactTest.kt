@@ -30,7 +30,7 @@ class RedactTest : AbstractTest() {
                 "product" to product
             ) + if (type != null) mapOf("type" to type.name.lowercase()) else mapOf()
         )
-        invocation.invoke(vonage.redact)
+        invocation(vonage.redact)
     }
 
     @Test

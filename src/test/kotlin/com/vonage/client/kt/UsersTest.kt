@@ -139,7 +139,7 @@ class UsersTest : AbstractTest() {
     private fun assertUserNotFoundException(method: HttpMethod, invocation: Users.ExistingUser.() -> Any) =
         assertApiResponseException<UsersResponseException>(
             url = userUrl, requestMethod = method,
-            actualCall = { invocation.invoke(existingUser) },
+            actualCall = { invocation(existingUser) },
             status = 404,
             title = "Not found.",
             errorType = "https://developer.vonage.com/api/conversation#user:error:not-found",
@@ -173,7 +173,7 @@ class UsersTest : AbstractTest() {
                 )
             )
         )
-        val response = invocation.invoke(client)
+        val response = invocation(client)
         assertNotNull(response)
         val users = response.users
         assertNotNull(users)
@@ -197,7 +197,7 @@ class UsersTest : AbstractTest() {
         assertEquals(existingUser.id, client.user(idOnlyUser).id)
 
         assert401ApiResponseException<UsersResponseException>(baseUrl, HttpMethod.GET) {
-            invocation.invoke(client)
+            invocation(client)
         }
     }
 

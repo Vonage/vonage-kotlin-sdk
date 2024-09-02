@@ -23,10 +23,10 @@ import java.util.*
 import kotlin.test.*
 
 class VoiceTest : AbstractTest() {
-    private val voiceClient = vonage.voice
+    private val client = vonage.voice
     private val callsBaseUrl = "/v1/calls"
     private val callUrl = "$callsBaseUrl/$callIdStr"
-    private val callObj = voiceClient.call(callIdStr)
+    private val existingCall = client.call(callIdStr)
     private val conversationId = "CON-f972836a-550f-45fa-956c-12a2ab5b7d22"
     private val price = "23.40"
     private val duration = 60
@@ -139,7 +139,7 @@ class VoiceTest : AbstractTest() {
                     ),
             status = 204
         )
-        invocation.invoke()
+        invocation()
         assertExistingCall404(callUrl, HttpMethod.PUT, invocation)
     }
 
@@ -150,7 +150,7 @@ class VoiceTest : AbstractTest() {
         val streamUrl = "$callUrl/stream"
         val response = if (invocation == null) {
             mockDelete(streamUrl, expectedResponseParams = expectedResponseParams)
-            callObj.stopStream()
+            existingCall.stopStream()
         }
         else {
             mockPut(streamUrl, status = 200,
@@ -160,14 +160,14 @@ class VoiceTest : AbstractTest() {
                 ),
                 expectedResponseParams = expectedResponseParams
             )
-            invocation.invoke()
+            invocation()
         }
         assertNotNull(response)
         assertEquals(message, response.message)
         assertEquals(callIdStr, response.uuid)
 
         if (invocation != null) assertExistingCall404(streamUrl, HttpMethod.PUT, invocation)
-        else assertExistingCall404(streamUrl, HttpMethod.DELETE, callObj::stopStream)
+        else assertExistingCall404(streamUrl, HttpMethod.DELETE, existingCall::stopStream)
     }
 
     private fun testTextToSpeech(expectedRequestParams: Map<String, Any>? = null, invocation: () -> TalkResponse) {
@@ -180,7 +180,7 @@ class VoiceTest : AbstractTest() {
         else {
             mockDelete(talkUrl, AuthType.JWT, expectedResponseParams)
         }
-        val response = invocation.invoke()
+        val response = invocation()
         assertNotNull(response)
         assertEquals(message, response.message)
         assertEquals(callIdStr, response.uuid)
@@ -204,7 +204,7 @@ class VoiceTest : AbstractTest() {
             )
         )
 
-        val callEvent = voiceClient.createCall(call)
+        val callEvent = this@VoiceTest.client.createCall(call)
         assertNotNull(callEvent)
         assertEquals(callIdStr, callEvent.uuid)
         assertEquals(callStatus, callEvent.status)
@@ -249,48 +249,66 @@ class VoiceTest : AbstractTest() {
         )
 
     @Test
+    fun `existing call equals and hashCode`() {
+        val same = client.call(callIdStr)
+        assertEquals(existingCall, same)
+        assertEquals(existingCall.hashCode(), same.hashCode())
+        assertEquals(callIdStr.hashCode(), existingCall.hashCode())
+        assertFalse(existingCall.equals(callIdStr))
+        assertFalse(existingCall.equals(null))
+        val different = client.call(testUuidStr)
+        assertNotEquals(existingCall, different)
+        assertNotEquals(existingCall.hashCode(), different.hashCode())
+    }
+
+    @Test
+    fun `existing call toString`() {
+        assertEquals("com.vonage.client.kt.Voice.ExistingCall {id=$callIdStr}", existingCall.toString())
+    }
+
+    @Test
     fun `terminate call`() {
-        testModifyCall("hangup", callObj::hangup)
+        testModifyCall("hangup", existingCall::hangup)
     }
 
     @Test
     fun `mute call`() {
-        testModifyCall("mute", callObj::mute)
+        testModifyCall("mute", existingCall::mute)
     }
 
     @Test
     fun `umute call`() {
-        testModifyCall("unmute", callObj::unmute)
+        testModifyCall("unmute", existingCall::unmute)
     }
 
     @Test
     fun `earmuff call`() {
-        testModifyCall("earmuff", callObj::earmuff)
+        testModifyCall("earmuff", existingCall::earmuff)
     }
 
     @Test
     fun `umearmuff call`() {
-        testModifyCall("unearmuff", callObj::unearmuff)
+        testModifyCall("unearmuff", existingCall::unearmuff)
     }
 
     @Test
     fun `get call`() {
         mockGet(expectedUrl = callUrl, expectedResponseParams = callResponseMap)
-        assertEqualsSampleCall(callObj.info())
+        assertEqualsSampleCall(existingCall.info())
     }
 
     @Test
     fun `transfer call with answer url`() {
         testModifyCall(nccoUrl = onAnswerUrl, invocation = {
-            callObj.transfer(URI.create(onAnswerUrl))
-            callObj.transfer(onAnswerUrl)
+            existingCall.transfer(URI.create(onAnswerUrl))
+            existingCall.transfer(onAnswerUrl)
         })
     }
 
     @Test
     fun `transfer call with ncco`() {
         testModifyCall(nccoAction = mapOf("action" to "talk", "text" to text), invocation = {
-            callObj.transfer(TalkAction.builder(text).build())
+            existingCall.transfer(TalkAction.builder(text).build())
         })
     }
 
@@ -301,7 +319,7 @@ class VoiceTest : AbstractTest() {
             expectedRequestParams = mapOf("digits" to dtmf),
             expectedResponseParams = mapOf("message" to message, "uuid" to callIdStr)
         )
-        val response = callObj.sendDtmf(dtmf)
+        val response = existingCall.sendDtmf(dtmf)
         assertNotNull(response)
         assertEquals(message, response.message)
         assertEquals(callIdStr, response.uuid)
@@ -312,16 +330,16 @@ class VoiceTest : AbstractTest() {
         val loop = 3
         val level = 0.45
         testStream {
-            callObj.streamAudio(streamUrl)
+            existingCall.streamAudio(streamUrl)
         }
         testStream(loop = loop) {
-            callObj.streamAudio(streamUrl, loop)
+            existingCall.streamAudio(streamUrl, loop)
         }
         testStream(level = level) {
-            callObj.streamAudio(streamUrl, level = level)
+            existingCall.streamAudio(streamUrl, level = level)
         }
         testStream(loop = loop, level = level) {
-            callObj.streamAudio(streamUrl, loop = loop, level = level)
+            existingCall.streamAudio(streamUrl, loop = loop, level = level)
         }
     }
 
@@ -341,7 +359,7 @@ class VoiceTest : AbstractTest() {
             "style" to style, "premium" to premium,
             "loop" to loop, "level" to level
         )) {
-            callObj.startTalk(text) {
+            existingCall.startTalk(text) {
                 language(TextToSpeechLanguage.SCOTTISH_ENGLISH)
                 style(style); premium(premium); loop(loop); level(level)
             }
@@ -351,14 +369,14 @@ class VoiceTest : AbstractTest() {
     @Test
     fun `play text to speech text only`() {
         testTextToSpeech(mapOf("text" to text)) {
-            callObj.startTalk(text)
+            existingCall.startTalk(text)
         }
     }
 
     @Test
     fun `stop text to speech`() {
         testTextToSpeech {
-            callObj.stopTalk()
+            existingCall.stopTalk()
         }
     }
 
@@ -374,7 +392,7 @@ class VoiceTest : AbstractTest() {
             "conversation_uuid" to conversationId
         ), expectedResponseParams = listCallsResponse)
 
-        val callsPage = voiceClient.listCalls {
+        val callsPage = this@VoiceTest.client.listCalls {
             status(CallStatus.UNANSWERED)
             dateStart(startTimeStr); dateEnd(endTimeStr)
             pageSize(pageSize); recordIndex(recordIndex)
@@ -387,7 +405,7 @@ class VoiceTest : AbstractTest() {
     @Test
     fun `list calls no filter`() {
         mockGet(callsBaseUrl, expectedResponseParams = listCallsResponse)
-        assertEqualsSampleCallsPage(voiceClient.listCalls())
+        assertEqualsSampleCallsPage(this@VoiceTest.client.listCalls())
     }
 
     @Test
