@@ -21,6 +21,9 @@ import java.net.URI
 import java.time.Instant
 import java.util.*
 
+/**
+ * Implementation of the [Voice API](https://developer.vonage.com/en/api/voice).
+ */
 class Voice internal constructor(private val client: VoiceClient) {
 
     fun call(callId: String): ExistingCall = ExistingCall(callId)

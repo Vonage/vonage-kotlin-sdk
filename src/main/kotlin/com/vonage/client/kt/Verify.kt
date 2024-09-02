@@ -18,6 +18,9 @@ package com.vonage.client.kt
 import com.vonage.client.verify2.*
 import java.util.*
 
+/**
+ * Implementation of the [Verify v2 API](https://developer.vonage.com/en/api/verify.v2).
+ */
 class Verify(private val client: Verify2Client) {
 
     fun sendVerification(

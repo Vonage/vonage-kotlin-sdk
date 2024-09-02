@@ -19,6 +19,9 @@ import com.vonage.client.conversion.*
 import java.time.Instant
 import java.util.*
 
+/**
+ * Implementation of the [Conversion API](https://developer.vonage.com/en/api/Conversion).
+ */
 class Conversion internal constructor(private val client: ConversionClient) {
 
     private fun convert(type: ConversionRequest.Type,

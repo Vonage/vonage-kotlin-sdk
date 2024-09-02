@@ -18,6 +18,9 @@ package com.vonage.client.kt
 import com.vonage.client.camara.numberverification.*
 import java.net.URI
 
+/**
+ * Implementation of the [Number Verification API](https://developer.vonage.com/en/api/camara/number-verification).
+ */
 class NumberVerification internal constructor(private val client: NumberVerificationClient) {
     private var redirectUri: URI? = null
 

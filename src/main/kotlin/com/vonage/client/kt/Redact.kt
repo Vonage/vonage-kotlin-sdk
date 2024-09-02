@@ -17,6 +17,9 @@ package com.vonage.client.kt
 
 import com.vonage.client.redact.*
 
+/**
+ * Implementation of the [Redact API](https://developer.vonage.com/en/api/redact).
+ */
 class Redact internal constructor(private val client: RedactClient) {
 
     fun redactSms(messageId: String, direction: RedactRequest.Type = RedactRequest.Type.OUTBOUND): Unit =

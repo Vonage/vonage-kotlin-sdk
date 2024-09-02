@@ -17,8 +17,17 @@ package com.vonage.client.kt
 
 import com.vonage.client.account.*
 
+/**
+ * Implementation of the [Account API](https://developer.vonage.com/en/api/account).
+ */
 class Account internal constructor(private val client: AccountClient) {
 
+    /**
+     * Obtains the current account remaining balance.
+     *
+     * @return A [BalanceResponse] object containing the current account balance.
+     * @throws [AccountResponseException] If the balance cannot be retrieved.
+     */
     fun getBalance(): BalanceResponse = client.balance
 
     fun topUp(transactionId: String): Unit = client.topUp(transactionId)

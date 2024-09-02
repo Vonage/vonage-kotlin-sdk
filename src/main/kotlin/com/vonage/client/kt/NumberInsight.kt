@@ -17,6 +17,9 @@ package com.vonage.client.kt
 
 import com.vonage.client.insight.*
 
+/**
+ * Implementation of the [Number Insight API](https://developer.vonage.com/en/api/number-insight).
+ */
 class NumberInsight internal constructor(private val client: InsightClient) {
 
     fun basic(number: String, countryCode: String? = null): BasicInsightResponse =

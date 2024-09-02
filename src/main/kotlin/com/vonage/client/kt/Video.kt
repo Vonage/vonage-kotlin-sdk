@@ -18,6 +18,9 @@ package com.vonage.client.kt
 import com.vonage.client.video.*
 import java.util.*
 
+/**
+ * Implementation of the [Video API](https://developer.vonage.com/en/api/video).
+ */
 class Video(private val client: VideoClient) {
 
     fun createSession(properties: CreateSessionRequest.Builder.() -> Unit = {}): CreateSessionResponse =

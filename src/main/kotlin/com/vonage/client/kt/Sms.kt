@@ -18,6 +18,9 @@ package com.vonage.client.kt
 import com.vonage.client.sms.*
 import com.vonage.client.sms.messages.*
 
+/**
+ * Implementation of the [SMS API](https://developer.vonage.com/en/api/sms).
+ */
 class Sms internal constructor(private val client: SmsClient) {
 
     private fun send(msgObj: Message, statusReport: Boolean?, ttl: Int?,

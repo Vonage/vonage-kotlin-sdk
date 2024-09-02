@@ -17,6 +17,9 @@ package com.vonage.client.kt
 
 import com.vonage.client.numbers.*
 
+/**
+ * Implementation of the [Numbers API](https://developer.vonage.com/en/api/numbers).
+ */
 class Numbers internal constructor(private val client: NumbersClient) {
 
     fun number(countryCode: String, msisdn: String) = ExistingNumber(countryCode, msisdn)

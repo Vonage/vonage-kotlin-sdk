@@ -17,6 +17,9 @@ package com.vonage.client.kt
 
 import com.vonage.client.users.*
 
+/**
+ * Implementation of the [Users API](https://developer.vonage.com/en/api/application.v2#User).
+ */
 class Users internal constructor(private val client: UsersClient) {
 
     fun user(userId: String): ExistingUser = ExistingUser(userId)

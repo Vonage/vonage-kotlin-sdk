@@ -19,6 +19,9 @@ import com.vonage.client.subaccounts.*
 import com.vonage.client.subaccounts.Account
 import java.time.Instant
 
+/**
+ * Implementation of the [Subaccounts API](https://developer.vonage.com/en/api/subaccounts).
+ */
 class Subaccounts internal constructor(private val client: SubaccountsClient) {
 
     fun listSubaccounts(): ListSubaccountsResponse = client.listSubaccounts()

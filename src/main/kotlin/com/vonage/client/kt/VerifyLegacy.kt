@@ -17,6 +17,9 @@ package com.vonage.client.kt
 
 import com.vonage.client.verify.*
 
+/**
+ * Implementation of the [Verify v1 API](https://developer.vonage.com/en/api/verify).
+ */
 class VerifyLegacy internal constructor(private val client: VerifyClient) {
 
     fun verify(number: String, brand: String, properties: (VerifyRequest.Builder.() -> Unit) = {}): VerifyResponse =

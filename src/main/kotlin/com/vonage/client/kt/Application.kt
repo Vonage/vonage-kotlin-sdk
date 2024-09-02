@@ -24,6 +24,9 @@ import com.vonage.client.application.capabilities.Voice
 import com.vonage.client.common.Webhook
 import java.util.*
 
+/**
+ * Implementation of the [Application API](https://developer.vonage.com/en/api/application.v2).
+ */
 class Application internal constructor(private val client: ApplicationClient) {
 
     fun application(applicationId: String): ExistingApplication = ExistingApplication(applicationId)

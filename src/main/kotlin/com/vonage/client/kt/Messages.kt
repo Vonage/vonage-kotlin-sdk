@@ -23,6 +23,9 @@ import com.vonage.client.messages.messenger.*
 import com.vonage.client.messages.viber.*
 import java.util.UUID
 
+/**
+ * Implementation of the [Messages API](https://developer.vonage.com/en/api/messages-olympus).
+ */
 class Messages internal constructor(private val client: MessagesClient) {
     fun send(message: MessageRequest, sandbox: Boolean = false): UUID =
         (if (sandbox) client.useSandboxEndpoint()

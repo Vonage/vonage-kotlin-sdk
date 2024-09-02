@@ -15,6 +15,10 @@
  */
 package com.vonage.client.kt
 
+/**
+ * Base class for top-level endpoint domain objects with IDs.
+ * This factors out the ID field and provides a common `toString`, `equals`, and `hashCode` implementation.
+ */
 open class ExistingResource internal constructor(val id: String) {
 
     @Override

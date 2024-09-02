@@ -18,6 +18,9 @@ package com.vonage.client.kt
 import com.vonage.client.camara.simswap.*
 import java.time.Instant
 
+/**
+ * Implementation of the [Sim Swap API](https://developer.vonage.com/en/api/camara/sim-swap).
+ */
 class SimSwap internal constructor(private val client: SimSwapClient) {
 
     fun checkSimSwap(phoneNumber: String, maxAgeHours: Int = 240): Boolean =
