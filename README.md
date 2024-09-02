@@ -56,8 +56,8 @@ Release notes can be found in the [changelog](CHANGELOG.md).
 
 ### Build It Yourself
 
-**Note**: We *strongly recommend* that you use a tool that supports dependency management,
-such as [Maven](https://maven.apache.org/), [Gradle](https://gradle.org/) or [Ivy](http://ant.apache.org/ivy/).
+**Note**: We *strongly recommend* that you use a tool with dependency management,
+such as [Maven](https://maven.apache.org/) or [Gradle](https://gradle.org/).
 
 Alternatively you can clone the repo and build the JAR file yourself:
 
@@ -72,9 +72,9 @@ directory at the root of the repo. You can then include this in your project's c
 ## Configuration
 
 ## Typical Instantiation
-For default configuration, you just need to specify your Vonage account credentials using API key and secret, private
-key and application ID or both. For maximum compatibility with all APIs, it is recommended that you specify both
-authentication methods, like so:
+For default configuration, you just need to specify your Vonage account credentials using API key and secret,
+private key and application ID or both. For maximum compatibility with all APIs, it is recommended that you
+specify both authentication methods, like so:
 
 ```kotlin
 import com.vonage.client.kt.Vonage
@@ -87,11 +87,11 @@ val vonage = Vonage {
 ```
 
 You can also use environment variables for convenience, by setting the following:
-- `VONAGE_API_KEY`
-- `VONAGE_API_SECRET`
-- `VONAGE_SIGNATURE_SECRET`
-- `VONAGE_APPLICATION_ID`
-- `VONAGE_PRIVATE_KEY_PATH`
+- `VONAGE_API_KEY` - Your account API key
+- `VONAGE_API_SECRET` - Your account API secret
+- `VONAGE_SIGNATURE_SECRET` - (Advanced, optional) Signature secret for signed requests when using SMS API
+- `VONAGE_APPLICATION_ID` - UUID of the Vonage application you want to use
+- `VONAGE_PRIVATE_KEY_PATH` - Absolute path to the private key file for the application
 
 and then instantiate the client with:
 
@@ -117,10 +117,11 @@ val vonageClient = Vonage {
 
 **Q: Why use this SDK instead of the [Vonage Java Server SDK](https://github.com/Vonage/vonage-java-sdk)?**
 
-**A:** This Kotlin SDK is actually based on the to improve the user experience in Kotlin. It adds
+**A:** This Kotlin SDK is actually based on the Java SDK to improve the user experience in Kotlin. It adds
 syntactic sugar, so you can avoid the cumbersome builder pattern in favour of a more idiomatic DSL-like
-syntax. Furthermore, you are more partially shielded from "platform types" (the `!`) so you have a better
-idea of what is and isn't nullable when creating requests.
+syntax, optional and named parameters with default values etc. whilst still reataining the strong typing
+offered by the Java SDK. Furthermore, you are more partially shielded from "platform types" (the `!`)
+so you have a better idea of what is and isn't nullable when creating requests.
 
 **Q: What is your policy on thread safety?**
 
