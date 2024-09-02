@@ -254,7 +254,19 @@ class SubaccountsTest : AbstractTest() {
     }
 
     @Test
-    fun `update subaccount`() {
+    fun `update subaccount name only`() {
+        mockPatch(
+            expectedUrl = existingSubUrl, authType = authType,
+            expectedRequestParams = mapOf("name" to name),
+            expectedResponseParams = sampleSubaccountMap
+        )
+        val invocation = { existingSubaccount.update(name = name) }
+        assertEqualsSampleSubaccount(invocation())
+        assert401ApiResponseException<SubaccountsResponseException>(existingSubUrl, HttpMethod.PATCH, invocation)
+    }
+
+    @Test
+    fun `update subaccount both parameters`() {
         mockPatch(
             expectedUrl = existingSubUrl, authType = authType,
             expectedRequestParams = mapOf(
@@ -264,9 +276,6 @@ class SubaccountsTest : AbstractTest() {
             expectedResponseParams = sampleSubaccountMap
         )
         assertEqualsSampleSubaccount(existingSubaccount.update(name, usePrimary))
-        assert401ApiResponseException<SubaccountsResponseException>(existingSubUrl, HttpMethod.PATCH) {
-            existingSubaccount.update(usePrimaryAccountBalance = usePrimary)
-        }
     }
 
     @Test
