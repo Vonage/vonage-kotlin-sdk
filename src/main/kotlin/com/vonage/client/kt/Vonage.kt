@@ -24,9 +24,17 @@ import com.vonage.client.VonageClient
  * your account credentials (API key and secret) and/or application ID and private key depending
  * on which APIs you plan to use. It is recommended that you set the parameters for both
  * authentication methods to maximise compatibility.
+ *
+ * Every sub-client for interacting with each API is exposed as a property of this class. Those classes
+ * document their accepted / preferred authentication type(s). For JWT authentication, you will need to
+ * provide the application ID and private key path. For API key and secret authentication, you will need
+ * to provide the API key and secret. These are specified on the [VonageClient.Builder] when initialising
+ * this class using the provided lambda function.
+ *
+ * @param config The configuration lambda, where you provide your Vonage account credentials.
  */
-class Vonage(init: VonageClient.Builder.() -> Unit) {
-    private val client : VonageClient = VonageClient.builder().apply(init).build()
+class Vonage(config: VonageClient.Builder.() -> Unit) {
+    private val client : VonageClient = VonageClient.builder().apply(config).build()
 
     /**
      * Access to the Vonage Account API.

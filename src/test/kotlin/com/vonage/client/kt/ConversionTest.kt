@@ -18,7 +18,7 @@ package com.vonage.client.kt
 import kotlin.test.*
 
 class ConversionTest : AbstractTest() {
-    private val conversionClient = vonage.conversion
+    private val client = vonage.conversion
     private val smsEndpoint = "sms"
     private val voiceEndpoint = "voice"
 
@@ -33,27 +33,27 @@ class ConversionTest : AbstractTest() {
     fun `submit sms conversion with timestamp`() {
         val delivered = true
         mockSuccess(smsMessageId, smsEndpoint, delivered, true)
-        conversionClient.convertSms(smsMessageId, delivered, timestampDate.toInstant())
+        client.convertSms(smsMessageId, delivered, timestampDate.toInstant())
     }
 
     @Test
     fun `submit sms conversion without timestamp`() {
         val delivered = false
         mockSuccess(smsMessageId, smsEndpoint, delivered, false)
-        conversionClient.convertSms(smsMessageId, delivered)
+        client.convertSms(smsMessageId, delivered)
     }
 
     @Test
     fun `submit voice conversion with timestamp`() {
         val delivered = false
         mockSuccess(callIdStr, voiceEndpoint, delivered, true)
-        conversionClient.convertVoice(callIdStr, delivered, timestamp)
+        client.convertVoice(callIdStr, delivered, timestamp)
     }
 
     @Test
     fun `submit voice conversion without timestamp`() {
         val delivered = true
         mockSuccess(callIdStr, voiceEndpoint, delivered, false)
-        conversionClient.convertVoice(callIdStr, delivered)
+        client.convertVoice(callIdStr, delivered)
     }
 }

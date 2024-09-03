@@ -23,6 +23,8 @@ import java.util.*
 
 /**
  * Implementation of the [Voice API](https://developer.vonage.com/en/api/voice).
+ *
+ * Authentication method: JWT.
  */
 class Voice internal constructor(private val client: VoiceClient) {
 

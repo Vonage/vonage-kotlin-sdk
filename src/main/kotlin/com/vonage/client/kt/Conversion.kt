@@ -21,6 +21,8 @@ import java.util.*
 
 /**
  * Implementation of the [Conversion API](https://developer.vonage.com/en/api/Conversion).
+ *
+ * Authentication method: API key & secret.
  */
 class Conversion internal constructor(private val client: ConversionClient) {
 

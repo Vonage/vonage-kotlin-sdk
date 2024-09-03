@@ -20,6 +20,8 @@ import java.util.*
 
 /**
  * Implementation of the [Video API](https://developer.vonage.com/en/api/video).
+ *
+ * Authentication method: JWT.
  */
 class Video(private val client: VideoClient) {
 

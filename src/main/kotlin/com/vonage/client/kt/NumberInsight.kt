@@ -19,6 +19,8 @@ import com.vonage.client.insight.*
 
 /**
  * Implementation of the [Number Insight API](https://developer.vonage.com/en/api/number-insight).
+ *
+ * Authentication method: API key & secret.
  */
 class NumberInsight internal constructor(private val client: InsightClient) {
 
