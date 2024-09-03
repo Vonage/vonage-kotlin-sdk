@@ -51,7 +51,7 @@ class Application internal constructor(private val client: ApplicationClient) {
     /**
      * Class for working with an existing application.
      *
-     * @property id The ID of the application.
+     * @property id The application ID.
      */
     inner class ExistingApplication internal constructor(id: String): ExistingResource(id) {
 
