@@ -44,7 +44,5 @@ class VerifyLegacy internal constructor(private val client: VerifyClient) {
         fun check(code: String): CheckResponse = client.check(id, code)
 
         fun search(): SearchVerifyResponse = client.search(id)
-
     }
-
 }
