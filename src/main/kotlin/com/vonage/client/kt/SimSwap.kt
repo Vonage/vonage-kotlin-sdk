@@ -15,7 +15,9 @@
  */
 package com.vonage.client.kt
 
+import com.vonage.client.auth.camara.NetworkAuthResponseException
 import com.vonage.client.camara.simswap.*
+import com.vonage.client.camara.CamaraResponseException
 import java.time.Instant
 
 /**
@@ -32,6 +34,9 @@ class SimSwap internal constructor(private val client: SimSwapClient) {
      * Default is 10 days (240 hours).
      *
      * @return `true` if the SIM card has been swapped during the period within the provided age.
+     *
+     * @throws NetworkAuthResponseException If an error was encountered in the OAuth 2 flow when
+     * using the Vonage Network Auth API to obtain the access token.
      *
      * @throws CamaraResponseException If the request was unsuccessful. This could be for the following reasons:
      * - **400**: Invalid request arguments.
@@ -50,6 +55,9 @@ class SimSwap internal constructor(private val client: SimSwapClient) {
      * @param phoneNumber Subscriber number in E.164 format (starting with country code). Optionally prefixed with '+'.
      *
      * @return Time of the latest SIM swap performed as an Instant, or `null` if unknown / not applicable.
+     *
+     * @throws NetworkAuthResponseException If an error was encountered in the OAuth 2 flow when
+     * using the Vonage Network Auth API to obtain the access token.
      *
      * @throws CamaraResponseException If the request was unsuccessful. This could be for the following reasons:
      * - **400**: Invalid request arguments.
