@@ -21,9 +21,9 @@ import java.util.*
 import kotlin.test.*
 
 class VerifyLegacyTest : AbstractTest() {
-    private val verifyClient = vonage.verifyLegacy
+    private val client = vonage.verifyLegacy
     private val requestId = "abcdef0123456789abcdef0123456789"
-    private val existingRequest = verifyClient.request(requestId)
+    private val existingRequest = client.request(requestId)
     private val eventId = "0A00000012345678"
     private val accountId = "abcdef01"
     private val payee = "Acme Inc"
@@ -45,11 +45,11 @@ class VerifyLegacyTest : AbstractTest() {
             "request_id" to requestId,
             "status" to "0"
         ))
-        val successParsed = invocation(verifyClient)
+        val successParsed = invocation(client)
         assertNotNull(successParsed)
         assertEquals(requestId, successParsed.requestId)
         assertEquals(VerifyStatus.OK, successParsed.status)
-        assertEquals(existingRequest, verifyClient.request(successParsed))
+        assertEquals(existingRequest, client.request(successParsed))
 
         val errorText = "Your request is incomplete and missing the mandatory parameter `number`"
         mockPostQueryParams(expectedUrl, params, expectedResponseParams = mapOf(
@@ -58,7 +58,7 @@ class VerifyLegacyTest : AbstractTest() {
             "error_text" to errorText,
             "network" to networkCode
         ))
-        val failureParsed = invocation(verifyClient)
+        val failureParsed = invocation(client)
         assertNotNull(failureParsed)
         assertEquals(requestId, failureParsed.requestId)
         assertEquals(VerifyStatus.MISSING_PARAMS, failureParsed.status)
@@ -137,7 +137,7 @@ class VerifyLegacyTest : AbstractTest() {
                 )
             )
         )
-        val response = if (single) existingRequest.search() else verifyClient.search(*requestIds)
+        val response = if (single) existingRequest.search() else client.search(*requestIds)
         assertNotNull(response)
         assertNull(response.errorText)
         assertEquals(3, response.verificationRequests.size)
@@ -162,7 +162,7 @@ class VerifyLegacyTest : AbstractTest() {
     @Test
     fun `existing request hashCode is based on the requestId`() {
         assertEquals(requestId.hashCode(), existingRequest.hashCode())
-        assertEquals(existingRequest, verifyClient.request(requestId))
+        assertEquals(existingRequest, client.request(requestId))
         assertEquals(existingRequest, existingRequest)
         assertFalse(existingRequest.equals(requestId))
     }

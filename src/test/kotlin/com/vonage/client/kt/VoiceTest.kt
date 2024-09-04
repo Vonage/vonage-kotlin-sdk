@@ -204,7 +204,7 @@ class VoiceTest : AbstractTest() {
             )
         )
 
-        val callEvent = this@VoiceTest.client.createCall(call)
+        val callEvent = client.createCall(call)
         assertNotNull(callEvent)
         assertEquals(callIdStr, callEvent.uuid)
         assertEquals(callStatus, callEvent.status)
@@ -392,7 +392,7 @@ class VoiceTest : AbstractTest() {
             "conversation_uuid" to conversationId
         ), expectedResponseParams = listCallsResponse)
 
-        val callsPage = this@VoiceTest.client.listCalls {
+        val callsPage = client.listCalls {
             status(CallStatus.UNANSWERED)
             dateStart(startTimeStr); dateEnd(endTimeStr)
             pageSize(pageSize); recordIndex(recordIndex)
@@ -405,7 +405,7 @@ class VoiceTest : AbstractTest() {
     @Test
     fun `list calls no filter`() {
         mockGet(callsBaseUrl, expectedResponseParams = listCallsResponse)
-        assertEqualsSampleCallsPage(this@VoiceTest.client.listCalls())
+        assertEqualsSampleCallsPage(client.listCalls())
     }
 
     @Test

@@ -19,7 +19,7 @@ import com.vonage.client.auth.camara.FraudPreventionDetectionScope
 import kotlin.test.*
 
 class SimSwapTest : AbstractTest() {
-    private val simSwapClient = vonage.simSwap
+    private val client = vonage.simSwap
     private val baseSimSwapUrl = "/camara/sim-swap/v040"
     private val checkSimSwapUrl = "$baseSimSwapUrl/check"
     private val retrieveSimSwapDateUrl = "$baseSimSwapUrl/retrieve-date"
@@ -66,7 +66,7 @@ class SimSwapTest : AbstractTest() {
                 expectedRequestParams = phoneNumberMap + mapOf("maxAge" to maxAge),
                 expectedResponseParams = if (result != null) mapOf("swapped" to result) else mapOf()
             )
-            assertEquals(result == true, invocation(simSwapClient))
+            assertEquals(result == true, invocation(client))
         }
     }
 
@@ -78,7 +78,7 @@ class SimSwapTest : AbstractTest() {
             expectedRequestParams = phoneNumberMap,
             expectedResponseParams = if (includeResponse) mapOf("latestSimChange" to timestampStr) else mapOf()
         )
-        assertEquals(if (includeResponse) timestamp else null, simSwapClient.retrieveSimSwapDate(simSwapNumber))
+        assertEquals(if (includeResponse) timestamp else null, client.retrieveSimSwapDate(simSwapNumber))
     }
 
     @Test

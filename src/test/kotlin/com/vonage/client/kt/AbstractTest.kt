@@ -104,11 +104,11 @@ abstract class AbstractTest {
     )
 
     val vonage = Vonage {
-        apiKey(apiKey); apiSecret(apiSecret);
-        applicationId(applicationId); privateKeyPath(privateKeyPath)
-        httpConfig {
+        authFromEnv(); httpConfig {
             baseUri("http://localhost:$port")
         }
+        apiKey(apiKey); apiSecret(apiSecret); signatureSecret(null)
+        applicationId(applicationId); privateKeyPath(privateKeyPath)
     }
 
     @BeforeEach
