@@ -24,23 +24,78 @@ import com.vonage.client.numbers.*
  */
 class Numbers internal constructor(private val client: NumbersClient) {
 
+    /**
+     * Call this method to work with an existing number.
+     *
+     * @param countryCode The two-character country code of the number.
+     * @param msisdn The phone number in E.164 format.
+     *
+     * @return An [ExistingNumber] object with methods to interact with the number.
+     */
     fun number(countryCode: String, msisdn: String) = ExistingNumber(countryCode, msisdn)
 
+    /**
+     * Class for working with an existing number.
+     *
+     * @property countryCode The two-character country code of the number.
+     * @property msisdn The phone number in E.164 format.
+     */
     inner class ExistingNumber internal constructor(val countryCode: String, val msisdn: String) {
 
+        /**
+         * Purchase the number.
+         *
+         * @param targetApiKey (OPTIONAL) The API key of the subaccount to assign the number to.
+         * If unspecified (the default), the action will be performed on the main account.
+         *
+         * @throws [NumbersResponseException] If the number could not be purchased.
+         */
         fun buy(targetApiKey: String? = null): Unit =
             client.buyNumber(countryCode, msisdn, targetApiKey)
 
+        /**
+         * Cancel the number.
+         *
+         * @param targetApiKey (OPTIONAL) The API key of the subaccount to cancel the number on.
+         * If unspecified (the default), the action will be performed on the main account.
+         *
+         * @throws [NumbersResponseException] If the number could not be cancelled.
+         */
         fun cancel(targetApiKey: String? = null): Unit =
             client.cancelNumber(countryCode, msisdn, targetApiKey)
 
+        /**
+         * Update the number's assignment on your account.
+         *
+         * @param properties A lambda function for specifying the properties to update.
+         *
+         * @throws [NumbersResponseException] If the number could not be updated.
+         */
         fun update(properties: UpdateNumberRequest.Builder.() -> Unit): Unit =
             client.updateNumber(UpdateNumberRequest.builder(msisdn, countryCode).apply(properties).build())
     }
 
+    /**
+     * List numbers owned by the account.
+     *
+     * @param filter (OPTIONAL) A lambda function for specifying the filter properties.
+     *
+     * @return A [ListNumbersResponse] object containing the list of owned numbers.
+     *
+     * @throws [NumbersResponseException] If the list could not be retrieved.
+     */
     fun listOwned(filter: ListNumbersFilter.Builder.() -> Unit = {}): ListNumbersResponse =
         client.listNumbers(ListNumbersFilter.builder().apply(filter).build())
 
+    /**
+     * Search for numbers that are available to purchase.
+     *
+     * @param filter A lambda function for specifying the search filter properties.
+     *
+     * @return A [SearchNumbersResponse] object containing the list of available numbers.
+     *
+     * @throws [NumbersResponseException] If the search request could not be completed.
+     */
     fun searchAvailable(filter: SearchNumbersFilter.Builder.() -> Unit): SearchNumbersResponse =
         client.searchNumbers(SearchNumbersFilter.builder().apply(filter).build())
 }

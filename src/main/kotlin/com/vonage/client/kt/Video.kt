@@ -30,6 +30,7 @@ class Video(private val client: VideoClient) {
 
     fun session(sessionId: String): ExistingSession = ExistingSession(sessionId)
 
+
     inner class ExistingSession internal constructor(id: String): ExistingResource(id) {
 
         fun stream(streamId: String): ExistingStream = ExistingStream(streamId)
