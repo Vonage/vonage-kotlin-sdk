@@ -137,7 +137,7 @@ class VerifyLegacyTest : AbstractTest() {
                 )
             )
         )
-        val response = if (single) existingRequest.search() else client.search(*requestIds)
+        val response = if (single) existingRequest.info() else client.search(*requestIds)
         assertNotNull(response)
         assertNull(response.errorText)
         assertEquals(3, response.verificationRequests.size)
