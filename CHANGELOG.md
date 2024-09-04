@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 GA release!
 
 ### Added
-- Documentation (KDocs) for all classes and methods
+- Documentation (KDocs) for all classes and methods.
 
 ## [1.0.0-beta1] - 2024-09-02
 Feature-complete beta release.
@@ -17,7 +17,10 @@ Feature-complete beta release.
 - Video API
 
 ### Changed
-- Standardised `Existing*` classes to extend `ExistingResource` for consistency
+- Renamed `VerifyLegacy.ExistingRequest#search` to `info` for consistency with other APIs.
+
+### Changed
+- Standardised `Existing*` classes to extend `ExistingResource` for consistency.
 
 ## [0.9.0] - 2024-08-19
 
@@ -36,8 +39,8 @@ Feature-complete beta release.
 - Account API
 
 ### Changed
-- Explicit return types for all methods
-- Introduced `ExistingRequest` class to Verify (v2) to reduce duplicating `requestId` parameter
+- Explicit return types for all methods.
+- Introduced `ExistingRequest` class to Verify (v2) to reduce duplicating `requestId` parameter.
 
 ## [0.6.0] - 2024-07-30
 
@@ -46,8 +49,8 @@ Feature-complete beta release.
 - Number Verification API
 
 ### Changed
-- `InputAction.Builder#dtmf` extension method uses `DtmfSettings` builder instead of setters
-- `Messages#send` now uses optional Boolean parameter for sandbox instead of separate method
+- `InputAction.Builder#dtmf` extension method uses `DtmfSettings` builder instead of setters.
+- `Messages#send` now uses optional Boolean parameter for sandbox instead of separate method.
 
 ## [0.5.0] - 2024-07-25
 
@@ -62,7 +65,7 @@ Feature-complete beta release.
 ## [0.3.1] - 2024-07-12
 
 ### Changed
-- Upgraded Java SDK version to 8.9.2
+- Upgraded Java SDK version to 8.9.2.
 
 ## [0.3.0] - 2024-07-08
 
@@ -81,7 +84,7 @@ Feature-complete beta release.
 - Voice API
 
 ### Fixed
-- `authFromEnv` now checks for absent environment variables before attempting to set them
+- `authFromEnv` now checks for absent environment variables before attempting to set them.
 
 ## [0.1.0] - 2024-06-25
 Initial version.
