@@ -29,82 +29,279 @@ import java.util.UUID
  * Authentication method: JWT (recommended), API key & secret (limited functionality).
  */
 class Messages internal constructor(private val client: MessagesClient) {
+
+    /**
+     * Send a message.
+     *
+     * The details of its format, channel, sender, recipient etc. are specified entirely by
+     * the type and contents of the [MessageRequest]. This file contains utility functions for creating
+     * each valid combination of [Channel] and [com.vonage.client.common.MessageType]. Generally, the only
+     * required parameters are the `from` (sender), `to` (recipient), and the message content, which is
+     * typically either `text` (for text messages) or `url` (for media messages).
+     *
+     * @param message The message to send. Use one of the DSL functions to create the message.
+     * @param sandbox (OPTIONAL) Set to `true` to use the Messages API Sandbox endpoint.
+     *
+     * @return UUID of the message.
+     *
+     * @throws [MessageResponseException] If the message could not be sent. This may be for the following reasons:
+     * - **401**: Invalid credentials.
+     * - **402**: The account balance is too low.
+     * - **422**: Malformed request.
+     * - **429**: Too many requests.
+     * - **500**: Internal server error.
+     */
     fun send(message: MessageRequest, sandbox: Boolean = false): UUID =
         (if (sandbox) client.useSandboxEndpoint()
             else client.useRegularEndpoint()).sendMessage(message).messageUuid
 }
 
-fun smsText(init: SmsTextRequest.Builder.() -> Unit): SmsTextRequest =
-    SmsTextRequest.builder().apply(init).build()
+/**
+ * Create an SMS text message.
+ * 
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [SmsTextRequest] object with the specified properties.
+ */
+fun smsText(properties: SmsTextRequest.Builder.() -> Unit): SmsTextRequest =
+    SmsTextRequest.builder().apply(properties).build()
 
-fun mmsVcard(init: MmsVcardRequest.Builder.() -> Unit): MmsVcardRequest =
-    MmsVcardRequest.builder().apply(init).build()
+/**
+ * Creates an MMS vCard message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return An [MmsVcardRequest] object with the specified properties.
+ */
+fun mmsVcard(properties: MmsVcardRequest.Builder.() -> Unit): MmsVcardRequest =
+    MmsVcardRequest.builder().apply(properties).build()
 
-fun mmsImage(init: MmsImageRequest.Builder.() -> Unit): MmsImageRequest =
-    MmsImageRequest.builder().apply(init).build()
+/**
+ * Creates an MMS image message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return An [MmsImageRequest] object with the specified properties.
+ */
+fun mmsImage(properties: MmsImageRequest.Builder.() -> Unit): MmsImageRequest =
+    MmsImageRequest.builder().apply(properties).build()
 
-fun mmsAudio(init: MmsAudioRequest.Builder.() -> Unit): MmsAudioRequest =
-    MmsAudioRequest.builder().apply(init).build()
+/**
+ * Creates an MMS audio message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return An [MmsAudioRequest] object with the specified properties.
+ */
+fun mmsAudio(properties: MmsAudioRequest.Builder.() -> Unit): MmsAudioRequest =
+    MmsAudioRequest.builder().apply(properties).build()
 
-fun mmsVideo(init: MmsVideoRequest.Builder.() -> Unit): MmsVideoRequest =
-    MmsVideoRequest.builder().apply(init).build()
+/**
+ * Creates an MMS video message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return An [MmsVideoRequest] object with the specified properties.
+ */
+fun mmsVideo(properties: MmsVideoRequest.Builder.() -> Unit): MmsVideoRequest =
+    MmsVideoRequest.builder().apply(properties).build()
 
-fun whatsappText(init: WhatsappTextRequest.Builder.() -> Unit): WhatsappTextRequest =
-    WhatsappTextRequest.builder().apply(init).build()
+/**
+ * Creates a WhatsApp text message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [WhatsappTextRequest] object with the specified properties.
+ */
+fun whatsappText(properties: WhatsappTextRequest.Builder.() -> Unit): WhatsappTextRequest =
+    WhatsappTextRequest.builder().apply(properties).build()
 
-fun whatsappImage(init: WhatsappImageRequest.Builder.() -> Unit): WhatsappImageRequest =
-    WhatsappImageRequest.builder().apply(init).build()
+/**
+ * Creates a WhatsApp image message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [WhatsappImageRequest] object with the specified properties.
+ */
+fun whatsappImage(properties: WhatsappImageRequest.Builder.() -> Unit): WhatsappImageRequest =
+    WhatsappImageRequest.builder().apply(properties).build()
 
-fun whatsappAudio(init: WhatsappAudioRequest.Builder.() -> Unit): WhatsappAudioRequest =
-    WhatsappAudioRequest.builder().apply(init).build()
+/**
+ * Creates a WhatsApp audio message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [WhatsappAudioRequest] object with the specified properties.
+ */
+fun whatsappAudio(properties: WhatsappAudioRequest.Builder.() -> Unit): WhatsappAudioRequest =
+    WhatsappAudioRequest.builder().apply(properties).build()
 
-fun whatsappVideo(init: WhatsappVideoRequest.Builder.() -> Unit): WhatsappVideoRequest =
-    WhatsappVideoRequest.builder().apply(init).build()
+/**
+ * Creates a WhatsApp video message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [WhatsappVideoRequest] object with the specified properties.
+ */
+fun whatsappVideo(properties: WhatsappVideoRequest.Builder.() -> Unit): WhatsappVideoRequest =
+    WhatsappVideoRequest.builder().apply(properties).build()
 
-fun whatsappFile(init: WhatsappFileRequest.Builder.() -> Unit): WhatsappFileRequest =
-    WhatsappFileRequest.builder().apply(init).build()
+/**
+ * Creates a WhatsApp file message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [WhatsappFileRequest] object with the specified properties.
+ */
+fun whatsappFile(properties: WhatsappFileRequest.Builder.() -> Unit): WhatsappFileRequest =
+    WhatsappFileRequest.builder().apply(properties).build()
 
-fun whatsappSticker(init: WhatsappStickerRequest.Builder.() -> Unit): WhatsappStickerRequest =
-    WhatsappStickerRequest.builder().apply(init).build()
+/**
+ * Creates a WhatsApp sticker message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [WhatsappStickerRequest] object with the specified properties.
+ */
+fun whatsappSticker(properties: WhatsappStickerRequest.Builder.() -> Unit): WhatsappStickerRequest =
+    WhatsappStickerRequest.builder().apply(properties).build()
 
-fun whatsappLocation(init: WhatsappLocationRequest.Builder.() -> Unit): WhatsappLocationRequest =
-    WhatsappLocationRequest.builder().apply(init).build()
+/**
+ * Creates a WhatsApp location message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [WhatsappLocationRequest] object with the specified properties.
+ */
+fun whatsappLocation(properties: WhatsappLocationRequest.Builder.() -> Unit): WhatsappLocationRequest =
+    WhatsappLocationRequest.builder().apply(properties).build()
 
-fun whatsappSingleProduct(init: WhatsappSingleProductRequest.Builder.() -> Unit): WhatsappSingleProductRequest =
-    WhatsappSingleProductRequest.builder().apply(init).build()
+/**
+ * Creates a WhatsApp single product message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [WhatsappSingleProductRequest] object with the specified properties.
+ */
+fun whatsappSingleProduct(properties: WhatsappSingleProductRequest.Builder.() -> Unit): WhatsappSingleProductRequest =
+    WhatsappSingleProductRequest.builder().apply(properties).build()
 
-fun whatsappMultiProduct(init: WhatsappMultiProductRequest.Builder.() -> Unit): WhatsappMultiProductRequest =
-    WhatsappMultiProductRequest.builder().apply(init).build()
+/**
+ * Creates a WhatsApp multi product message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [WhatsappMultiProductRequest] object with the specified properties.
+ */
+fun whatsappMultiProduct(properties: WhatsappMultiProductRequest.Builder.() -> Unit): WhatsappMultiProductRequest =
+    WhatsappMultiProductRequest.builder().apply(properties).build()
 
-fun whatsappTemplate(init: WhatsappTemplateRequest.Builder.() -> Unit): WhatsappTemplateRequest =
-    WhatsappTemplateRequest.builder().apply(init).build()
+/**
+ * Creates a WhatsApp template message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [WhatsappTemplateRequest] object with the specified properties.
+ */
+fun whatsappTemplate(properties: WhatsappTemplateRequest.Builder.() -> Unit): WhatsappTemplateRequest =
+    WhatsappTemplateRequest.builder().apply(properties).build()
 
-fun whatsappCustom(init: WhatsappCustomRequest.Builder.() -> Unit): WhatsappCustomRequest =
-    WhatsappCustomRequest.builder().apply(init).build()
+/**
+ * Creates a WhatsApp custom message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [WhatsappCustomRequest] object with the specified properties.
+ */
+fun whatsappCustom(properties: WhatsappCustomRequest.Builder.() -> Unit): WhatsappCustomRequest =
+    WhatsappCustomRequest.builder().apply(properties).build()
 
-fun messengerText(init: MessengerTextRequest.Builder.() -> Unit): MessengerTextRequest =
-    MessengerTextRequest.builder().apply(init).build()
+/**
+ * Creates a Messenger text message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [MessengerTextRequest] object with the specified properties.
+ */
+fun messengerText(properties: MessengerTextRequest.Builder.() -> Unit): MessengerTextRequest =
+    MessengerTextRequest.builder().apply(properties).build()
 
-fun messengerImage(init: MessengerImageRequest.Builder.() -> Unit): MessengerImageRequest =
-    MessengerImageRequest.builder().apply(init).build()
+/**
+ * Creates a Messenger image message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [MessengerImageRequest] object with the specified properties.
+ */
+fun messengerImage(properties: MessengerImageRequest.Builder.() -> Unit): MessengerImageRequest =
+    MessengerImageRequest.builder().apply(properties).build()
 
-fun messengerAudio(init: MessengerAudioRequest.Builder.() -> Unit): MessengerAudioRequest =
-    MessengerAudioRequest.builder().apply(init).build()
+/**
+ * Creates a Messenger audio message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [MessengerAudioRequest] object with the specified properties.
+ */
+fun messengerAudio(properties: MessengerAudioRequest.Builder.() -> Unit): MessengerAudioRequest =
+    MessengerAudioRequest.builder().apply(properties).build()
 
-fun messengerVideo(init: MessengerVideoRequest.Builder.() -> Unit): MessengerVideoRequest =
-    MessengerVideoRequest.builder().apply(init).build()
+/**
+ * Creates a Messenger video message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [MessengerVideoRequest] object with the specified properties.
+ */
+fun messengerVideo(properties: MessengerVideoRequest.Builder.() -> Unit): MessengerVideoRequest =
+    MessengerVideoRequest.builder().apply(properties).build()
 
-fun messengerFile(init: MessengerFileRequest.Builder.() -> Unit): MessengerFileRequest =
-    MessengerFileRequest.builder().apply(init).build()
+/**
+ * Creates a Messenger file message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [MessengerFileRequest] object with the specified properties.
+ */
+fun messengerFile(properties: MessengerFileRequest.Builder.() -> Unit): MessengerFileRequest =
+    MessengerFileRequest.builder().apply(properties).build()
 
-fun viberText(init: ViberTextRequest.Builder.() -> Unit): ViberTextRequest =
-    ViberTextRequest.builder().apply(init).build()
+/**
+ * Creates a Viber text message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [ViberTextRequest] object with the specified properties.
+ */
+fun viberText(properties: ViberTextRequest.Builder.() -> Unit): ViberTextRequest =
+    ViberTextRequest.builder().apply(properties).build()
 
-fun viberImage(init: ViberImageRequest.Builder.() -> Unit): ViberImageRequest =
-    ViberImageRequest.builder().apply(init).build()
+/**
+ * Creates a Viber image message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [ViberImageRequest] object with the specified properties.
+ */
+fun viberImage(properties: ViberImageRequest.Builder.() -> Unit): ViberImageRequest =
+    ViberImageRequest.builder().apply(properties).build()
 
-fun viberVideo(init: ViberVideoRequest.Builder.() -> Unit): ViberVideoRequest =
-    ViberVideoRequest.builder().apply(init).build()
+/**
+ * Creates a Viber video message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [ViberVideoRequest] object with the specified properties.
+ */
+fun viberVideo(properties: ViberVideoRequest.Builder.() -> Unit): ViberVideoRequest =
+    ViberVideoRequest.builder().apply(properties).build()
 
-fun viberFile(init: ViberFileRequest.Builder.() -> Unit): ViberFileRequest =
-    ViberFileRequest.builder().apply(init).build()
+/**
+ * Creates a Viber file message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [ViberFileRequest] object with the specified properties.
+ */
+fun viberFile(properties: ViberFileRequest.Builder.() -> Unit): ViberFileRequest =
+    ViberFileRequest.builder().apply(properties).build()
