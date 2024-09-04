@@ -21,7 +21,7 @@ class VonageTest {
 
     @Test
     fun `live testing placeholder`() {
-        val client = Vonage { authFromEnv() }
-
+        val client = Vonage { authFromEnv(); signatureSecret(null) }
+        println("Finished") // Place debug breakpoint here
     }
 }
