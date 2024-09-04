@@ -39,6 +39,37 @@ class Sms internal constructor(private val client: SmsClient) {
         return client.submitMessage(msgObj).messages
     }
 
+    /**
+     * Send a text message.
+     *
+     * @param from The sender ID. This can be a phone number or a short alphanumeric string.
+     *
+     * @param to The recipient phone number in E.164 format.
+     *
+     * @param message Text of the message to send.
+     *
+     * @param unicode `true` if the message should be sent as Unicode, `false` for GSM (the default).
+     *
+     * @param statusReport (OPTIONAL) Whether to include a Delivery Receipt.
+     *
+     * @param ttl (OPTIONAL) The duration in milliseconds the delivery of an SMS will be attempted. By default, Vonage
+     * attempts delivery for 72 hours, however the maximum effective value depends on the operator and is typically
+     * 24 - 48 hours. We recommend this value should be kept at its default or at least 30 minutes.
+     *
+     * @param messageClass (OPTIONAL) Data Coding Scheme value of the message.
+     *
+     * @param clientRef (OPTIONAL) You can optionally include your own reference of up to 100 characters.
+     *
+     * @param contentId (OPTIONAL) This is to satisfy regulatory requirements when sending an SMS to specific countries.
+     *
+     * @param entityId (OPTIONAL) This is to satisfy regulatory requirements when sending an SMS to specific countries.
+     *
+     * @param callbackUrl (OPTIONAL) The URL to which delivery receipts for this message are sent.
+     *
+     * @return A list of [SmsSubmissionResponseMessage] objects, one for each message part sent.
+     * Multiple messages are sent if the text was too long. For convenience, you can use the
+     * [wasSuccessfullySent] method to check if all messages were sent successfully.
+     */
     fun sendText(from: String, to: String, message: String, unicode: Boolean = false,
                  statusReport: Boolean? = null, ttl: Int? = null,
                  messageClass: Message.MessageClass? = null, clientRef: String? = null,
@@ -49,6 +80,39 @@ class Sms internal constructor(private val client: SmsClient) {
             statusReport, ttl, messageClass, clientRef, contentId, entityId, callbackUrl
         )
 
+    /**
+     * Send a binary (hex) message.
+     *
+     * @param from The sender ID. This can be a phone number or a short alphanumeric string.
+     *
+     * @param to The recipient phone number in E.164 format.
+     *
+     * @param body Hex encoded binary data message to send.
+     *
+     * @param udh Hex encoded User Data Header.
+     *
+     * @param protocolId (OPTIONAL) The value of the protocol identifier to use. Should be aligned with `udh`.
+     *
+     * @param statusReport (OPTIONAL) Whether to include a Delivery Receipt.
+     *
+     * @param ttl (OPTIONAL) The duration in milliseconds the delivery of an SMS will be attempted. By default, Vonage
+     * attempts delivery for 72 hours, however the maximum effective value depends on the operator and is typically
+     * 24 - 48 hours. We recommend this value should be kept at its default or at least 30 minutes.
+     *
+     * @param messageClass (OPTIONAL) Data Coding Scheme value of the message.
+     *
+     * @param clientRef (OPTIONAL) You can optionally include your own reference of up to 100 characters.
+     *
+     * @param contentId (OPTIONAL) This is to satisfy regulatory requirements when sending an SMS to specific countries.
+     *
+     * @param entityId (OPTIONAL) This is to satisfy regulatory requirements when sending an SMS to specific countries.
+     *
+     * @param callbackUrl (OPTIONAL) The URL to which delivery receipts for this message are sent.
+     *
+     * @return A list of [SmsSubmissionResponseMessage] objects, one for each message part sent.
+     * Multiple messages are sent if the body was too long. For convenience, you can use the
+     * [wasSuccessfullySent] method to check if all messages were sent successfully.
+     */
     fun sendBinary(from: String, to: String, body: ByteArray, udh: ByteArray,
                    protocolId: Int? = null, statusReport: Boolean? = null, ttl: Int? = null,
                    messageClass: Message.MessageClass? = null, clientRef: String? = null,
@@ -59,6 +123,13 @@ class Sms internal constructor(private val client: SmsClient) {
         return send(msgObj, statusReport, ttl, messageClass, clientRef, contentId, entityId, callbackUrl)
     }
 
+    /**
+     * Convenience method to check if all messages were sent successfully.
+     *
+     * @param response The list of [SmsSubmissionResponseMessage] objects returned when sending a message.
+     *
+     * @return `true` if all messages responses have a status of [MessageStatus.OK], `false` otherwise.
+     */
     fun wasSuccessfullySent(response: List<SmsSubmissionResponseMessage>): Boolean =
         response.all { ssrm -> ssrm.status == MessageStatus.OK }
 }

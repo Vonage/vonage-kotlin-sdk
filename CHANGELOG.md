@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.0] - 2024-09-??
+GA release!
+
+### Added
+- Documentation (KDocs) for all classes and methods
+
 ## [1.0.0-beta1] - 2024-09-02
+Feature-complete beta release.
 
 ### Added
 - Video API
@@ -77,7 +84,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - `authFromEnv` now checks for absent environment variables before attempting to set them
 
 ## [0.1.0] - 2024-06-25
-
 Initial version.
 
 ### Added
