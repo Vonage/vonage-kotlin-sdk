@@ -460,10 +460,9 @@ class VideoTest : AbstractTest() {
             )
         )
 
-        val response = client.connectToWebsocket {
+        val response = existingSession.connectToWebsocket {
             uri(websocketUri); headers(headers)
-            sessionId(sessionId); token(token)
-            streams(streamId, randomUuidStr)
+            streams(streamId, randomUuidStr); token(token)
             audioRate(Websocket.AudioRate.L16_16K)
         }
         assertNotNull(response)
@@ -480,8 +479,8 @@ class VideoTest : AbstractTest() {
             expectedResponseParams = mapOf("id" to audioConnectorId)
         )
 
-        val invocation = { client.connectToWebsocket {
-            uri(websocketUri); sessionId(sessionId); token(token)
+        val invocation = { existingSession.connectToWebsocket {
+            uri(websocketUri); token(token)
         }}
         val response = invocation()
         assertNotNull(response)
@@ -576,11 +575,10 @@ class VideoTest : AbstractTest() {
                 "streamId" to streamId
             )
         )
-        val response = client.sipDial {
-            sessionId(sessionId); token(token)
+        val response = existingSession.sipDial {
             uri(URI.create(sipUri), true)
             addHeaders(headers); secure(secure)
-            from(from); video(video)
+            from(from); video(video); token(token)
             observeForceMute(observeForceMute)
             username(userName); password(password)
         }
@@ -599,7 +597,7 @@ class VideoTest : AbstractTest() {
             ),
             expectedResponseParams = mapOf("id" to sipCallId)
         )
-        val invocation = { client.sipDial {
+        val invocation = { existingSession.sipDial {
             sessionId(sessionId); token(token); uri(URI.create(sipUri), false)
         } }
         val response = invocation()
@@ -1139,9 +1137,8 @@ class VideoTest : AbstractTest() {
             expectedRequestParams = renderRequestMap,
             expectedResponseParams = mapOf()
         )
-        val invocation = { client.startRender {
-            sessionId(sessionId); token(token)
-            url(mediaUrl); name(renderName)
+        val invocation = { existingSession.startRender {
+            token(token); url(mediaUrl); name(renderName)
         } }
         assertEqualsEmptyRender(invocation())
         assertApiResponseException<VideoResponseException>(renderBaseUrl, HttpMethod.POST, invocation)
@@ -1156,7 +1153,7 @@ class VideoTest : AbstractTest() {
             ),
             expectedResponseParams = renderResponseMap
         )
-        assertEqualsSampleRender(client.startRender {
+        assertEqualsSampleRender(existingSession.startRender {
             url(mediaUrl); maxDuration(maxDuration)
             resolution(Resolution.HD_LANDSCAPE)
             sessionId(sessionId); token(token); name(renderName)

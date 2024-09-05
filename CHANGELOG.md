@@ -10,6 +10,9 @@ GA release!
 ### Added
 - Documentation (KDocs) for all classes and methods.
 
+### Changed
+- Moved Video API's `connectToWebSocket`, `startRender` and `sipDial` methods to `ExistingSession`.
+
 ## [1.0.0-beta1] - 2024-09-02
 Feature-complete beta release.
 
