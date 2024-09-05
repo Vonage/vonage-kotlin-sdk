@@ -26,7 +26,7 @@ import java.util.UUID
 /**
  * Implementation of the [Messages API](https://developer.vonage.com/en/api/messages-olympus).
  *
- * Authentication method: JWT (recommended), API key & secret (limited functionality).
+ * *Authentication method:* JWT (recommended), API key & secret (limited functionality).
  */
 class Messages internal constructor(private val client: MessagesClient) {
 

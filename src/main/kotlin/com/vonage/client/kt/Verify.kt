@@ -21,7 +21,7 @@ import java.util.*
 /**
  * Implementation of the [Verify v2 API](https://developer.vonage.com/en/api/verify.v2).
  *
- * Authentication method: JWT (recommended) and API key & secret (limited functionality).
+ * *Authentication method:* JWT (recommended) and API key & secret (limited functionality).
  */
 class Verify(private val client: Verify2Client) {
 

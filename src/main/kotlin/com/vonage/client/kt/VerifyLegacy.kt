@@ -20,7 +20,7 @@ import com.vonage.client.verify.*
 /**
  * Implementation of the [Verify v1 API](https://developer.vonage.com/en/api/verify).
  *
- * Authentication method: API key & secret or signature secret.
+ * *Authentication method:* API key & secret or signature secret.
  */
 class VerifyLegacy internal constructor(private val client: VerifyClient) {
 

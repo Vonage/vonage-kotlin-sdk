@@ -22,7 +22,7 @@ import java.time.Instant
 /**
  * Implementation of the [Subaccounts API](https://developer.vonage.com/en/api/subaccounts).
  *
- * Authentication method: API key & secret.
+ * *Authentication method:* API key & secret.
  */
 class Subaccounts internal constructor(private val client: SubaccountsClient) {
 

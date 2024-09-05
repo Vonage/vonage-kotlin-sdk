@@ -20,7 +20,7 @@ import com.vonage.client.account.*
 /**
  * Implementation of the [Account API](https://developer.vonage.com/en/api/account).
  *
- * Authentication method: API key & secret.
+ * *Authentication method:* API key & secret.
  */
 class Account internal constructor(private val client: AccountClient) {
 

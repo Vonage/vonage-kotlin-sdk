@@ -20,7 +20,7 @@ import com.vonage.client.numbers.*
 /**
  * Implementation of the [Numbers API](https://developer.vonage.com/en/api/numbers).
  *
- * Authentication method: API key & secret.
+ * *Authentication method:* API key & secret.
  */
 class Numbers internal constructor(private val client: NumbersClient) {
 

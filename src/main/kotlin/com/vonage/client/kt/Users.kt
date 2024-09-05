@@ -20,7 +20,7 @@ import com.vonage.client.users.*
 /**
  * Implementation of the [Users API](https://developer.vonage.com/en/api/application.v2#User).
  *
- * Authentication method: JWT.
+ * *Authentication method:* JWT.
  */
 class Users internal constructor(private val client: UsersClient) {
 

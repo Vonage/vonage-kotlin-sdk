@@ -21,7 +21,7 @@ import java.util.*
 /**
  * Implementation of the [Video API](https://developer.vonage.com/en/api/video).
  *
- * Authentication method: JWT.
+ * *Authentication method:* JWT.
  */
 class Video(private val client: VideoClient) {
 
@@ -31,6 +31,8 @@ class Video(private val client: VideoClient) {
      * @param properties (OPTIONAL) A lambda function to set the parameters of the session.
      *
      * @return The created session metadata.
+     *
+     * @throws [VideoResponseException] If the session could not be created.
      */
     fun createSession(properties: CreateSessionRequest.Builder.() -> Unit = {}): CreateSessionResponse =
         client.createSession(CreateSessionRequest.builder().apply(properties).build())
@@ -69,11 +71,15 @@ class Video(private val client: VideoClient) {
              * Retrieves the stream details.
              *
              * @return The stream metadata.
+             *
+             * @throws [VideoResponseException] If the stream details could not be retrieved.
              */
             fun info(): GetStreamResponse = client.getStream(this@ExistingSession.id, id)
 
             /**
              * Mute the stream.
+             *
+             * @throws [VideoResponseException] If the stream could not be muted.
              */
             fun mute(): Unit = client.muteStream(this@ExistingSession.id, id)
 
@@ -81,6 +87,8 @@ class Video(private val client: VideoClient) {
              * Update the stream's video layout.
              *
              * @param layoutClasses The layout class names to apply to the stream.
+             *
+             * @throws [VideoResponseException] If the stream layout could not be updated.
              */
             fun setLayout(vararg layoutClasses: String): Unit =
                 client.setStreamLayout(this@ExistingSession.id,
@@ -106,6 +114,8 @@ class Video(private val client: VideoClient) {
 
             /**
              * Force the client to disconnect from the session.
+             *
+             * @throws [VideoResponseException] If the client could not be disconnected.
              */
             fun disconnect(): Unit = client.forceDisconnect(this@ExistingSession.id, id)
 
@@ -114,6 +124,8 @@ class Video(private val client: VideoClient) {
              *
              * @param type Type of data that is being sent to the client. This cannot exceed 128 bytes.
              * @param data Payload that is being sent to the client. This cannot exceed 8kb.
+             *
+             * @throws [VideoResponseException] If the signal could not be sent.
              */
             fun signal(type: String, data: String): Unit =
                 client.signal(this@ExistingSession.id, id, signalRequest(type, data))
@@ -124,6 +136,8 @@ class Video(private val client: VideoClient) {
              *
              * @param digits The string of DTMF digits to send. This can include 0-9, '*', '#', and 'p'.
              * A 'p' indicates a pause of 500ms (if you need to add a delay in sending the digits).
+             *
+             * @throws [VideoResponseException] If the DTMF tones could not be sent.
              */
             fun sendDtmf(digits: String): Unit = client.sendDtmf(this@ExistingSession.id, id, digits)
         }
@@ -142,6 +156,8 @@ class Video(private val client: VideoClient) {
          * property is set to true. When the active property is set to false, it is ignored.
          *
          * @return The updated project details.
+         *
+         * @throws [VideoResponseException] If the streams could not be muted.
          */
         fun muteStreams(active: Boolean = true, vararg excludedStreamIds: String): ProjectDetails =
             client.muteSession(id, active,
@@ -153,6 +169,8 @@ class Video(private val client: VideoClient) {
          * Video stream. The layout classes define how the stream is displayed in the layout of a broadcast stream.
          *
          * @return A list of streams and their layouts for this session.
+         *
+         * @throws [VideoResponseException] If the streams could not be retrieved.
          */
         fun listStreams(): List<GetStreamResponse> = client.listStreams(id)
 
@@ -163,6 +181,8 @@ class Video(private val client: VideoClient) {
          * @param offset (OPTIONAL) Index of the first Archive to return (used for pagination).
          *
          * @return A list of Archives.
+         *
+         * @throws [VideoResponseException] If the archives could not be retrieved.
          */
         fun listArchives(count: Int = 1000, offset: Int = 0): List<Archive> =
             client.listArchives(listCompositionsFilter(count, offset, id))
@@ -174,6 +194,8 @@ class Video(private val client: VideoClient) {
          * @param offset (OPTIONAL) Index of the first Broadcast to return (used for pagination).
          *
          * @return A list of Broadcasts.
+         *
+         * @throws [VideoResponseException] If the broadcasts could not be retrieved.
          */
         fun listBroadcasts(count: Int = 1000, offset: Int = 0): List<Broadcast> =
             client.listBroadcasts(listCompositionsFilter(count, offset, id))
@@ -183,6 +205,8 @@ class Video(private val client: VideoClient) {
          *
          * @param type Type of data that is being sent to the clients. This cannot exceed 128 bytes.
          * @param data Payload that is being sent to the clients. This cannot exceed 8kb.
+         *
+         * @throws [VideoResponseException] If the signal could not be sent.
          */
         fun signalAll(type: String, data: String): Unit =
             client.signalAll(id, signalRequest(type, data))
@@ -193,6 +217,8 @@ class Video(private val client: VideoClient) {
          *
          * @param digits The string of DTMF digits to send. This can include 0-9, '*', '#', and 'p'.
          * A 'p' indicates a pause of 500ms (if you need to add a delay in sending the digits).
+         *
+         * @throws [VideoResponseException] If the DTMF tones could not be sent.
          */
         fun sendDtmf(digits: String): Unit = client.sendDtmf(id, digits)
 
@@ -206,7 +232,9 @@ class Video(private val client: VideoClient) {
          * @param token A valid Vonage JWT with role set to Moderator.
          * @param properties (OPTIONAL) A lambda function to set the parameters of the audio captioning session.
          *
-         * @return Unique ID of the audio captioning session
+         * @return Unique ID of the audio captioning session.
+         *
+         * @throws [VideoResponseException] If the captions could not be started.
          */
         fun startCaptions(token: String, properties: CaptionsRequest.Builder.() -> Unit = {}): UUID =
             client.startCaptions(CaptionsRequest.builder()
@@ -217,6 +245,8 @@ class Video(private val client: VideoClient) {
          * Stop Live Captions for the session.
          *
          * @param captionsId The unique ID of the audio captioning session.
+         *
+         * @throws [VideoResponseException] If the captions could not be stopped.
          */
         fun stopCaptions(captionsId: String): Unit = client.stopCaptions(captionsId)
 
@@ -236,6 +266,8 @@ class Video(private val client: VideoClient) {
          * You need to provide a token and a SIP URI to establish the connection.
          *
          * @return Details of the SIP connection.
+         *
+         * @throws [VideoResponseException] If the SIP connection could not be established.
          */
         fun sipDial(properties: SipDialRequest.Builder.() -> Unit): SipDialResponse =
             client.sipDial(SipDialRequest.builder().sessionId(id).apply(properties).build())
@@ -246,6 +278,8 @@ class Video(private val client: VideoClient) {
          * @param properties A lambda function to set the parameters of the WebSocket connection.
          *
          * @return Details of the WebSocket connection.
+         *
+         * @throws [VideoResponseException] If the WebSocket connection could not be established.
          */
         fun connectToWebsocket(properties: ConnectRequest.Builder.() -> Unit): ConnectResponse =
             client.connectToWebsocket(ConnectRequest.builder().sessionId(id).apply(properties).build())
@@ -256,6 +290,8 @@ class Video(private val client: VideoClient) {
          * @param properties A lambda function to set the parameters of the Experience Composer.
          *
          * @return Details of the created Experience Composer.
+         *
+         * @throws [VideoResponseException] If the Experience Composer could not be created.
          */
         fun startRender(properties: RenderRequest.Builder.() -> Unit): RenderResponse =
             client.startRender(RenderRequest.builder().sessionId(id).apply(properties).build())
@@ -266,6 +302,8 @@ class Video(private val client: VideoClient) {
          * @param properties (OPTIONAL) A lambda function to set the parameters of the Archive.
          *
          * @return Details of the created Archive.
+         *
+         * @throws [VideoResponseException] If the Archive could not be created.
          */
         fun createArchive(properties: Archive.Builder.() -> Unit = {}): Archive =
             client.createArchive(Archive.builder(id).apply(properties).build())
@@ -283,6 +321,8 @@ class Video(private val client: VideoClient) {
          * for details of required and optional parameters.
          *
          * @return Details of the created broadcast.
+         *
+         * @throws [VideoResponseException] If the broadcast could not be started.
          */
         fun startBroadcast(properties: Broadcast.Builder.() -> Unit): Broadcast =
             client.createBroadcast(Broadcast.builder(id).apply(properties).build())
@@ -293,6 +333,8 @@ class Video(private val client: VideoClient) {
          * @param options (OPTIONAL) A lambda function to set the parameters (claims) of the token.
          *
          * @return A new JWT with the specified claims.
+         *
+         * @throws [VideoResponseException] If the token could not be generated.
          */
         fun generateToken(options: TokenOptions.Builder.() -> Unit = {}): String =
             client.generateToken(id, TokenOptions.builder().apply(options).build())
@@ -305,6 +347,8 @@ class Video(private val client: VideoClient) {
      * @param offset (OPTIONAL) Index of the first Archive to return (used for pagination).
      *
      * @return A list of Archives.
+     *
+     * @throws [VideoResponseException] If the archives could not be retrieved.
      */
     fun listArchives(count: Int = 1000, offset: Int = 0): List<Archive> =
         client.listArchives(listCompositionsFilter(count, offset))
@@ -329,6 +373,8 @@ class Video(private val client: VideoClient) {
          * Retrieve archive information.
          *
          * @return Details of the archive.
+         *
+         * @throws [VideoResponseException] If the archive details could not be retrieved.
          */
         fun info(): Archive = client.getArchive(id)
 
@@ -344,11 +390,15 @@ class Video(private val client: VideoClient) {
          * disconnects from the session, or 60 minutes after the last client stops publishing a stream to the session.
          *
          * @return Details of the archive.
+         *
+         * @throws [VideoResponseException] If the archive could not be stopped.
          */
         fun stop(): Archive = client.stopArchive(id)
 
         /**
          * Delete the archive.
+         *
+         * @throws [VideoResponseException] If the archive could not be deleted.
          */
         fun delete(): Unit = client.deleteArchive(id)
 
@@ -364,6 +414,8 @@ class Video(private val client: VideoClient) {
          *
          * @param stylesheet (OPTIONAL) The CSS stylesheet to use for the archive. If you set this property,
          * then `initialLayout` must be set to [ScreenLayoutType.CUSTOM].
+         *
+         * @throws [VideoResponseException] If the layout could not be set.
          */
         fun setLayout(initialLayout: ScreenLayoutType,
                       screenshareType: ScreenLayoutType? = null,
@@ -382,6 +434,8 @@ class Video(private val client: VideoClient) {
          * @param streamId UUID of the stream to add.
          * @param audio (OPTIONAL) Whether the composed archive should include the stream's audio.
          * @param video (OPTIONAL) Whether the composed archive should include the stream's video.
+         *
+         * @throws [VideoResponseException] If the stream could not be added.
          */
         fun addStream(streamId: String, audio: Boolean = true, video: Boolean = true): Unit =
             client.addArchiveStream(id, streamId, audio, video)
@@ -391,6 +445,8 @@ class Video(private val client: VideoClient) {
          * the `streamMode` set to [StreamMode.MANUAL].
          *
          * @param streamId UUID of the stream to remove.
+         *
+         * @throws [VideoResponseException] If the stream could not be removed.
          */
         fun removeStream(streamId: String): Unit = client.removeArchiveStream(id, streamId)
     }
@@ -402,6 +458,8 @@ class Video(private val client: VideoClient) {
      * @param offset (OPTIONAL) Index of the first Broadcast to return (used for pagination).
      *
      * @return A list of Broadcasts.
+     *
+     * @throws [VideoResponseException] If the broadcasts could not be retrieved.
      */
     fun listBroadcasts(count: Int = 1000, offset: Int = 0): List<Broadcast> =
         client.listBroadcasts(listCompositionsFilter(count, offset))
@@ -423,9 +481,11 @@ class Video(private val client: VideoClient) {
     inner class ExistingBroadcast internal constructor(id: String): ExistingResource(id) {
 
         /**
-         * Retrieves the broadcast details.
+         * Retrieves information about the broadcast in progress.
          *
-         * @return The broadcast metadata.
+         * @return Details of the broadcast.
+         *
+         * @throws [VideoResponseException] If the broadcast details could not be retrieved.
          */
         fun info(): Broadcast = client.getBroadcast(id)
 
@@ -433,6 +493,8 @@ class Video(private val client: VideoClient) {
          * Stops the broadcast.
          *
          * @return Details of the broadcast.
+         *
+         * @throws [VideoResponseException] If the broadcast could not be stopped.
          */
         fun stop(): Broadcast = client.stopBroadcast(id)
 
@@ -448,6 +510,8 @@ class Video(private val client: VideoClient) {
          *
          * @param stylesheet (OPTIONAL) The CSS stylesheet to use for the broadcast. If you set this property,
          * then `initialLayout` must be set to [ScreenLayoutType.CUSTOM].
+         *
+         * @throws [VideoResponseException] If the layout could not be set.
          */
         fun setLayout(initialLayout: ScreenLayoutType,
                       screenshareType: ScreenLayoutType? = null,
@@ -465,6 +529,8 @@ class Video(private val client: VideoClient) {
          * @param streamId UUID of the stream to add.
          * @param audio (OPTIONAL) Whether the broadcast should include the stream's audio.
          * @param video (OPTIONAL) Whether the broadcast should include the stream's video.
+         *
+         * @throws [VideoResponseException] If the stream could not be added.
          */
         fun addStream(streamId: String, audio: Boolean = true, video: Boolean = true): Unit =
             client.addBroadcastStream(id, streamId, audio, video)
@@ -473,6 +539,8 @@ class Video(private val client: VideoClient) {
          * Remove a stream from the broadcast.
          *
          * @param streamId UUID of the stream to remove.
+         *
+         * @throws [VideoResponseException] If the stream could not be removed.
          */
         fun removeStream(streamId: String): Unit = client.removeBroadcastStream(id, streamId)
     }
@@ -484,6 +552,8 @@ class Video(private val client: VideoClient) {
      * @param offset (OPTIONAL) Index of the first Experience Composer to return (used for pagination).
      *
      * @return A list of Experience Composers.
+     *
+     * @throws [VideoResponseException] If the Experience Composers could not be retrieved.
      */
     fun listRenders(count: Int = 1000, offset: Int = 0): List<RenderResponse> =
         client.listRenders(ListStreamCompositionsRequest.builder().count(count).offset(offset).build())
@@ -508,11 +578,15 @@ class Video(private val client: VideoClient) {
          * Retrieves the Experience Composer.
          *
          * @return Details of the Experience Composer.
+         *
+         * @throws [VideoResponseException] If the Experience Composer details could not be retrieved.
          */
         fun info(): RenderResponse = client.getRender(id)
 
         /**
          * Stops the Experience Composer.
+         *
+         * @throws [VideoResponseException] If the Experience Composer could not be stopped.
          */
         fun stop(): Unit = client.stopRender(id)
     }
