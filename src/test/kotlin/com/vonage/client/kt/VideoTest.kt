@@ -912,7 +912,7 @@ class VideoTest : AbstractTest() {
             multiBroadcastTag(multiBroadcastTag)
             maxDuration(maxDuration); maxBitrate(maxBitrate)
             resolution(broadcastResolution); streamMode(broadcastStreamMode)
-            layout(ScreenLayoutType.VERTICAL) // This is to get 100% coverage; override below
+            layout(); layout(ScreenLayoutType.VERTICAL) // This is to get 100% coverage; override below
             layout(ScreenLayoutType.BEST_FIT, ScreenLayoutType.PIP)
             hls {
                 dvr(dvr); lowLatency(lowLatency)

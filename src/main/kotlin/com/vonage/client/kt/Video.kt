@@ -325,12 +325,46 @@ class Video(private val client: VideoClient) {
      */
     inner class ExistingArchive internal constructor(id: String): ExistingResource(id) {
 
+        /**
+         * Retrieve archive information.
+         *
+         * @return Details of the archive.
+         */
         fun info(): Archive = client.getArchive(id)
 
+        /**
+         * Stop the archive.
+         *
+         * Archives stop recording after 4 hours (14,400 seconds), or 60 seconds after the last client disconnects
+         * from the session, or 60 minutes after the last client stops publishing. However, automatic archives continue
+         * recording to multiple consecutive files of up to 4 hours in length each.
+         *
+         * Calling this method for automatic archives has no effect. Automatic archives continue recording to multiple
+         * consecutive files of up to 4 hours (14,400 seconds) in length each, until 60 seconds after the last client
+         * disconnects from the session, or 60 minutes after the last client stops publishing a stream to the session.
+         *
+         * @return Details of the archive.
+         */
         fun stop(): Archive = client.stopArchive(id)
 
+        /**
+         * Delete the archive.
+         */
         fun delete(): Unit = client.deleteArchive(id)
 
+        /**
+         * Set the layout for the archive. This only applies if it is composed.
+         *
+         * @param initialLayout The layout type to use for the archive as an enum. If set to
+         * [ScreenLayoutType.CUSTOM], then you must also set the `stylesheet` property.
+         *
+         * @param screenshareType (OPTIONAL) The layout type to use when there is a screen-sharing stream in the
+         * session. Note if you set this property, then `initialLayout` must be set to [ScreenLayoutType.BEST_FIT]
+         * and you must leave the `stylesheet` property unset (null).
+         *
+         * @param stylesheet (OPTIONAL) The CSS stylesheet to use for the archive. If you set this property,
+         * then `initialLayout` must be set to [ScreenLayoutType.CUSTOM].
+         */
         fun setLayout(initialLayout: ScreenLayoutType,
                       screenshareType: ScreenLayoutType? = null,
                       stylesheet: String? = null): Unit =
@@ -341,9 +375,23 @@ class Video(private val client: VideoClient) {
                     .build()
             )
 
-        fun addStream(streamId: String, audio: Boolean = true, video: Boolean = true) =
+        /**
+         * Add a stream to the archive. This only applies if it's a composed archive that was started with
+         * the `streamMode` set to [StreamMode.MANUAL].
+         *
+         * @param streamId UUID of the stream to add.
+         * @param audio (OPTIONAL) Whether the composed archive should include the stream's audio.
+         * @param video (OPTIONAL) Whether the composed archive should include the stream's video.
+         */
+        fun addStream(streamId: String, audio: Boolean = true, video: Boolean = true): Unit =
             client.addArchiveStream(id, streamId, audio, video)
 
+        /**
+         * Remove a stream from the archive. This only applies if it's a composed archive that was started with
+         * the `streamMode` set to [StreamMode.MANUAL].
+         *
+         * @param streamId UUID of the stream to remove.
+         */
         fun removeStream(streamId: String): Unit = client.removeArchiveStream(id, streamId)
     }
 
@@ -368,9 +416,9 @@ class Video(private val client: VideoClient) {
     fun broadcast(broadcastId: String): ExistingBroadcast = ExistingBroadcast(broadcastId)
 
     /**
-     * Class for working with an existing Broadcast.
+     * Class for working with an existing broadcast.
      *
-     * @property id The Broadcast ID.
+     * @property id The broadcast ID.
      */
     inner class ExistingBroadcast internal constructor(id: String): ExistingResource(id) {
 
@@ -381,8 +429,26 @@ class Video(private val client: VideoClient) {
          */
         fun info(): Broadcast = client.getBroadcast(id)
 
+        /**
+         * Stops the broadcast.
+         *
+         * @return Details of the broadcast.
+         */
         fun stop(): Broadcast = client.stopBroadcast(id)
 
+        /**
+         * Set the layout for the broadcast.
+         *
+         * @param initialLayout The layout type to use for the broadcast as an enum. If set to
+         * [ScreenLayoutType.CUSTOM], then you must also set the `stylesheet` property.
+         *
+         * @param screenshareType (OPTIONAL) The layout type to use when there is a screen-sharing stream in the
+         * session. Note if you set this property, then `initialLayout` must be set to [ScreenLayoutType.BEST_FIT]
+         * and you must leave the `stylesheet` property unset (null).
+         *
+         * @param stylesheet (OPTIONAL) The CSS stylesheet to use for the broadcast. If you set this property,
+         * then `initialLayout` must be set to [ScreenLayoutType.CUSTOM].
+         */
         fun setLayout(initialLayout: ScreenLayoutType,
                       screenshareType: ScreenLayoutType? = null,
                       stylesheet: String? = null): Unit =
@@ -393,9 +459,21 @@ class Video(private val client: VideoClient) {
                     .build()
             )
 
-        fun addStream(streamId: String, audio: Boolean = true, video: Boolean = true) =
+        /**
+         * Add a stream to the broadcast.
+         *
+         * @param streamId UUID of the stream to add.
+         * @param audio (OPTIONAL) Whether the broadcast should include the stream's audio.
+         * @param video (OPTIONAL) Whether the broadcast should include the stream's video.
+         */
+        fun addStream(streamId: String, audio: Boolean = true, video: Boolean = true): Unit =
             client.addBroadcastStream(id, streamId, audio, video)
 
+        /**
+         * Remove a stream from the broadcast.
+         *
+         * @param streamId UUID of the stream to remove.
+         */
         fun removeStream(streamId: String): Unit = client.removeBroadcastStream(id, streamId)
     }
 
@@ -429,7 +507,7 @@ class Video(private val client: VideoClient) {
         /**
          * Retrieves the Experience Composer.
          *
-         * @return The render details.
+         * @return Details of the Experience Composer.
          */
         fun info(): RenderResponse = client.getRender(id)
 
@@ -453,18 +531,64 @@ private fun streamCompositionLayout(initialLayout: ScreenLayoutType,
     StreamCompositionLayout.builder(initialLayout)
         .screenshareType(screenshareType).stylesheet(stylesheet).build()
 
+/**
+ * Adds an RTMP stream to the broadcast builder.
+ *
+ * @param properties A lambda function to set the parameters of the RTMP stream.
+ *
+ * @return The updated broadcast builder.
+ */
 fun Broadcast.Builder.addRtmpStream(properties: Rtmp.Builder.() -> Unit): Broadcast.Builder =
     addRtmpStream(Rtmp.builder().apply(properties).build())
 
-fun Broadcast.Builder.hls(hls: Hls.Builder.() -> Unit = {}): Broadcast.Builder =
-    hls(Hls.builder().apply(hls).build())
+/**
+ * Adds an HTTP Live Stream to the broadcast builder.
+ *
+ * @param properties (OPTIONAL) A lambda function to set the parameters of the HLS stream.
+ *
+ * @return The updated broadcast builder.
+ */
+fun Broadcast.Builder.hls(properties: Hls.Builder.() -> Unit = {}): Broadcast.Builder =
+    hls(Hls.builder().apply(properties).build())
 
+/**
+ * Sets the layout for a composed archive. If this option is specified,
+ * [Archive.Builder.outputMode] must be set to [OutputMode.COMPOSED].
+ *
+ * @param initialLayout The layout type to use for the archive as an enum. If set to
+ * [ScreenLayoutType.CUSTOM], then you must also set the `stylesheet` property.
+ *
+ * @param screenshareType (OPTIONAL) The layout type to use when there is a screen-sharing stream in the
+ * session. Note if you set this property, then `initialLayout` must be set to [ScreenLayoutType.BEST_FIT]
+ * and you must leave the `stylesheet` property unset (null).
+ *
+ * @param stylesheet (OPTIONAL) The CSS stylesheet to use for the archive. If you set this property,
+ * then `initialLayout` must be set to [ScreenLayoutType.CUSTOM].
+ *
+ * @return The updated archive builder.
+ */
 fun Archive.Builder.layout(initialLayout: ScreenLayoutType,
                            screenshareType: ScreenLayoutType? = null,
                            stylesheet: String? = null): Archive.Builder =
     layout(streamCompositionLayout(initialLayout, screenshareType, stylesheet))
 
-fun Broadcast.Builder.layout(initialLayout: ScreenLayoutType,
+/**
+ * Specify this to assign the initial layout type for the broadcast. If you do not specify an initial layout type,
+ * the broadcast stream uses [ScreenLayoutType.BEST_FIT] as the default layout type.
+ *
+ * @param initialLayout The layout type to use for the broadcast as an enum. If set to
+ * [ScreenLayoutType.CUSTOM], then you must also set the `stylesheet` property.
+ *
+ * @param screenshareType (OPTIONAL) The layout type to use when there is a screen-sharing stream in the
+ * session. Note if you set this property, then `initialLayout` must be set to [ScreenLayoutType.BEST_FIT]
+ * and you must leave the `stylesheet` property unset (null).
+ *
+ * @param stylesheet (OPTIONAL) The CSS stylesheet to use for the broadcast. If you set this property,
+ * then `initialLayout` must be set to [ScreenLayoutType.CUSTOM].
+ *
+ * @return The updated broadcast builder.
+ */
+fun Broadcast.Builder.layout(initialLayout: ScreenLayoutType = ScreenLayoutType.BEST_FIT,
                            screenshareType: ScreenLayoutType? = null,
                            stylesheet: String? = null): Broadcast.Builder =
     layout(streamCompositionLayout(initialLayout, screenshareType, stylesheet))
