@@ -467,7 +467,7 @@ class VoiceTest : AbstractTest() {
 
     @Test
     fun `create call to WebSocket`() {
-        val baseMap = mapOf("type" to "websocket", "uri" to websocketUri)
+        val baseMap = mapOf("type" to "websocket", "uri" to websocketUri, "content-type" to wsContentTypeStr)
         testCreateCallToSingleEndpoint(baseMap) {
             toWebSocket(websocketUri, wsContentType)
         }
