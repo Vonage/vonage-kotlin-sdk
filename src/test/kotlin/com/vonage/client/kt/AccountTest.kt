@@ -21,7 +21,7 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.test.*
 
 class AccountTest : AbstractTest() {
-    private val account = vonage.account
+    private val client = vonage.account
     private val authType = AuthType.API_KEY_SECRET_HEADER
     private val secretId = "ad6dc56f-07b5-46e1-a527-85530e625800"
     private val trx = "8ef2447e69604f642ae59363aa5f781b"
@@ -30,8 +30,8 @@ class AccountTest : AbstractTest() {
     private val secretsAltUrl = "${baseUrl}s/$apiKey2/secrets"
     private val secretUrl = "$secretsUrl/$secretId"
     private val altSecretUrl = "$secretsAltUrl/$secretId"
-    private val secretsNoApiKey = account.secrets()
-    private val secretsWithApiKey = account.secrets(apiKey2)
+    private val secretsNoApiKey = client.secrets()
+    private val secretsWithApiKey = client.secrets(apiKey2)
     private val errorCode = 401
     private val secretResponse = linksSelfHref(secretUrl) + mapOf(
         "id" to secretId,
@@ -60,7 +60,7 @@ class AccountTest : AbstractTest() {
             )
         )
 
-        val response = invocation(account)
+        val response = invocation(client)
         assertNotNull(response)
         assertEquals(moCallbackUrl, response.incomingSmsUrl)
         assertEquals(drCallbackUrl, response.deliveryReceiptUrl)
@@ -159,7 +159,7 @@ class AccountTest : AbstractTest() {
             )
         )
 
-        val response = account.getBalance()
+        val response = client.getBalance()
         assertNotNull(response)
         assertEquals(value, response.value)
         assertEquals(autoReload, response.isAutoReload)
@@ -172,7 +172,7 @@ class AccountTest : AbstractTest() {
             status = errorCode, authType = authType,
             expectedResponseParams = errorResponse
         )
-        assertThrows<AccountResponseException> { account.getBalance() }
+        assertThrows<AccountResponseException> { client.getBalance() }
     }
 
     @Test
@@ -186,7 +186,7 @@ class AccountTest : AbstractTest() {
                 "error-code-label" to "success"
             )
         )
-        account.topUp(trx)
+        client.topUp(trx)
     }
 
     @Test
@@ -198,7 +198,7 @@ class AccountTest : AbstractTest() {
             expectedResponseParams = errorResponse
         )
 
-        assertThrows<AccountResponseException> { account.topUp(trx) }
+        assertThrows<AccountResponseException> { client.topUp(trx) }
     }
 
     @Test

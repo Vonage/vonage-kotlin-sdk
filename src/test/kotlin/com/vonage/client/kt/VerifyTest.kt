@@ -23,12 +23,12 @@ import java.util.UUID
 import kotlin.test.*
 
 class VerifyTest : AbstractTest() {
-    private val verifyClient = vonage.verify
+    private val client = vonage.verify
     private val baseUrl = "/v2/verify"
     private val requestIdStr = "c11236f4-00bf-4b89-84ba-88b25df97315"
     private val requestId = UUID.fromString(requestIdStr)
     private val requestIdUrl = "$baseUrl/$requestIdStr"
-    private val existingRequest = verifyClient.request(requestIdStr)
+    private val existingRequest = client.request(requestIdStr)
     private val timeout = 60
     private val fraudCheck = false
     private val sandbox = true
@@ -80,7 +80,7 @@ class VerifyTest : AbstractTest() {
                         if (channel == Channel.SILENT_AUTH) mapOf("check_url" to checkUrl) else mapOf()
             )
 
-            val response = verifyClient.sendVerification(brand) {
+            val response = client.sendVerification(brand) {
                 when (channel) {
                     Channel.VOICE -> voice(toNumber)
                     Channel.SMS -> sms(toNumber)
@@ -154,7 +154,7 @@ class VerifyTest : AbstractTest() {
             status = 202
         )
 
-        val response = verifyClient.sendVerification {
+        val response = client.sendVerification {
             brand(brand); clientRef(clientRef); channelTimeout(timeout)
             fraudCheck(fraudCheck); codeLength(codeLength); locale(locale)
             silentAuth(toNumber, sandbox, redirectUrl); voice(altNumber); sms(toNumber) {

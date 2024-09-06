@@ -18,7 +18,6 @@ package com.vonage.client.kt
 import com.vonage.client.common.HttpMethod
 import com.vonage.client.voice.*
 import com.vonage.client.voice.ncco.*
-import java.net.URI
 import java.util.*
 import kotlin.test.*
 
@@ -204,7 +203,7 @@ class VoiceTest : AbstractTest() {
             )
         )
 
-        val callEvent = this@VoiceTest.client.createCall(call)
+        val callEvent = client.createCall(call)
         assertNotNull(callEvent)
         assertEquals(callIdStr, callEvent.uuid)
         assertEquals(callStatus, callEvent.status)
@@ -300,7 +299,6 @@ class VoiceTest : AbstractTest() {
     @Test
     fun `transfer call with answer url`() {
         testModifyCall(nccoUrl = onAnswerUrl, invocation = {
-            existingCall.transfer(URI.create(onAnswerUrl))
             existingCall.transfer(onAnswerUrl)
         })
     }
@@ -384,17 +382,17 @@ class VoiceTest : AbstractTest() {
     fun `list calls all filter parameters`() {
         mockGet(callsBaseUrl, expectedQueryParams = mapOf(
             "status" to "unanswered",
-            "date_start" to startTime,
-            "date_end" to endTime,
+            "date_start" to startTimeStr,
+            "date_end" to endTimeStr,
             "page_size" to pageSize,
             "record_index" to recordIndex,
             "order" to "desc",
             "conversation_uuid" to conversationId
         ), expectedResponseParams = listCallsResponse)
 
-        val callsPage = this@VoiceTest.client.listCalls {
+        val callsPage = client.listCalls {
             status(CallStatus.UNANSWERED)
-            dateStart(startTimeStr); dateEnd(endTimeStr)
+            dateStart(startTime); dateEnd(endTime)
             pageSize(pageSize); recordIndex(recordIndex)
             order(CallOrder.DESCENDING); conversationUuid(conversationId)
         }
@@ -405,7 +403,7 @@ class VoiceTest : AbstractTest() {
     @Test
     fun `list calls no filter`() {
         mockGet(callsBaseUrl, expectedResponseParams = listCallsResponse)
-        assertEqualsSampleCallsPage(this@VoiceTest.client.listCalls())
+        assertEqualsSampleCallsPage(client.listCalls())
     }
 
     @Test
@@ -469,13 +467,13 @@ class VoiceTest : AbstractTest() {
 
     @Test
     fun `create call to WebSocket`() {
-        val baseMap = mapOf("type" to "websocket", "uri" to websocketUri)
+        val baseMap = mapOf("type" to "websocket", "uri" to websocketUri, "content-type" to wsContentTypeStr)
         testCreateCallToSingleEndpoint(baseMap) {
-            toWebSocket(websocketUri)
+            toWebSocket(websocketUri, wsContentType)
         }
 
         testCreateCallToSingleEndpoint(baseMap + mapOf(
-            "content-type" to wsContentType, "headers" to customHeaders
+            "content-type" to wsContentTypeStr, "headers" to customHeaders
         )) {
             toWebSocket(websocketUri, wsContentType, customHeaders)
         }
@@ -512,7 +510,7 @@ class VoiceTest : AbstractTest() {
                 mapOf(
                     "type" to "websocket",
                     "uri" to websocketUri,
-                    "content-type" to wsContentType,
+                    "content-type" to wsContentTypeStr,
                     "headers" to customHeaders
                 ),
                 mapOf(
@@ -548,7 +546,7 @@ class VoiceTest : AbstractTest() {
                 com.vonage.client.voice.AppEndpoint(userName),
                 com.vonage.client.voice.PhoneEndpoint(toNumber, dtmf),
                 com.vonage.client.voice.VbcEndpoint(vbcExt),
-                com.vonage.client.voice.WebSocketEndpoint(websocketUri, wsContentType, customHeaders),
+                com.vonage.client.voice.WebSocketEndpoint(websocketUri, wsContentTypeStr, customHeaders),
                 com.vonage.client.voice.SipEndpoint(sipUri, customHeaders, userToUserHeader)
             )
         }
@@ -571,7 +569,11 @@ class VoiceTest : AbstractTest() {
 
     @Test
     fun `create call with input action required parameters only`() {
-        testSingleNcco(ncco = inputAction())
+        val types = listOf("dtmf", "speech")
+        testSingleNcco(
+            additionalParams = mapOf("type" to types),
+            ncco = inputAction { type(types) }
+        )
     }
 
     @Test
@@ -645,12 +647,12 @@ class VoiceTest : AbstractTest() {
     @Test
     fun `create call with connect to WebSocket ncco`() {
         testSingleNccoConnect(
-            mapOf("uri" to websocketUri, "content-type" to wsContentType),
+            mapOf("uri" to websocketUri, "content-type" to wsContentTypeStr),
             connectToWebsocket(websocketUri, wsContentType)
         )
 
         testSingleNccoConnect(
-            mapOf("uri" to websocketUri, "content-type" to wsContentType, "headers" to customHeaders),
+            mapOf("uri" to websocketUri, "content-type" to wsContentTypeStr, "headers" to customHeaders),
             connectToWebsocket(websocketUri, wsContentType, customHeaders)
         )
     }

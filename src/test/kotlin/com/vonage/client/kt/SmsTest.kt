@@ -22,7 +22,7 @@ import java.math.BigDecimal
 import kotlin.test.*
 
 class SmsTest : AbstractTest() {
-    private val smsClient = vonage.sms
+    private val client = vonage.sms
     private val sendUrl = "/sms/json"
     private val from = brand
     private val accountRef = "customer1234"
@@ -70,7 +70,7 @@ class SmsTest : AbstractTest() {
         assertEquals(network, first.network)
         assertEquals(clientRef, first.clientRef)
         assertEquals(accountRef, first.accountRef)
-        assertTrue(smsClient.wasSuccessfullySent(response))
+        assertTrue(client.wasSuccessfullySent(response))
     }
 
     private fun errorStatus(code: Int, text: String) = mapOf("status" to code, "error-text" to text)
@@ -78,14 +78,14 @@ class SmsTest : AbstractTest() {
     @Test
     fun `send regular text message success required parameters`() {
         testSuccessSingleMessage(mapOf("from" to from, "to" to toNumber, "text" to text, "type" to "unicode")) {
-            smsClient.sendText(from, toNumber, text, unicode = true)
+            client.sendText(from, toNumber, text, unicode = true)
         }
     }
 
     @Test
     fun `send unicode text message success required parameters`() {
         testSuccessSingleMessage(mapOf("from" to from, "to" to toNumber, "text" to text, "type" to "text")) {
-            smsClient.sendText(from, toNumber, text)
+            client.sendText(from, toNumber, text)
         }
     }
 
@@ -104,7 +104,7 @@ class SmsTest : AbstractTest() {
             "entity-id" to entityId,
             "content-id" to contentId
         )) {
-            smsClient.sendText(from, toNumber, text,
+            client.sendText(from, toNumber, text,
                 unicode = false, statusReport = statusReport,
                 ttl = ttl, messageClass = Message.MessageClass.CLASS_1,
                 clientRef = clientRef, contentId = contentId, entityId = entityId,
@@ -119,7 +119,7 @@ class SmsTest : AbstractTest() {
             "from" to from, "to" to toNumber, "type" to "binary",
             "body" to textHexEncoded, "udh" to udhHex.lowercase()
         )) {
-            smsClient.sendBinary(from, toNumber, text.encodeToByteArray(), udhBinary)
+            client.sendBinary(from, toNumber, text.encodeToByteArray(), udhBinary)
         }
     }
 
@@ -140,7 +140,7 @@ class SmsTest : AbstractTest() {
             "entity-id" to entityId,
             "content-id" to contentId
         )) {
-            smsClient.sendBinary(from, toNumber, text.encodeToByteArray(), udh = udhBinary,
+            client.sendBinary(from, toNumber, text.encodeToByteArray(), udh = udhBinary,
                 protocolId = protocolId, statusReport = statusReport, ttl = ttl,
                 messageClass = Message.MessageClass.CLASS_2, clientRef = clientRef,
                 contentId = contentId, entityId = entityId, callbackUrl = moCallbackUrl
@@ -183,9 +183,9 @@ class SmsTest : AbstractTest() {
                 )
             )
         )
-        val response = smsClient.sendText(from, toNumber, text)
+        val response = client.sendText(from, toNumber, text)
         assertNotNull(response)
-        assertFalse(smsClient.wasSuccessfullySent(response))
+        assertFalse(client.wasSuccessfullySent(response))
 
         assertEquals(24, response.size)
         var offset = 0

@@ -20,7 +20,7 @@ import java.net.URLEncoder
 import kotlin.test.*
 
 class NumberVerificationTest : AbstractTest() {
-    private val nvClient = vonage.numberVerification
+    private val client = vonage.numberVerification
     private val nvCheckUrl = "/camara/number-verification/v031/verify"
     private val clientAuthUrl = "https://oidc.idp.vonage.com/oauth2/auth"
     private val redirectUrl = "$exampleUrlBase/nv/redirect"
@@ -50,7 +50,7 @@ class NumberVerificationTest : AbstractTest() {
                 expectedResponseParams = if (result != null)
                     mapOf("devicePhoneNumberVerified" to result) else mapOf()
             )
-            assertEquals(result ?: false, invocation(nvClient))
+            assertEquals(result ?: false, invocation(client))
         }
     }
 
@@ -62,10 +62,10 @@ class NumberVerificationTest : AbstractTest() {
                 URLEncoder.encode(redirectUrl, "UTF-8")
             }&response_type=code"
 
-        assertEquals(URI.create(expectedUrlStr), nvClient.createVerificationUrl(toNumber, redirectUrl))
+        assertEquals(URI.create(expectedUrlStr), client.createVerificationUrl(toNumber, redirectUrl))
 
         val expectedUrlWithState = URI.create("$expectedUrlStr&state=$state")
-        assertEquals(expectedUrlWithState, nvClient.createVerificationUrl(toNumber, redirectUrl, state))
+        assertEquals(expectedUrlWithState, client.createVerificationUrl(toNumber, redirectUrl, state))
     }
 
     @Test
@@ -84,7 +84,7 @@ class NumberVerificationTest : AbstractTest() {
 
     @Test
     fun `verify number relying on cached redirect url`() {
-        nvClient.createVerificationUrl(altNumber, redirectUrl)
+        client.createVerificationUrl(altNumber, redirectUrl)
 
         assertVerifyNumber {
             verifyNumberWithCode(toNumber, code)

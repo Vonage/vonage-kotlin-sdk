@@ -23,13 +23,12 @@ import com.vonage.client.messages.whatsapp.Policy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.net.URI
-import java.time.Instant
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class MessagesTest : AbstractTest() {
-    private val messagesClient = vonage.messages
+    private val client = vonage.messages
     private val sendUrl = "/v1/messages"
     private val messageUuid = testUuid
     private val mmsChannel = "mms"
@@ -48,7 +47,7 @@ class MessagesTest : AbstractTest() {
             expectedUrl = sendUrl, expectedRequestParams = expectedBodyParams,
             status = status, expectedResponseParams = expectedResponseParams
         )
-        assertEquals(messageUuid, messagesClient.send(req))
+        assertEquals(messageUuid, client.send(req))
     }
 
     private fun baseBody(messageType: String, channel: String): Map<String, Any> =
@@ -84,7 +83,7 @@ class MessagesTest : AbstractTest() {
     @Test
     fun `send message exception responses`() {
         assertApiResponseException<MessageResponseException>(sendUrl, HttpMethod.POST) {
-            messagesClient.send(smsText {
+            client.send(smsText {
                 from(altNumber); to(toNumber); text(text)
             })
         }

@@ -24,9 +24,9 @@ import com.vonage.client.common.Webhook
 import kotlin.test.*
 
 class ApplicationTest : AbstractTest() {
-    private val ac = vonage.application
+    private val client = vonage.application
     private val authType = AuthType.API_KEY_SECRET_HEADER
-    private val existingApplication = ac.application(testUuid)
+    private val existingApplication = client.application(testUuid)
     private val baseUrl = "/v2/applications"
     private val appUrl = "$baseUrl/$testUuid"
     private val answerUrl = "$exampleUrlBase/answer"
@@ -266,18 +266,18 @@ class ApplicationTest : AbstractTest() {
 
     @Test
     fun `list all applications`() {
-        assertListApplications { ac.listAll() }
+        assertListApplications { client.listAll() }
     }
 
     @Test
     fun `list applications no filter`() {
-        assertListApplications { ac.list() }
+        assertListApplications { client.list() }
     }
 
     @Test
     fun `list applications all filters`() {
         assertListApplications(mapOf("page" to page, "page_size" to pageSize)) {
-            ac.list(page, pageSize)
+            client.list(page, pageSize)
         }
     }
 
@@ -316,7 +316,7 @@ class ApplicationTest : AbstractTest() {
             expectedRequestParams = advancedApplicationRequest,
             expectedResponseParams = fullApplicationResponse
         )
-        assertEqualsFullApplication(ac.create {
+        assertEqualsFullApplication(client.create {
             name(name)
             publicKey(publicKey)
             voice {
@@ -369,7 +369,7 @@ class ApplicationTest : AbstractTest() {
         })
 
         assert401ApiResponseException<ApplicationResponseException>(baseUrl, HttpMethod.POST) {
-            ac.create { name(name) }
+            client.create { name(name) }
         }
     }
 }

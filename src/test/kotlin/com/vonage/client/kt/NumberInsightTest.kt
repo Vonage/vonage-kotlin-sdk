@@ -22,7 +22,7 @@ import java.math.BigDecimal
 import kotlin.test.*
 
 class NumberInsightTest : AbstractTest() {
-    private val niClient = vonage.numberInsight
+    private val client = vonage.numberInsight
     private val cnam = true
     private val realTimeData = true
     private val statusMessage = "Success"
@@ -230,48 +230,48 @@ class NumberInsightTest : AbstractTest() {
     @Test
     fun `basic insight required params`() {
         mockInsight(InsightType.BASIC, false)
-        assertBasicResponse(niClient.basic(toNumber))
+        assertBasicResponse(client.basic(toNumber))
     }
 
     @Test
     fun `basic insight all params`() {
         mockInsight(InsightType.BASIC, true)
-        assertBasicResponse(niClient.basic(toNumber, countryCode))
+        assertBasicResponse(client.basic(toNumber, countryCode))
     }
 
     @Test
     fun `standard insight required params`() {
         mockInsight(InsightType.STANDARD, false)
-        assertStandardResponse(niClient.standard(toNumber))
+        assertStandardResponse(client.standard(toNumber))
     }
 
     @Test
     fun `standard insight all params`() {
         mockInsight(InsightType.STANDARD, true)
-        assertStandardResponse(niClient.standard(toNumber, countryCode, cnam))
+        assertStandardResponse(client.standard(toNumber, countryCode, cnam))
     }
 
     @Test
     fun `advanced insight required params`() {
         mockInsight(InsightType.ADVANCED, false)
-        assertAdvancedResponse(niClient.advanced(toNumber))
+        assertAdvancedResponse(client.advanced(toNumber))
     }
 
     @Test
     fun `advanced insight all params`() {
         mockInsight(InsightType.ADVANCED, true)
-        assertAdvancedResponse(niClient.advanced(toNumber, countryCode, cnam, realTimeData))
+        assertAdvancedResponse(client.advanced(toNumber, countryCode, cnam, realTimeData))
     }
 
     @Test
     fun `advanced async insight required params`() {
         mockInsight(InsightType.ADVANCED_ASYNC, false)
-        niClient.advancedAsync(toNumber, callbackUrl)
+        client.advancedAsync(toNumber, callbackUrl)
     }
 
     @Test
     fun `advanced async insight all params`() {
         mockInsight(InsightType.ADVANCED_ASYNC, true)
-        niClient.advancedAsync(toNumber, callbackUrl, countryCode, cnam)
+        client.advancedAsync(toNumber, callbackUrl, countryCode, cnam)
     }
 }
