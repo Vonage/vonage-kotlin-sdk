@@ -27,6 +27,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.vonage.client.users.channels.Websocket
 import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -66,7 +67,8 @@ abstract class AbstractTest {
     protected val dtmf = "p*123#"
     protected val sipUri = "sip:rebekka@sip.example.com"
     protected val websocketUri = "wss://example.com/socket"
-    protected val wsContentType = "audio/l16;rate=8000"
+    protected val wsContentTypeStr = "audio/l16;rate=8000"
+    protected val wsContentType = Websocket.ContentType.AUDIO_L16_8K
     protected val clientRef = "my-personal-reference"
     protected val textHexEncoded = "48656c6c6f2c20576f726c6421"
     protected val entityId = "1101407360000017170"

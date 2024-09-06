@@ -60,7 +60,7 @@ class UsersTest : AbstractTest() {
             )),
             "websocket" to listOf(mapOf(
                 "uri" to websocketUri,
-                "content-type" to wsContentType,
+                "content-type" to wsContentTypeStr,
                 "headers" to customData
             )),
             "mms" to listOf(mapOf(
@@ -120,7 +120,7 @@ class UsersTest : AbstractTest() {
         assertNotNull(websocket)
         assertEquals(1, websocket.size)
         assertEquals(URI.create(websocketUri), websocket[0].uri)
-        assertEquals(Websocket.ContentType.fromString(wsContentType), websocket[0].contentType)
+        assertEquals(Websocket.ContentType.fromString(wsContentTypeStr), websocket[0].contentType)
         assertEquals(customData, websocket[0].headers)
 
         val sip = channels.sip
@@ -273,7 +273,7 @@ class UsersTest : AbstractTest() {
             customData(customData)
             channels(
                 Pstn(toNumber), Sip(sipUri, sipUser, sipPassword),
-                Websocket(websocketUri, Websocket.ContentType.fromString(wsContentType), customData),
+                Websocket(websocketUri, Websocket.ContentType.fromString(wsContentTypeStr), customData),
                 Vbc(vbcExt.toInt()), Mms(toNumber), Whatsapp(altNumber),
                 Viber(altNumber), Messenger(messengerId)
             )

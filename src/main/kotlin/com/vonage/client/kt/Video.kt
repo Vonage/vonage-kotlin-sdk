@@ -40,7 +40,7 @@ class Video(private val client: VideoClient) {
     /**
      * Call this method to work with an existing session.
      *
-     * @param sessionId The UUID of the session to work with.
+     * @param sessionId ID of the session to work with.
      *
      * @return An [ExistingSession] object with methods to interact with the session.
      */
