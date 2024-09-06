@@ -469,13 +469,13 @@ class VoiceTest : AbstractTest() {
     fun `create call to WebSocket`() {
         val baseMap = mapOf("type" to "websocket", "uri" to websocketUri)
         testCreateCallToSingleEndpoint(baseMap) {
-            toWebSocket(websocketUri)
+            toWebSocket(websocketUri, wsContentType)
         }
 
         testCreateCallToSingleEndpoint(baseMap + mapOf(
             "content-type" to wsContentTypeStr, "headers" to customHeaders
         )) {
-            toWebSocket(websocketUri, wsContentTypeStr, customHeaders)
+            toWebSocket(websocketUri, wsContentType, customHeaders)
         }
     }
 
@@ -648,7 +648,7 @@ class VoiceTest : AbstractTest() {
     fun `create call with connect to WebSocket ncco`() {
         testSingleNccoConnect(
             mapOf("uri" to websocketUri, "content-type" to wsContentTypeStr),
-            connectToWebsocket(websocketUri)
+            connectToWebsocket(websocketUri, wsContentType)
         )
 
         testSingleNccoConnect(
