@@ -103,4 +103,3 @@ Initial version
 ### Added
 - Messages API
 - Verify v2 API
-
