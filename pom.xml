@@ -5,7 +5,7 @@
 
   <groupId>com.vonage</groupId>
   <artifactId>server-sdk-kotlin</artifactId>
-  <version>1.0.0-beta2</version>
+  <version>1.0.0</version>
 
   <name>Vonage Kotlin Server SDK</name>
   <description>Kotlin client for Vonage APIs</description>
