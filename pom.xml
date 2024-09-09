@@ -154,19 +154,6 @@
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.10.0</version>
-        <executions>
-          <execution>
-            <id>dokka-jar</id>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-            <configuration>
-              <classifier>dokka</classifier>
-              <javadocDirectory>${project.build.directory}/dokka</javadocDirectory>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
@@ -200,11 +187,13 @@
             <phase>prepare-package</phase>
             <goals>
               <goal>dokka</goal>
-              <goal>javadoc</goal>
               <goal>javadocJar</goal>
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <reportUndocumented>true</reportUndocumented>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.jetbrains.kotlin</groupId>
