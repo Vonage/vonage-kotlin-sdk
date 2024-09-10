@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.0.0] - 2024-09-12
 GA release!
 
+### Changed
+- Split `layout` method in `Archive.Builder` and `Broadcast.Builder` into 3 separate presets
+- Publish Javadoc JAR in Dokka HTML format
+
 ## [1.0.0-beta2] - 2024-09-06
 
 ### Added

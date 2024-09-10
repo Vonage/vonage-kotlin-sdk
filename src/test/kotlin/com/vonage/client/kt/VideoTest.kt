@@ -878,8 +878,9 @@ class VideoTest : AbstractTest() {
             multiArchiveTag(multiArchiveTag)
             hasVideo(archiveHasVideo); hasAudio(archiveHasAudio)
             streamMode(archiveStreamMode); outputMode(archiveOutputMode)
-            layout(ScreenLayoutType.HORIZONTAL) // This is to get 100% coverage; override below
-            layout(ScreenLayoutType.CUSTOM, stylesheet = stylesheet)
+            standardLayout(ScreenLayoutType.HORIZONTAL)
+            screenshareLayout(ScreenLayoutType.BEST_FIT)
+            customLayout(stylesheet)
         })
     }
 
@@ -912,8 +913,8 @@ class VideoTest : AbstractTest() {
             multiBroadcastTag(multiBroadcastTag)
             maxDuration(maxDuration); maxBitrate(maxBitrate)
             resolution(broadcastResolution); streamMode(broadcastStreamMode)
-            layout(); layout(ScreenLayoutType.VERTICAL) // This is to get 100% coverage; override below
-            layout(ScreenLayoutType.BEST_FIT, ScreenLayoutType.PIP)
+            standardLayout(ScreenLayoutType.VERTICAL); customLayout(stylesheet)
+            screenshareLayout(ScreenLayoutType.PIP)
             hls {
                 dvr(dvr); lowLatency(lowLatency)
             }

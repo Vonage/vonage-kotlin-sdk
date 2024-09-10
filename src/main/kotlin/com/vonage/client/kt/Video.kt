@@ -625,44 +625,63 @@ fun Broadcast.Builder.addRtmpStream(properties: Rtmp.Builder.() -> Unit): Broadc
 fun Broadcast.Builder.hls(properties: Hls.Builder.() -> Unit = {}): Broadcast.Builder =
     hls(Hls.builder().apply(properties).build())
 
+
 /**
- * Sets the layout for a composed archive. If this option is specified,
- * [Archive.Builder.outputMode] must be set to [OutputMode.COMPOSED].
+ * Sets the layout for a composed archive.
  *
- * @param initialLayout The layout type to use for the archive as an enum. If set to
- * [ScreenLayoutType.CUSTOM], then you must also set the `stylesheet` property.
- *
- * @param screenshareType (OPTIONAL) The layout type to use when there is a screen-sharing stream in the
- * session. Note if you set this property, then `initialLayout` must be set to [ScreenLayoutType.BEST_FIT]
- * and you must leave the `stylesheet` property unset (null).
- *
- * @param stylesheet (OPTIONAL) The CSS stylesheet to use for the archive. If you set this property,
- * then `initialLayout` must be set to [ScreenLayoutType.CUSTOM].
+ * @param initialLayout The layout type to use for the archive as an enum.
  *
  * @return The updated archive builder.
  */
-fun Archive.Builder.layout(initialLayout: ScreenLayoutType,
-                           screenshareType: ScreenLayoutType? = null,
-                           stylesheet: String? = null): Archive.Builder =
-    layout(streamCompositionLayout(initialLayout, screenshareType, stylesheet))
+fun Archive.Builder.standardLayout(initialLayout: ScreenLayoutType): Archive.Builder =
+    layout(streamCompositionLayout(initialLayout, null, null))
 
 /**
- * Specify this to assign the initial layout type for the broadcast. If you do not specify an initial layout type,
- * the broadcast stream uses [ScreenLayoutType.BEST_FIT] as the default layout type.
+ * Sets the layout for a composed archive to [ScreenLayoutType.BEST_FIT].
  *
- * @param initialLayout The layout type to use for the broadcast as an enum. If set to
- * [ScreenLayoutType.CUSTOM], then you must also set the `stylesheet` property.
+ * @param screenshareType The layout type to use when there is a screen-sharing stream in the session.
  *
- * @param screenshareType (OPTIONAL) The layout type to use when there is a screen-sharing stream in the
- * session. Note if you set this property, then `initialLayout` must be set to [ScreenLayoutType.BEST_FIT]
- * and you must leave the `stylesheet` property unset (null).
+ * @return The updated archive builder.
+ */
+fun Archive.Builder.screenshareLayout(screenshareType: ScreenLayoutType): Archive.Builder =
+    layout(streamCompositionLayout(ScreenLayoutType.BEST_FIT, screenshareType, null))
+
+/**
+ * Sets the layout for a composed archive to [ScreenLayoutType.CUSTOM].
  *
- * @param stylesheet (OPTIONAL) The CSS stylesheet to use for the broadcast. If you set this property,
- * then `initialLayout` must be set to [ScreenLayoutType.CUSTOM].
+ * @param stylesheet The CSS stylesheet to use for the archive.
+ *
+ * @return The updated archive builder.
+ */
+fun Archive.Builder.customLayout(stylesheet: String): Archive.Builder =
+    layout(streamCompositionLayout(ScreenLayoutType.CUSTOM, null, stylesheet))
+
+/**
+ * Specify this to assign the initial layout type for the broadcast.
+ *
+ * @param initialLayout The layout type to use for the broadcast as an enum.
  *
  * @return The updated broadcast builder.
  */
-fun Broadcast.Builder.layout(initialLayout: ScreenLayoutType = ScreenLayoutType.BEST_FIT,
-                           screenshareType: ScreenLayoutType? = null,
-                           stylesheet: String? = null): Broadcast.Builder =
-    layout(streamCompositionLayout(initialLayout, screenshareType, stylesheet))
+fun Broadcast.Builder.standardLayout(initialLayout: ScreenLayoutType): Broadcast.Builder =
+    layout(streamCompositionLayout(initialLayout, null, null))
+
+/**
+ * Sets the layout for the broadcast to [ScreenLayoutType.BEST_FIT].
+ *
+ * @param screenshareType The layout type to use when there is a screen-sharing stream in the session.
+ *
+ * @return The updated broadcast builder.
+ */
+fun Broadcast.Builder.screenshareLayout(screenshareType: ScreenLayoutType): Broadcast.Builder =
+    layout(streamCompositionLayout(ScreenLayoutType.BEST_FIT, screenshareType, null))
+
+/**
+ * Sets the layout for the broadcast to [ScreenLayoutType.CUSTOM].
+ *
+ * @param stylesheet The CSS stylesheet to use for the broadcast.
+ *
+ * @return The updated broadcast builder.
+ */
+fun Broadcast.Builder.customLayout(stylesheet: String): Broadcast.Builder =
+    layout(streamCompositionLayout(ScreenLayoutType.CUSTOM, null, stylesheet))
