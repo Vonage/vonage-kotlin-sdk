@@ -4,8 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.0.0] - 2024-09-12
-GA release!
+## [1.0.0-RC1] - 2024-09-12
+First release candidate
 
 ### Changed
 - Split `layout` method in `Archive.Builder` and `Broadcast.Builder` into 3 separate presets
