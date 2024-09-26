@@ -15,6 +15,7 @@
  */
 package com.vonage.client.kt
 
+import com.vonage.client.ApiRegion
 import com.vonage.client.common.HttpMethod
 import com.vonage.client.messages.*
 import com.vonage.client.messages.viber.Category
@@ -31,7 +32,9 @@ class MessagesTest : AbstractTest() {
     private val client = vonage.messages
     private val sendUrl = "/v1/messages"
     private val messageUuid = testUuid
+    private val messageUuidStr = testUuidStr
     private val mmsChannel = "mms"
+    private val rcsChannel = "rcs"
     private val whatsappChannel = "whatsapp"
     private val viberChannel = "viber_service"
     private val messengerChannel = "messenger"
@@ -41,7 +44,7 @@ class MessagesTest : AbstractTest() {
 
     private fun testSend(expectedBodyParams: Map<String, Any>, req: MessageRequest) {
         val status = 202
-        val expectedResponseParams = mapOf("message_uuid" to messageUuid)
+        val expectedResponseParams = mapOf("message_uuid" to messageUuidStr)
 
         mockPost(
             expectedUrl = sendUrl, expectedRequestParams = expectedBodyParams,
@@ -118,6 +121,13 @@ class MessagesTest : AbstractTest() {
     }
 
     @Test
+    fun `send RCS text`() {
+        testSend(textBody(rcsChannel), rcsText {
+            from(altNumber); to(toNumber); text(text)
+        })
+    }
+
+    @Test
     fun `send WhatsApp text`() {
         testSend(textBody(whatsappChannel), whatsappText {
             from(altNumber); to(toNumber); text(text)
@@ -150,6 +160,13 @@ class MessagesTest : AbstractTest() {
     fun `send MMS image`() {
         testSend(imageBody(mmsChannel, captionMap), mmsImage {
             from(altNumber); to(toNumber); url(imageUrl); caption(caption)
+        })
+    }
+
+    @Test
+    fun `send RCS image`() {
+        testSend(imageBody(rcsChannel), rcsImage {
+            from(altNumber); to(toNumber); url(imageUrl)
         })
     }
 
@@ -203,6 +220,13 @@ class MessagesTest : AbstractTest() {
     }
 
     @Test
+    fun `send RCS video`() {
+        testSend(videoBody(rcsChannel), rcsVideo {
+            from(altNumber); to(toNumber); url(videoUrl)
+        })
+    }
+
+    @Test
     fun `send WhatsApp video`() {
         testSend(videoBody(whatsappChannel, captionMap), whatsappVideo {
             from(altNumber); to(toNumber); url(videoUrl); caption(caption)
@@ -213,17 +237,16 @@ class MessagesTest : AbstractTest() {
     fun `send Viber video`() {
         val duration = 23
         val fileSize = 7
-        val ttl = 90
+        val ttl = 90 // TODO fix in Java SDK
         val thumbUrl = "https://example.com/file1.jpg"
         testSend(videoBody(viberChannel,
             captionMap + mapOf("thumb_url" to thumbUrl)) + mapOf(viberChannel to mapOf(
                     "category" to "transaction",
                     "duration" to duration,
-                    "file_size" to fileSize,
-                    "ttl" to ttl
+                    "file_size" to fileSize
             )), viberVideo {
                 from(altNumber); to(toNumber); url(videoUrl); caption(caption);
-                category(Category.TRANSACTION); duration(duration); ttl(ttl);
+                category(Category.TRANSACTION); duration(duration)
                 fileSize(fileSize); thumbUrl(thumbUrl)
             }
         )
@@ -233,6 +256,13 @@ class MessagesTest : AbstractTest() {
     fun `send Messenger video`() {
         testSend(videoBody(messengerChannel), messengerVideo {
             from(altNumber); to(toNumber); url(videoUrl)
+        })
+    }
+
+    @Test
+    fun `send RCS file`() {
+        testSend(fileBody(rcsChannel), rcsFile {
+            from(altNumber); to(toNumber); url(fileUrl)
         })
     }
 
@@ -260,10 +290,47 @@ class MessagesTest : AbstractTest() {
     }
 
     @Test
+    fun `send WhatsApp reaction`() {
+        val emoji = "😍"
+        testSend(
+            baseBody("reaction", whatsappChannel) + mapOf(
+                "reaction" to mapOf(
+                    "action" to "react",
+                    "emoji" to emoji
+                ),
+                "context" to mapOf(
+                    "message_uuid" to messageUuidStr
+                )
+            ),
+            whatsappReaction {
+                from(altNumber); to(toNumber); reaction(emoji)
+                contextMessageId(messageUuidStr)
+            }
+        )
+    }
+
+    @Test
+    fun `send WhatsApp unreaction`() {
+        testSend(
+            baseBody("reaction", whatsappChannel) + mapOf(
+                "reaction" to mapOf(
+                    "action" to "unreact"
+                ),
+                "context" to mapOf(
+                    "message_uuid" to messageUuidStr
+                )
+            ),
+            whatsappReaction {
+                from(altNumber); to(toNumber); unreact()
+                contextMessageId(messageUuidStr)
+            }
+        )
+    }
+
+    @Test
     fun `send WhatsApp sticker`() {
-        val stickerType = "sticker"
         val stickerUrl = "https://example.com/image.webp"
-        testSend(mediaBody(whatsappChannel, stickerType, stickerUrl), whatsappSticker {
+        testSend(mediaBody(whatsappChannel, "sticker", stickerUrl), whatsappSticker {
             from(altNumber); to(toNumber); url(stickerUrl)
         })
 
@@ -418,6 +485,97 @@ class MessagesTest : AbstractTest() {
     }
 
     @Test
+    fun `send RCS suggested actions`() {
+        val postback = "postback_data_1234"
+        val payload = mapOf(
+            "contentMessage" to mapOf(
+                "text" to "Need some help? Call us now or visit our website for more information.",
+                "suggestions" to listOf(
+                    mapOf(
+                        "action" to mapOf(
+                            "text" to "Call us",
+                            "postbackData" to postback,
+                            "fallbackUrl" to "$exampleUrlBase/contact/",
+                            "dialAction" to mapOf(
+                                "phoneNumber" to "+447900000000"
+                            )
+                        )
+                    ),
+                    mapOf(
+                        "action" to mapOf(
+                            "text" to "Visit site",
+                            "postbackData" to postback,
+                            "openUrlAction" to mapOf(
+                                "url" to exampleUrlBase
+                            )
+                        )
+                    ),
+                    mapOf(
+                        "action" to mapOf(
+                            "text" to "Save to calendar",
+                            "postbackData" to postback,
+                            "fallbackUrl" to "https://www.google.com/calendar",
+                            "createCalendarEventAction" to mapOf(
+                                "startTime" to "2024-06-28T19:00:00Z",
+                                "endTime" to "2024-06-28T20:00:00Z",
+                                "title" to "Vonage API Product Launch",
+                                "description" to "Event to demo Vonage's new and exciting API product"
+                            )
+                        )
+                    ),
+                    mapOf(
+                        "action" to mapOf(
+                            "text" to "View map",
+                            "postbackData" to postback,
+                            "fallbackUrl" to "https://www.google.com/maps/place/Vonage/@51.5230371,-0.0852492,15z",
+                            "viewLocationAction" to mapOf(
+                                "latLong" to mapOf(
+                                    "latitude" to "51.5230371",
+                                    "longitude" to "-0.0852492"
+                                ),
+                                "label" to "Vonage London Office"
+                            )
+                        )
+                    ),
+                    mapOf(
+                        "action" to mapOf(
+                            "text" to "Share a location",
+                            "postbackData" to postback,
+                            "shareLocationAction" to emptyMap<String, Any>()
+                        )
+                    )
+                )
+            )
+        )
+        testSend(
+            baseBody("custom", rcsChannel) + mapOf("custom" to payload),
+            rcsCustom {
+                from(altNumber); to(toNumber); custom(payload)
+            }
+        )
+    }
+
+    @Test
+    fun `revoke outbound message`() {
+        mockPatch(
+            expectedUrl = "/v1/messages/$messageUuidStr",
+            expectedRequestParams = mapOf("status" to "revoked"),
+            authType = AuthType.JWT, status = 200
+        )
+        client.existingMessage(messageUuidStr, ApiRegion.API_US).revoke()
+    }
+
+    @Test
+    fun `mark inbound message as read`() {
+        mockPatch(
+            expectedUrl = "/v1/messages/$messageUuidStr",
+            expectedRequestParams = mapOf("status" to "read"),
+            authType = AuthType.JWT, status = 200
+        )
+        client.existingMessage(messageUuidStr, ApiRegion.API_AP).markAsRead()
+    }
+
+    @Test
     fun `parse inbound MMS image`() {
         val parsed = InboundMessage.fromJson(
             """
@@ -449,5 +607,59 @@ class MessagesTest : AbstractTest() {
         assertEquals(MessageType.IMAGE, parsed.messageType)
         assertEquals(URI.create(imageUrl), parsed.imageUrl)
         assertEquals(caption, parsed.imageCaption)
+    }
+
+    @Test
+    fun `parse status update`() {
+        val statusEnum = MessageStatus.Status.SUBMITTED
+        val currency = "EUR"
+        val amount = 0.0333
+        val channel = Channel.SMS
+        val smsCount = 2
+        val parsed = MessageStatus.fromJson(
+            """
+                {
+                   "message_uuid": "$messageUuidStr",
+                   "to": "$toNumber",
+                   "from": "$altNumber",
+                   "timestamp": "$timestampStr",
+                   "status": "${statusEnum.name.lowercase()}",
+                   "error": {
+                      "error": {
+                         "type": "https://developer.vonage.com/api-errors/messages#1000",
+                         "title": 1000,
+                         "detail": "Throttled - You have exceeded the submission capacity allowed on this account. Please wait and retry",
+                         "instance": "bf0ca0bf927b3b52e3cb03217e1a1ddf"
+                      }
+                   },
+                   "client_ref": "$clientRef",
+                   "usage": {
+                      "currency": "$currency",
+                      "price": "$amount"
+                   },
+                   "channel": "${channel.name.lowercase()}",
+                   "destination": {
+                      "network_code": "$networkCode"
+                   },
+                   "sms": {
+                      "count_total": "$smsCount"
+                   }
+                }
+            """
+        )
+        assertNotNull(parsed)
+        assertEquals(messageUuid, parsed.messageUuid)
+        assertEquals(toNumber, parsed.to)
+        assertEquals(altNumber, parsed.from)
+        assertEquals(timestamp, parsed.timestamp)
+        assertEquals(statusEnum, parsed.status)
+        assertEquals(clientRef, parsed.clientRef)
+        val usage = parsed.usage
+        assertNotNull(usage)
+        assertEquals(Currency.getInstance(currency), usage.currency)
+        assertEquals(amount, usage.price)
+        assertEquals(channel, parsed.channel)
+        assertEquals(networkCode, parsed.destinationNetworkCode)
+        assertEquals(smsCount, parsed.smsTotalCount)
     }
 }

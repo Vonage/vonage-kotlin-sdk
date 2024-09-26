@@ -101,13 +101,15 @@ abstract class AbstractTest {
     protected val fileUrl = "$exampleUrlBase/file.pdf"
 
     private val port = 8081
+    private val wmBaseUrl = "http://localhost:$port"
     private val wiremock: WireMockServer = WireMockServer(
         options().port(port).notifier(ConsoleNotifier(false))
     )
 
     val vonage = Vonage {
         authFromEnv(); httpConfig {
-            baseUri("http://localhost:$port")
+            baseUri(wmBaseUrl)
+            regionalUriGetter { wmBaseUrl }
         }
         apiKey(apiKey); apiSecret(apiSecret); signatureSecret(null)
         applicationId(applicationId); privateKeyPath(privateKeyPath)

@@ -15,12 +15,14 @@
  */
 package com.vonage.client.kt
 
+import com.vonage.client.ApiRegion
 import com.vonage.client.messages.*
 import com.vonage.client.messages.sms.*
 import com.vonage.client.messages.mms.*
 import com.vonage.client.messages.whatsapp.*
 import com.vonage.client.messages.messenger.*
 import com.vonage.client.messages.viber.*
+import com.vonage.client.messages.rcs.*
 import java.util.UUID
 
 /**
@@ -54,6 +56,51 @@ class Messages internal constructor(private val client: MessagesClient) {
     fun send(message: MessageRequest, sandbox: Boolean = false): UUID =
         (if (sandbox) client.useSandboxEndpoint()
             else client.useRegularEndpoint()).sendMessage(message).messageUuid
+
+    /**
+     * Call this method to update an existing message.
+     *
+     * @param id The message UUID as a string.
+     * @param region The API region server URL in which the message was sent.
+     *
+     * @return An [ExistingMessage] object for updating the existing message.
+     */
+    fun existingMessage(id: String, region: ApiRegion): ExistingMessage = ExistingMessage(id, region)
+
+    /**
+     * Class for working with an existing message.
+     *
+     * @property id The message ID.
+     * @property region The regional URL server in which the message was sent.
+     */
+    inner class ExistingMessage internal constructor(id: String, val region: ApiRegion): ExistingResource(id) {
+
+        /**
+         * Marks the inbound message as read. Currently only applies to the WhatsApp channel.
+         *
+         * @throws [MessageResponseException] If the message could not be updated.
+         * This may be for the following reasons:
+         * - **401**: Invalid credentials.
+         * - **404**: Not Found. The message ID is not known, or the wrong region was used.
+         * - **422**: Malformed request.
+         * - **429**: Too many requests.
+         * - **500**: Internal server error.
+         */
+        fun markAsRead(): Unit = client.ackInboundMessage(id, region)
+
+        /**
+         * Revokes the outbound message. Currently only applies to the RCS channel.
+         *
+         * @throws [MessageResponseException] If the message could not be updated.
+         * This may be for the following reasons:
+         * - **401**: Invalid credentials.
+         * - **404**: Not Found. The message ID is not known, or the wrong region was used.
+         * - **422**: Malformed request.
+         * - **429**: Too many requests.
+         * - **500**: Internal server error.
+         */
+        fun revoke(): Unit = client.revokeOutboundMessage(id, region)
+    }
 }
 
 /**
@@ -165,6 +212,16 @@ fun whatsappFile(properties: WhatsappFileRequest.Builder.() -> Unit): WhatsappFi
  */
 fun whatsappSticker(properties: WhatsappStickerRequest.Builder.() -> Unit): WhatsappStickerRequest =
     WhatsappStickerRequest.builder().apply(properties).build()
+
+/**
+ * Creates a WhatsApp reaction message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return A [WhatsappReactionRequest] object with the specified properties.
+ */
+fun whatsappReaction(properties: WhatsappReactionRequest.Builder.() -> Unit): WhatsappReactionRequest =
+    WhatsappReactionRequest.builder().apply(properties).build()
 
 /**
  * Creates a WhatsApp location message.
@@ -305,3 +362,53 @@ fun viberVideo(properties: ViberVideoRequest.Builder.() -> Unit): ViberVideoRequ
  */
 fun viberFile(properties: ViberFileRequest.Builder.() -> Unit): ViberFileRequest =
     ViberFileRequest.builder().apply(properties).build()
+
+/**
+ * Creates an RCS text message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return An [RcsTextRequest] object with the specified properties.
+ */
+fun rcsText(properties: RcsTextRequest.Builder.() -> Unit): RcsTextRequest =
+    RcsTextRequest.builder().apply(properties).build()
+
+/**
+ * Creates an RCS image message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return An [RcsImageRequest] object with the specified properties.
+ */
+fun rcsImage(properties: RcsImageRequest.Builder.() -> Unit): RcsImageRequest =
+    RcsImageRequest.builder().apply(properties).build()
+
+/**
+ * Creates an RCS video message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return An [RcsVideoRequest] object with the specified properties.
+ */
+fun rcsVideo(properties: RcsVideoRequest.Builder.() -> Unit): RcsVideoRequest =
+    RcsVideoRequest.builder().apply(properties).build()
+
+/**
+ * Creates an RCS file message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return An [RcsFileRequest] object with the specified properties.
+ */
+fun rcsFile(properties: RcsFileRequest.Builder.() -> Unit): RcsFileRequest =
+    RcsFileRequest.builder().apply(properties).build()
+
+/**
+ * Creates an RCS custom message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return An [RcsCustomRequest] object with the specified properties.
+ */
+fun rcsCustom(properties: RcsCustomRequest.Builder.() -> Unit): RcsCustomRequest =
+    RcsCustomRequest.builder().apply(properties).build()

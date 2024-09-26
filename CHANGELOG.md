@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.0-RC2] - 2024-09-2?
+Messages API updates based on Java SDK v8.11.0
+
+### Added
+- RCS message type builders
+- WhatsApp Reaction builder
+- Ability to read and revoke messages (support for the `PATCH` endpoint in Messages API)
+
 ## [1.0.0-RC1] - 2024-09-12
 First release candidate
 
