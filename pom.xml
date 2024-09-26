@@ -94,6 +94,27 @@
     <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
     <plugins>
       <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <replaceregexp
+                        file="src/main/kotlin/com/vonage/client/kt/Vonage.kt"
+                        match="VONAGE_KOTLIN_SDK_VERSION = &quot;.+&quot;"
+                        replace="VONAGE_KOTLIN_SDK_VERSION = &quot;${project.version}&quot;"
+                />
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
         <version>3.5.0</version>
         <executions>

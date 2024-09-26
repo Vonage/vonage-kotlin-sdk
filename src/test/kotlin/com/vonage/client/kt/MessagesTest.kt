@@ -30,6 +30,7 @@ import kotlin.test.assertNotNull
 
 class MessagesTest : AbstractTest() {
     private val client = vonage.messages
+    private val authType = AuthType.JWT
     private val sendUrl = "/v1/messages"
     private val messageUuid = testUuid
     private val messageUuidStr = testUuidStr
@@ -43,12 +44,9 @@ class MessagesTest : AbstractTest() {
 
 
     private fun testSend(expectedBodyParams: Map<String, Any>, req: MessageRequest) {
-        val status = 202
-        val expectedResponseParams = mapOf("message_uuid" to messageUuidStr)
-
-        mockPost(
-            expectedUrl = sendUrl, expectedRequestParams = expectedBodyParams,
-            status = status, expectedResponseParams = expectedResponseParams
+        mockPost(expectedUrl = sendUrl, status = 202, authType = authType,
+            expectedRequestParams = expectedBodyParams,
+            expectedResponseParams = mapOf("message_uuid" to messageUuidStr)
         )
         assertEquals(messageUuid, client.send(req))
     }
@@ -558,9 +556,9 @@ class MessagesTest : AbstractTest() {
     @Test
     fun `revoke outbound message`() {
         mockPatch(
-            expectedUrl = "/v1/messages/$messageUuidStr",
+            expectedUrl = "$sendUrl/$messageUuidStr",
             expectedRequestParams = mapOf("status" to "revoked"),
-            authType = AuthType.JWT, status = 200
+            authType = authType, status = 200
         )
         client.existingMessage(messageUuidStr, ApiRegion.API_US).revoke()
     }

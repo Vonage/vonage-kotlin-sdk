@@ -27,6 +27,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.vonage.client.HttpWrapper
 import com.vonage.client.users.channels.Websocket
 import java.net.URI
 import java.net.URLEncoder
@@ -36,6 +37,9 @@ import java.util.*
 import kotlin.test.assertEquals
 
 abstract class AbstractTest {
+    private val userAgent = "vonage-java-sdk/${HttpWrapper().clientVersion} " +
+            "java/${System.getProperty("java.version")} " +
+            "vonage-kotlin-sdk/$VONAGE_KOTLIN_SDK_VERSION"
     protected val apiKey = "a1b2c3d4"
     protected val apiKey2 = "f9e8d7c6"
     protected val applicationId = "00000000-0000-4000-8000-000000000000"
@@ -205,7 +209,7 @@ abstract class AbstractTest {
         expectedParams: Map<String, Any>? = null): BuildingStep =
             wiremock.requestServerBuilderStep({
                 urlPath equalTo expectedUrl
-                headers contains "User-Agent" like "vonage-java-sdk\\/.+ java\\/.+"
+                headers contains "User-Agent" equalTo userAgent
                 if (contentType != null) {
                     headers contains contentTypeHeaderName equalTo contentType.mime
                 }

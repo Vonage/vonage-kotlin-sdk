@@ -15,6 +15,9 @@
  */
 package com.vonage.client.kt
 
+import com.vonage.client.HttpWrapper
+import com.vonage.client.VonageClient
+import org.apache.commons.lang3.reflect.FieldUtils
 import kotlin.test.*
 
 class VonageTest {
@@ -23,5 +26,22 @@ class VonageTest {
     fun `live testing placeholder`() {
         val client = Vonage { authFromEnv(); signatureSecret(null) }
         println("Finished") // Place debug breakpoint here
+    }
+
+    @Test
+    fun `test user agent is not overriden`() {
+        val timeout = 36000
+        val customUa = "MyCustomUserAgent"
+        val client = Vonage { httpConfig { timeoutMillis(timeout); appendUserAgent(customUa) } }
+        val wrapper = FieldUtils.readField(
+            client::class.java.getDeclaredField("client").apply { isAccessible = true }.get(client),
+            "httpWrapper", true
+        ) as HttpWrapper
+
+        assertEquals(
+            "vonage-kotlin-sdk/$VONAGE_KOTLIN_SDK_VERSION",
+            wrapper.httpConfig.customUserAgent
+        )
+        assertEquals(timeout, wrapper.httpConfig.timeoutMillis)
     }
 }

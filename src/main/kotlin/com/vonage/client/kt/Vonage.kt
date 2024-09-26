@@ -18,6 +18,9 @@ package com.vonage.client.kt
 import com.vonage.client.HttpConfig
 import com.vonage.client.VonageClient
 
+const val VONAGE_KOTLIN_SDK_VERSION = "1.0.0-RC2"
+private const val SDK_USER_AGENT = "vonage-kotlin-sdk/$VONAGE_KOTLIN_SDK_VERSION"
+
 /**
  * Entry point for the SDK. This class provides access to all the Vonage APIs via its properties.
  * The constructor takes a lambda that configures the client. At a minimum, you must provide
@@ -34,7 +37,7 @@ import com.vonage.client.VonageClient
  * @param config The configuration lambda, where you provide your Vonage account credentials.
  */
 class Vonage(config: VonageClient.Builder.() -> Unit) {
-    private val client : VonageClient = VonageClient.builder().apply(config).build()
+    private val client : VonageClient = VonageClient.builder().httpConfig{}.apply(config).build()
 
     /**
      * Access to the Vonage Account API.
@@ -181,4 +184,4 @@ fun VonageClient.Builder.authFromEnv(): VonageClient.Builder {
  * @return The builder.
  */
 fun VonageClient.Builder.httpConfig(init: HttpConfig.Builder.() -> Unit): VonageClient.Builder =
-    httpConfig(HttpConfig.builder().apply(init).build())
+    httpConfig(HttpConfig.builder().apply(init).appendUserAgent(SDK_USER_AGENT).build())
