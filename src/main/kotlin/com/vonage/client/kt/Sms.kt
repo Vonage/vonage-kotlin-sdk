@@ -122,14 +122,12 @@ class Sms internal constructor(private val client: SmsClient) {
         if (protocolId != null) msgObj.protocolId = protocolId
         return send(msgObj, statusReport, ttl, messageClass, clientRef, contentId, entityId, callbackUrl)
     }
-
-    /**
-     * Convenience method to check if all messages were sent successfully.
-     *
-     * @param response The list of [SmsSubmissionResponseMessage] objects returned when sending a message.
-     *
-     * @return `true` if all messages responses have a status of [MessageStatus.OK], `false` otherwise.
-     */
-    fun wasSuccessfullySent(response: List<SmsSubmissionResponseMessage>): Boolean =
-        response.all { ssrm -> ssrm.status == MessageStatus.OK }
 }
+
+/**
+ * Convenience method to check if all messages were sent successfully.
+ *
+ * @return `true` if all messages responses have a status of [MessageStatus.OK], `false` otherwise.
+ */
+fun List<SmsSubmissionResponseMessage>.wasSuccessfullySent(): Boolean =
+    isNotEmpty() && all { it.status == MessageStatus.OK }

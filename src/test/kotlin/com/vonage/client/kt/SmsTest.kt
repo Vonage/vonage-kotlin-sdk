@@ -70,7 +70,7 @@ class SmsTest : AbstractTest() {
         assertEquals(network, first.network)
         assertEquals(clientRef, first.clientRef)
         assertEquals(accountRef, first.accountRef)
-        assertTrue(client.wasSuccessfullySent(response))
+        assertTrue(response.wasSuccessfullySent())
     }
 
     private fun errorStatus(code: Int, text: String) = mapOf("status" to code, "error-text" to text)
@@ -185,7 +185,7 @@ class SmsTest : AbstractTest() {
         )
         val response = client.sendText(from, toNumber, text)
         assertNotNull(response)
-        assertFalse(client.wasSuccessfullySent(response))
+        assertFalse(response.wasSuccessfullySent())
 
         assertEquals(24, response.size)
         var offset = 0
