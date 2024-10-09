@@ -4,11 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.0.0] - 2024-10-?? (expected)
+## [1.0.0] - 2024-10-25 (expected)
 First stable GA release
 
 ### Changed
 - `Sms.wasSuccessfullySent()` now an extension function rather than being part of the client
+- `Numbers.listOwned()` now returns `List<OwnedNumber>` instead of `ListNumbersResponse`
+- `Numbers.searchAvailable()` now returns `List<AvailableNumber>` instead of `SearchNumbersResponse`
 
 ## [1.0.0-RC2] - 2024-09-26
 Messages API updates based on Java SDK v8.11.0

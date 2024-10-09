@@ -80,22 +80,22 @@ class Numbers internal constructor(private val client: NumbersClient) {
      *
      * @param filter (OPTIONAL) A lambda function for specifying the filter properties.
      *
-     * @return A [ListNumbersResponse] object containing the list of owned numbers.
+     * @return The list of owned numbers matching the filter criteria.
      *
      * @throws [NumbersResponseException] If the list could not be retrieved.
      */
-    fun listOwned(filter: ListNumbersFilter.Builder.() -> Unit = {}): ListNumbersResponse =
-        client.listNumbers(ListNumbersFilter.builder().apply(filter).build())
+    fun listOwned(filter: ListNumbersFilter.Builder.() -> Unit = {}): List<OwnedNumber> =
+        client.listNumbers(ListNumbersFilter.builder().apply(filter).build()).numbers.asList()
 
     /**
      * Search for numbers that are available to purchase.
      *
      * @param filter A lambda function for specifying the search filter properties.
      *
-     * @return A [SearchNumbersResponse] object containing the list of available numbers.
+     * @return The list of available numbers matching the filter critera.
      *
      * @throws [NumbersResponseException] If the search request could not be completed.
      */
-    fun searchAvailable(filter: SearchNumbersFilter.Builder.() -> Unit): SearchNumbersResponse =
-        client.searchNumbers(SearchNumbersFilter.builder().apply(filter).build())
+    fun searchAvailable(filter: SearchNumbersFilter.Builder.() -> Unit): List<AvailableNumber> =
+        client.searchNumbers(SearchNumbersFilter.builder().apply(filter).build()).numbers.asList()
 }

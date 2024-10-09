@@ -73,7 +73,7 @@ class NumbersTest : AbstractTest() {
         )
     }
 
-    private fun assertOwnedNumbers(params: Map<String, Any>, invocation: Numbers.() -> ListNumbersResponse) {
+    private fun assertOwnedNumbers(params: Map<String, Any>, invocation: Numbers.() -> List<OwnedNumber>) {
         val type = Type.MOBILE_LVN
         val voiceCallbackType = CallbackType.SIP
         val messagesCallbackValue = "aaaaaaaa-bbbb-cccc-dddd-0123456789ab"
@@ -103,12 +103,9 @@ class NumbersTest : AbstractTest() {
 
         val response = invocation(client)
         assertNotNull(response)
-        assertEquals(count, response.count)
-        val numbers = response.numbers
-        assertNotNull(numbers)
-        assertEquals(2, numbers.size)
+        assertEquals(2, response.size)
 
-        val empty = numbers[0]
+        val empty = response[0]
         assertNotNull(empty)
         assertNull(empty.msisdn)
         assertNull(empty.country)
@@ -119,7 +116,7 @@ class NumbersTest : AbstractTest() {
         assertNull(empty.type)
         assertNull(empty.features)
 
-        val main = numbers[1]
+        val main = response[1]
         assertNotNull(main)
         assertEquals(country, main.country)
         assertEquals(toNumber, main.msisdn)
@@ -133,7 +130,7 @@ class NumbersTest : AbstractTest() {
         assertThrowsGet(url, invocation)
     }
 
-    private fun assertAvailableNumbers(params: Map<String, Any>, invocation: Numbers.() -> SearchNumbersResponse) {
+    private fun assertAvailableNumbers(params: Map<String, Any>, invocation: Numbers.() -> List<AvailableNumber>) {
         val landline = "44800123456"
         val url = "/number/search"
         mockGet(
@@ -161,12 +158,9 @@ class NumbersTest : AbstractTest() {
 
         val response = invocation(client)
         assertNotNull(response)
-        assertEquals(count, response.count)
-        val numbers = response.numbers
-        assertNotNull(numbers)
-        assertEquals(3, numbers.size)
+        assertEquals(3, response.size)
 
-        val costOnly = numbers[0]
+        val costOnly = response[0]
         assertNotNull(costOnly)
         assertEquals(1.29, costOnly.cost.toDouble())
         assertNull(costOnly.type)
@@ -174,7 +168,7 @@ class NumbersTest : AbstractTest() {
         assertNull(costOnly.msisdn)
         assertNull(costOnly.features)
 
-        val main = numbers[1]
+        val main = response[1]
         assertNotNull(main)
         assertEquals(Type.LANDLINE_TOLL_FREE, Type.fromString(main.type))
         assertEquals(3.80, main.cost.toDouble())
@@ -185,7 +179,7 @@ class NumbersTest : AbstractTest() {
         assertEquals(1, mainFeatures.size)
         assertEquals(Feature.VOICE, Feature.fromString(mainFeatures[0]))
 
-        val mobile = numbers[2]
+        val mobile = response[2]
         assertEquals(country, mobile.country)
         assertEquals(toNumber, mobile.msisdn)
         assertEquals(Type.MOBILE_LVN, Type.fromString(mobile.type))
