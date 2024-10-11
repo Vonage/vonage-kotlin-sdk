@@ -18,6 +18,7 @@ package com.vonage.client.kt
 import com.vonage.client.users.channels.Websocket
 import com.vonage.client.voice.*
 import com.vonage.client.voice.ncco.*
+import java.nio.file.Path
 import java.time.Instant
 import java.util.*
 
@@ -154,6 +155,15 @@ class Voice internal constructor(private val client: VoiceClient) {
      */
     fun createCall(properties: Call.Builder.() -> Unit): CallEvent =
         client.createCall(Call.builder().apply(properties).build())
+
+    /**
+     * Download a recording of a call and save it to a file.
+     *
+     * @param recordingUrl The URL of the recording to download.
+     * @param destination Absolute path to save the recording to.
+     */
+    fun downloadRecording(recordingUrl: String, destination: Path): Unit =
+        client.saveRecording(recordingUrl, destination)
 }
 
 /**

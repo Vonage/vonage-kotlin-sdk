@@ -18,7 +18,12 @@ package com.vonage.client.kt
 import com.vonage.client.common.HttpMethod
 import com.vonage.client.voice.*
 import com.vonage.client.voice.ncco.*
+import org.junit.jupiter.api.Assertions.assertArrayEquals
+import java.nio.file.Files
 import java.util.*
+import kotlin.io.path.deleteExisting
+import kotlin.io.path.exists
+import kotlin.io.path.readBytes
 import kotlin.test.*
 
 class VoiceTest : AbstractTest() {
@@ -404,6 +409,28 @@ class VoiceTest : AbstractTest() {
     fun `list calls no filter`() {
         mockGet(callsBaseUrl, expectedResponseParams = listCallsResponse)
         assertEqualsSampleCallsPage(client.listCalls())
+    }
+
+    @Test
+    fun `download recording to temp file`() {
+        val fileName = "$randomUuidStr.wav"
+        val relativeUrl = "/api.nexmo.com/v1/files/$fileName"
+        val recordingUrl = wmBaseUrl + relativeUrl
+        var tempFile = Files.createTempFile(null, null)
+        tempFile.deleteExisting()
+        val content = "<110B1NARY0101;>".toByteArray(Charsets.UTF_8)
+        mockGetBinary(relativeUrl, content)
+
+        client.downloadRecording(recordingUrl, tempFile)
+        assertArrayEquals(content, tempFile.readBytes())
+        tempFile.deleteExisting()
+        assertFalse(tempFile.exists())
+
+        client.downloadRecording(recordingUrl, tempFile.parent)
+        tempFile = tempFile.parent.resolve(fileName)
+        assertTrue(tempFile.exists())
+        assertArrayEquals(content, tempFile.readBytes())
+        tempFile.deleteExisting()
     }
 
     @Test

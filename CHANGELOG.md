@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.0.0] - 2024-10-25 (expected)
 First stable GA release
 
+### Added
+- `Voice.downloadRecording(String, Path)` method
+
 ### Changed
 - `Sms.wasSuccessfullySent()` now an extension function rather than being part of the client
 - `Numbers.listOwned()` now returns `List<OwnedNumber>` instead of `ListNumbersResponse`

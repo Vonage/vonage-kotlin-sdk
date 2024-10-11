@@ -27,6 +27,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.vonage.client.HttpWrapper
 import com.vonage.client.users.channels.Websocket
 import java.net.URI
@@ -105,7 +106,7 @@ abstract class AbstractTest {
     protected val fileUrl = "$exampleUrlBase/file.pdf"
 
     private val port = 8081
-    private val wmBaseUrl = "http://localhost:$port"
+    protected val wmBaseUrl = "http://localhost:$port"
     private val wiremock: WireMockServer = WireMockServer(
         options().port(port).notifier(ConsoleNotifier(false))
     )
@@ -168,26 +169,29 @@ abstract class AbstractTest {
 
     private fun Any.toJson(): String = ObjectMapper().writeValueAsString(this)
 
+    private fun MappingBuilder.withAuth(authType: AuthType?): MappingBuilder {
+        when (authType) {
+            AuthType.API_KEY_SECRET_QUERY_PARAMS -> {
+                withFormParam(apiKeyName, equalTo(apiKey))
+                    .withFormParam(apiSecretName, equalTo(apiSecret))
+            }
+            AuthType.JWT -> withHeader(authHeaderName, matching(jwtBearerPattern))
+            AuthType.ACCESS_TOKEN -> withHeader(authHeaderName, equalTo(accessTokenBearer))
+            AuthType.API_KEY_SECRET_HEADER -> withHeader(authHeaderName, equalTo(basicSecretEncodedHeader))
+            AuthType.API_KEY_SIGNATURE_SECRET -> withFormParam(apiKeyName, equalTo(apiKey))
+            null -> Unit
+        }
+        return this
+    }
+
     protected fun mockPostQueryParams(expectedUrl: String, expectedRequestParams: Map<String, Any>,
                                       authType: AuthType? = AuthType.API_KEY_SECRET_QUERY_PARAMS,
                                       contentType: Boolean = false, status: Int = 200,
                                       expectedResponseParams: Any? = null) {
 
-        val stub = post(urlPathEqualTo(expectedUrl))
+        val stub = post(urlPathEqualTo(expectedUrl)).withAuth(authType)
         if (contentType) {
             stub.withHeader(contentTypeHeaderName, equalTo(ContentType.FORM_URLENCODED.mime))
-        }
-
-        when (authType) {
-            AuthType.API_KEY_SECRET_QUERY_PARAMS -> {
-                stub.withFormParam(apiKeyName, equalTo(apiKey))
-                    .withFormParam(apiSecretName, equalTo(apiSecret))
-            }
-            AuthType.JWT -> stub.withHeader(authHeaderName, matching(jwtBearerPattern))
-            AuthType.ACCESS_TOKEN -> stub.withHeader(authHeaderName, equalTo(accessTokenBearer))
-            AuthType.API_KEY_SECRET_HEADER -> stub.withHeader(authHeaderName, equalTo(basicSecretEncodedHeader))
-            AuthType.API_KEY_SIGNATURE_SECRET -> stub.withFormParam(apiKeyName, equalTo(apiKey))
-            null -> Unit
         }
 
         expectedRequestParams.forEach {(k, v) -> stub.withFormParam(k, equalTo(v.toString()))}
@@ -198,6 +202,13 @@ abstract class AbstractTest {
         }
         stub.willReturn(response)
         wiremock.stubFor(stub)
+    }
+
+    protected fun mockGetBinary(resourceUrl: String, body: ByteArray, authType: AuthType? = AuthType.JWT) {
+        wiremock.stubFor(
+            get(urlPathEqualTo(resourceUrl)).withAuth(authType)
+                .willReturn(aResponse().withBody(body).withStatus(200))
+        )
     }
 
     protected fun mockRequest(
@@ -282,7 +293,6 @@ abstract class AbstractTest {
                           authType: AuthType? = AuthType.JWT, expectedResponseParams: Map<String, Any>) =
         mockRequest(HttpMethod.GET, expectedUrl, accept = ContentType.APPLICATION_JSON, authType = authType,
             expectedParams = expectedQueryParams).mockReturn(status, expectedResponseParams)
-
 
     protected fun BuildingStep.mockReturn(
             status: Int? = null, expectedBody: Map<String, Any>? = null): ReturnsStep =
