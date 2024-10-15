@@ -10,6 +10,7 @@ First stable GA release
 ### Added
 - `Voice.downloadRecording(String, Path)` method
 - `InputAction.Builder.type` Boolean overload method (preferable to the Collection method)
+- `Application.Builder#networkApis` DSL method
 
 ### Changed
 - `Sms.wasSuccessfullySent()` now an extension function rather than being part of the client

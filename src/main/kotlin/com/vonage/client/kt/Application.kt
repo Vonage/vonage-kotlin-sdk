@@ -225,7 +225,7 @@ fun Application.Builder.removeCapabilities(vararg capabilities: Capability.Type)
 }
 
 /**
- * Adds a [Voice] capability to the application.
+ * Adds the [Voice] capability to the application.
  *
  * @param capability A lambda function for setting additional properties on the capability.
  *
@@ -235,7 +235,7 @@ fun Application.Builder.voice(capability: Voice.Builder.() -> Unit): Application
     addCapability(Voice.builder().apply(capability).build())
 
 /**
- * Adds a [Messages] capability to the application.
+ * Adds the [Messages] capability to the application.
  *
  * @param capability A lambda function for setting additional properties on the capability.
  *
@@ -245,7 +245,7 @@ fun Application.Builder.messages(capability: Messages.Builder.() -> Unit): Appli
     addCapability(Messages.builder().apply(capability).build())
 
 /**
- * Adds a [Verify] capability to the application.
+ * Adds the [Verify] capability to the application.
  *
  * @param capability A lambda function for setting additional properties on the capability.
  *
@@ -255,7 +255,7 @@ fun Application.Builder.verify(capability: Verify.Builder.() -> Unit): Applicati
     addCapability(Verify.builder().apply(capability).build())
 
 /**
- * Adds an [Rtc] capability to the application.
+ * Adds the [Rtc] capability to the application.
  *
  * @param capability A lambda function for setting additional properties on the capability.
  *
@@ -265,8 +265,19 @@ fun Application.Builder.rtc(capability: Rtc.Builder.() -> Unit): Application.Bui
     addCapability(Rtc.builder().apply(capability).build())
 
 /**
- * Adds a [Vbc] capability to the application.
+ * Adds the [Vbc] capability to the application.
  *
  * @return The application builder.
  */
 fun Application.Builder.vbc(): Application.Builder = addCapability(Vbc.builder().build())
+
+/**
+ * Adds the [NetworkApis] capability to the application.
+ *
+ * @param capability A lambda function for setting additional properties on the capability.
+ *
+ * @return The application builder.
+ */
+fun Application.Builder.networkApis(capability: NetworkApis.Builder.() -> Unit): Application.Builder =
+    addCapability(NetworkApis.builder().apply(capability).build())
+

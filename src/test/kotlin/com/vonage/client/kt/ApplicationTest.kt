@@ -30,6 +30,7 @@ class ApplicationTest : AbstractTest() {
     private val baseUrl = "/v2/applications"
     private val appUrl = "$baseUrl/$testUuid"
     private val answerUrl = "$exampleUrlBase/answer"
+    private val redirectUri = "$exampleUrlBase/redirect"
     private val page = 3
     private val pageSize = 25
     private val connectionTimeout = 500
@@ -43,6 +44,7 @@ class ApplicationTest : AbstractTest() {
     private val fallbackAnswerUrl = "$answerUrl-fallback"
     private val conversationsTtl = 12
     private val name = "My Application"
+    private val networkApplicationId = "2bzfIFqRG128IcjSj1YhZNtw6LADG"
     private val publicKey = "-----BEGIN PUBLIC KEY-----\npublic key\n-----END PUBLIC KEY-----"
     private val improveAi = false
     private val basicApplicationRequest = mapOf(
@@ -97,6 +99,10 @@ class ApplicationTest : AbstractTest() {
                         "http_method" to statusMethod
                     )
                 )
+            ),
+            "network_apis" to mapOf(
+                "redirect_uri" to redirectUri,
+                "network_application_id" to networkApplicationId
             ),
             "vbc" to emptyMap(),
             "verify" to mapOf(
@@ -299,6 +305,7 @@ class ApplicationTest : AbstractTest() {
                 Capability.Type.VOICE,
                 Capability.Type.RTC,
                 Capability.Type.MESSAGES,
+                Capability.Type.NETWORK,
                 Capability.Type.VERIFY
             )
         }
@@ -357,6 +364,10 @@ class ApplicationTest : AbstractTest() {
                     url(statusCallbackUrl)
                     method(statusMethod)
                 }
+            }
+            networkApis {
+                redirectUri(redirectUri)
+                networkApplicationId(networkApplicationId)
             }
             vbc()
             verify {
