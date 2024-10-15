@@ -218,6 +218,25 @@ fun InputAction.Builder.dtmf(settings: DtmfSettings.Builder.() -> Unit = {}): In
     dtmf(DtmfSettings.builder().apply(settings).build())
 
 /**
+ * Sets the input type(s). At least one must be specified (i.e. set to `true`).
+ *
+ * @param dtmf Whether to accept DTMF input.
+ * @param speech Whether to accept speech input.
+ *
+ * @return The updated [InputAction.Builder].
+ * @see InputAction.Builder.type(Collection)
+ */
+fun InputAction.Builder.type(dtmf: Boolean = false, speech: Boolean = false): InputAction.Builder {
+    var type = mutableListOf<String>()
+    if (dtmf) type.add("dtmf")
+    if (speech) type.add("speech")
+    if (type.isEmpty()) {
+        throw IllegalArgumentException("At least one input type must be specified.")
+    }
+    return type(type)
+}
+
+/**
  * Configure the behaviour of call recording transcription. If present (even if all settings are default),
  * transcription is activated. The [ConversationAction.Builder.record] parameter must also be set to `true`.
  *

@@ -47,7 +47,7 @@
     <kotlin.compiler.languageVersion>2.0</kotlin.compiler.languageVersion>
     <kotlin.compiler.apiVersion>${kotlin.compiler.languageVersion}</kotlin.compiler.apiVersion>
     <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
-    <kotlin.lib.version>2.0.20</kotlin.lib.version>
+    <kotlin.lib.version>2.0.21</kotlin.lib.version>
     <java.version>8</java.version>
   </properties>
 

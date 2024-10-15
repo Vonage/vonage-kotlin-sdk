@@ -19,6 +19,7 @@ import com.vonage.client.common.HttpMethod
 import com.vonage.client.voice.*
 import com.vonage.client.voice.ncco.*
 import org.junit.jupiter.api.Assertions.assertArrayEquals
+import org.junit.jupiter.api.assertThrows
 import java.nio.file.Files
 import java.util.*
 import kotlin.io.path.deleteExisting
@@ -596,11 +597,25 @@ class VoiceTest : AbstractTest() {
 
     @Test
     fun `create call with input action required parameters only`() {
-        val types = listOf("dtmf", "speech")
         testSingleNcco(
-            additionalParams = mapOf("type" to types),
-            ncco = inputAction { type(types) }
+            additionalParams = mapOf("type" to listOf("dtmf", "speech")),
+            ncco = inputAction { type(speech = true, dtmf = true) }
         )
+        testSingleNcco(
+            additionalParams = mapOf("type" to listOf("dtmf")),
+            ncco = inputAction { type(dtmf = true) }
+        )
+        testSingleNcco(
+            additionalParams = mapOf("type" to listOf("speech")),
+            ncco = inputAction { type(speech = true) }
+        )
+    }
+
+    @Test
+    fun `at least one type should be specified in inputAction`() {
+        assertThrows<IllegalArgumentException> {
+            inputAction { type() }
+        }
     }
 
     @Test
