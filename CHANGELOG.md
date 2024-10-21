@@ -9,7 +9,6 @@ First stable GA release
 
 ### Added
 - `Voice.downloadRecording(String, Path)` method
-- `InputAction.Builder.type` Boolean overload method (preferable to the Collection method)
 - `Application.Builder#networkApis` DSL method
 
 ### Changed
