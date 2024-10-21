@@ -235,16 +235,17 @@ class MessagesTest : AbstractTest() {
     fun `send Viber video`() {
         val duration = 23
         val fileSize = 7
-        val ttl = 90 // TODO fix in Java SDK
+        val ttl = 90
         val thumbUrl = "https://example.com/file1.jpg"
         testSend(videoBody(viberChannel,
             captionMap + mapOf("thumb_url" to thumbUrl)) + mapOf(viberChannel to mapOf(
                     "category" to "transaction",
                     "duration" to duration,
+                    "ttl" to ttl,
                     "file_size" to fileSize
             )), viberVideo {
-                from(altNumber); to(toNumber); url(videoUrl); caption(caption);
-                category(Category.TRANSACTION); duration(duration)
+                from(altNumber); to(toNumber); url(videoUrl); caption(caption)
+                category(Category.TRANSACTION); duration(duration); ttl(ttl)
                 fileSize(fileSize); thumbUrl(thumbUrl)
             }
         )
@@ -398,7 +399,7 @@ class MessagesTest : AbstractTest() {
         val params = whatsappCustomBody(mapOf(
                 "type" to "location",
                 "location" to mapOf(
-                    "lat" to latitude, "long" to longitude,
+                    "latitude" to latitude, "longitude" to longitude,
                     "name" to name, "address" to address
                 )
             )
