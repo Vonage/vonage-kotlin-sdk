@@ -597,24 +597,25 @@ class VoiceTest : AbstractTest() {
 
     @Test
     fun `create call with input action required parameters only`() {
+        val emptySpeech = mapOf("speech" to emptyMap<String, Any>())
         testSingleNcco(
-            additionalParams = mapOf("type" to listOf("dtmf", "speech")),
-            ncco = inputAction { type(speech = true, dtmf = true) }
+            additionalParams = mapOf("type" to listOf("dtmf", "speech")) + emptySpeech,
+            ncco = inputAction { dtmf(); speech() }
         )
         testSingleNcco(
             additionalParams = mapOf("type" to listOf("dtmf")),
-            ncco = inputAction { type(dtmf = true) }
+            ncco = inputAction { dtmf() }
         )
         testSingleNcco(
-            additionalParams = mapOf("type" to listOf("speech")),
-            ncco = inputAction { type(speech = true) }
+            additionalParams = mapOf("type" to listOf("speech")) + emptySpeech,
+            ncco = inputAction { speech() }
         )
     }
 
     @Test
     fun `at least one type should be specified in inputAction`() {
-        assertThrows<IllegalArgumentException> {
-            inputAction { type() }
+        assertThrows<IllegalStateException> {
+            inputAction { }
         }
     }
 
@@ -742,8 +743,8 @@ class VoiceTest : AbstractTest() {
                 ),
                 mapOf(
                     "action" to "input",
-                    "speech" to emptyMap,
-                    "dtmf" to emptyMap
+                    "type" to listOf("speech", "dtmf"),
+                    "speech" to emptyMap
                 ),
                 mapOf(
                     "action" to "notify",
@@ -806,7 +807,7 @@ class VoiceTest : AbstractTest() {
         val record = true
         val endOnExit = true
         val startOnEnter = true
-        val inputActionTypes = listOf("dtmf", "asr")
+        val inputActionTypes = listOf("dtmf", "speech")
         val dtmfTimeout = 7
         val maxDigits = 16
         val submitOnHash = true

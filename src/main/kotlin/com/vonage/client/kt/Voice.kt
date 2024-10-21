@@ -207,34 +207,15 @@ fun InputAction.Builder.speech(settings: SpeechSettings.Builder.() -> Unit = {})
     speech(SpeechSettings.builder().apply(settings).build())
 
 /**
- * Configure the behavior of Dual-Tone Multi-Frequency (DTMF) input. This setting is mutually exclusive with
- * [Call.Builder#speech], so you must provide one or the other for receiving input from the callee.
+ * Configure the behavior of Dual-Tone Multi-Frequency (DTMF) input.
  *
- * @param settings (OPTIONAL) A lambda function for configuring the DTMF settings.
+ * @param settings A lambda function for configuring the DTMF settings. If you provide this instead of
+ * calling the [InputAction.Builder#dtmf()] method, you cannot use asynchronous input mode.
  *
  * @return The updated [InputAction.Builder].
  */
-fun InputAction.Builder.dtmf(settings: DtmfSettings.Builder.() -> Unit = {}): InputAction.Builder =
+fun InputAction.Builder.dtmf(settings: DtmfSettings.Builder.() -> Unit): InputAction.Builder =
     dtmf(DtmfSettings.builder().apply(settings).build())
-
-/**
- * Sets the input type(s). At least one must be specified (i.e. set to `true`).
- *
- * @param dtmf Whether to accept DTMF input.
- * @param speech Whether to accept speech input.
- *
- * @return The updated [InputAction.Builder].
- * @see InputAction.Builder.type(Collection)
- */
-fun InputAction.Builder.type(dtmf: Boolean = false, speech: Boolean = false): InputAction.Builder {
-    var type = mutableListOf<String>()
-    if (dtmf) type.add("dtmf")
-    if (speech) type.add("speech")
-    if (type.isEmpty()) {
-        throw IllegalArgumentException("At least one input type must be specified.")
-    }
-    return type(type)
-}
 
 /**
  * Configure the behaviour of call recording transcription. If present (even if all settings are default),
