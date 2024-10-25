@@ -113,6 +113,9 @@ val vonageClient = Vonage {
 }
 ```
 
+## Usage
+You can find complete runnable code samples in the [vonage-kotlin-code-snippets repository](https://github.com/Vonage/vonage-kotlin-code-snippets).
+
 ## Frequently Asked Questions
 
 **Q: Why use this SDK instead of the [Vonage Java Server SDK](https://github.com/Vonage/vonage-java-sdk)?**
