@@ -48,7 +48,6 @@ class Verify(private val client: Verify2Client) {
                          properties: VerificationRequest.Builder.() -> Unit): VerificationResponse =
         client.sendVerification(VerificationRequest.builder().brand(brand).apply(properties).build())
 
-
     /**
      * Call this method to work with an existing verification request.
      *
@@ -67,7 +66,7 @@ class Verify(private val client: Verify2Client) {
     fun request(requestId: String): ExistingRequest = request(UUID.fromString(requestId))
 
     /**
-     * Call this method to work with an existing verification request.
+     * Class for working with an existing verification request.
      *
      * @param uuid UUID of the verification request to work with, as obtained from [VerificationResponse.getRequestId].
      */
@@ -106,12 +105,14 @@ class Verify(private val client: Verify2Client) {
          *
          * @return A [VerifyCodeResponse] object containing the verification status.
          *
-         * @throws [VerifyResponseException] If the code could not be checked. This could be for the following reasons:
+         * @throws [VerifyResponseException] If the check fails. This could be for the following reasons:
          * - **400**: Invalid code.
          * - **401**: Invalid credentials.
+         * - **402**: Account balance too low.
          * - **404**: Request was not found, or it has been verified already.
          * - **409**: The current workflow does not support a code.
          * - **410**: An incorrect code has been provided too many times. Workflow terminated.
+         * - **429**: Rate limit exceeded.
          * - **500**: Internal server error.
          *
          * @see isValidVerificationCode For a Boolean-returning version of this method.
@@ -126,6 +127,15 @@ class Verify(private val client: Verify2Client) {
          * @param code The verification code to check, as entered by the user.
          *
          * @return `true` if the code is valid, `false` if it is not.
+         *
+         * @throws [VerifyResponseException] If the code could not be checked. This could be for the following reasons:
+         * - **401**: Invalid credentials.
+         * - **402**: Account balance too low.
+         * - **404**: Request was not found, or it has been verified already.
+         * - **409**: The current workflow does not support a code.
+         * - **429**: Rate limit exceeded.
+         * - **500**: Internal server error.
+         *
          * @see checkVerificationCode For the original implementation which this method delegates to.
          */
         fun isValidVerificationCode(code: String): Boolean {
@@ -139,6 +149,237 @@ class Verify(private val client: Verify2Client) {
                     throw ex
                 }
             }
+        }
+    }
+
+    /**
+     * Create a new custom template.
+     *
+     * @param name Reference name for the template. Must not contain spaces or special characters than `_` and `-`.
+     *
+     * @return Details of the created template.
+     *
+     * @throws [VerifyResponseException] If the template could not be created. This could be for the following reasons:
+     * - **401**: Invalid credentials.
+     * - **402**: Account balance too low.
+     * - **403**: Template management is not enabled for your account.
+     * - **409**: Template with the same name already exists, or you have 10 templates already.
+     * - **429**: Rate limit exceeded.
+     * - **500**: Internal server error.
+     *
+     * @since 1.1.0
+     */
+    fun createTemplate(name: String): Template = client.createTemplate(name)
+
+    /**
+     * List all custom templates for your application.
+     *
+     * @return A list of all custom templates.
+     *
+     * @throws [VerifyResponseException] If the templates could not be listed. This could be for the following reasons:
+     * - **401**: Invalid credentials.
+     * - **402**: Account balance too low.
+     * - **429**: Rate limit exceeded.
+     * - **500**: Internal server error.
+     *
+     * @since 1.1.0
+     */
+    fun listTemplates(): List<Template> = client.listTemplates()
+
+    /**
+     * Call this method to work with an existing custom template.
+     *
+     * @param templateId ID of the template to work with as a string.
+     *
+     * @return An [ExistingTemplate] object with methods to interact with the template.
+     *
+     * @since 1.1.0
+     */
+    fun template(templateId: String): ExistingTemplate = ExistingTemplate(templateId)
+
+    /**
+     * Class for working with an existing custom template.
+     *
+     * @param templateId UUID of the template to work with, as obtained from [Template.getId].
+     *
+     * @since 1.1.0
+     */
+    inner class ExistingTemplate internal constructor(id: String): ExistingResource(id) {
+        private val templateId = UUID.fromString(id)
+
+        /**
+         * Get the custom template.
+         *
+         * @return Details of the custom template.
+         *
+         * @throws [VerifyResponseException] If the template could not be retrieved. This could be for the following reasons:
+         * - **401**: Invalid credentials.
+         * - **402**: Account balance too low.
+         * - **404**: Template not found.
+         * - **429**: Rate limit exceeded.
+         * - **500**: Internal server error.
+         *
+         * @since 1.1.0
+         */
+        fun get(): Template = client.getTemplate(templateId)
+
+        /**
+         * Update the custom template. Note that you must specify at least one parameter to change.
+         *
+         * @param name (OPTIONAL) New reference name for the template.
+         * Must not contain spaces or special characters besides `_` and `-`.
+         *
+         * @param isDefault (OPTIONAL) Whether to set this template as the default.
+         *
+         * @return Details of the updated template.
+         *
+         * @throws [VerifyResponseException] If the template could not be updated. This could be for the following reasons:
+         * - **401**: Invalid credentials.
+         * - **402**: Account balance too low.
+         * - **403**: Template management is not enabled for your account.
+         * - **404**: Template not found.
+         * - **409**: Template with this name already exists.
+         * - **429**: Rate limit exceeded.
+         * - **500**: Internal server error.
+         *
+         * @since 1.1.0
+         */
+        fun update(name: String? = null, isDefault: Boolean? = null): Template =
+            client.updateTemplate(templateId, name, isDefault)
+
+        /**
+         * Delete the custom template.
+         *
+         * @throws [VerifyResponseException] If the template could not be deleted. This could be for the following reasons:
+         * - **401**: Invalid credentials.
+         * - **402**: Account balance too low.
+         * - **403**: Template management is not enabled for your account.
+         * - **404**: Template not found.
+         * - **409**: Template is the default or contains undeleted fragments.
+         * - **429**: Rate limit exceeded.
+         * - **500**: Internal server error.
+         *
+         * @since 1.1.0
+         */
+        fun delete(): Unit = client.deleteTemplate(templateId)
+
+        /**
+         * Create a new template fragment.
+         *
+         * @param text Text content of the template. There are 4 reserved variables available to use:
+         * `${code}`, `${brand}`, `${time-limit}` and `${time-limit-unit}`. You must always use `${code}`.
+         * @param locale BCP-47 locale of the fragment.
+         * @param channel The channel for the fragment.
+         *
+         * @return Details of the created fragment.
+         *
+         * @throws [VerifyResponseException] If the fragment could not be created.
+         * This could be for the following reasons:
+         *
+         * - **401**: Invalid credentials.
+         * - **402**: Account balance too low.
+         * - **403**: Template management is not enabled for your account.
+         * - **404**: Template not found.
+         * - **409**: Fragment with the same locale and channel already exists.
+         * - **429**: Rate limit exceeded.
+         * - **500**: Internal server error.
+         *
+         * @since 1.1.0
+         */
+        fun createFragment(text: String, locale: String, channel: FragmentChannel): TemplateFragment =
+            client.createTemplateFragment(templateId, TemplateFragment(channel, locale, text))
+
+        /**
+         * List all template fragments for the template.
+         *
+         * @return A list of all template fragments.
+         *
+         * @throws [VerifyResponseException] If the fragments could not be listed.
+         * This could be for the following reasons:
+         * - **401**: Invalid credentials.
+         * - **402**: Account balance too low.
+         * - **404**: Template not found.
+         * - **429**: Rate limit exceeded.
+         * - **500**: Internal server error.
+         *
+         * @since 1.1.0
+         */
+        fun listFragments(): List<TemplateFragment> = client.listTemplateFragments(templateId)
+
+        /**
+         * Call this method to work with an existing template fragment.
+         *
+         * @param fragmentId ID of the fragment to work with as a string.
+         *
+         * @return An [ExistingTemplateFragment] object with methods to interact with the fragment.
+         *
+         * @since 1.1.0
+         */
+        fun fragment(fragmentId: String): ExistingTemplateFragment = ExistingTemplateFragment(fragmentId)
+
+        /**
+         * Class for working with an existing template fragment.
+         *
+         * @param fragmentId UUID of the fragment to work with, as obtained from [TemplateFragment.getId].
+         *
+         * @since 1.1.0
+         */
+        inner class ExistingTemplateFragment internal constructor(id: String): ExistingResource(id) {
+            private val fragmentId = UUID.fromString(id)
+
+            /**
+             * Get the template fragment.
+             *
+             * @return Details of the template fragment.
+             *
+             * @throws [VerifyResponseException] If the fragment could not be retrieved.
+             * This could be for the following reasons:
+             * - **401**: Invalid credentials.
+             * - **402**: Account balance too low.
+             * - **404**: Fragment not found.
+             * - **429**: Rate limit exceeded.
+             * - **500**: Internal server error.
+             *
+             * @since 1.1.0
+             */
+            fun get(): TemplateFragment = client.getTemplateFragment(templateId, fragmentId)
+
+            /**
+             * Update the template fragment.
+             *
+             * @param text New text for the fragment. There are 4 reserved variables available to use:
+             *`${code}`, `${brand}`, `${time-limit}` and `${time-limit-unit}`. You must always use `${code}`.
+             *
+             * @return Details of the updated fragment.
+             *
+             * @throws [VerifyResponseException] If the fragment could not be updated.
+             * This could be for the following reasons:
+             * - **401**: Invalid credentials.
+             * - **402**: Account balance too low.
+             * - **403**: Template management is not enabled for your account.
+             * - **404**: Fragment not found.
+             * - **429**: Rate limit exceeded.
+             * - **500**: Internal server error.
+             *
+             * @since 1.1.0
+             */
+            fun update(text: String): TemplateFragment = client.updateTemplateFragment(templateId, fragmentId, text)
+
+            /**
+             * Delete the template fragment.
+             *
+             * @throws [VerifyResponseException] If the fragment could not be deleted.
+             * This could be for the following reasons:
+             * - **401**: Invalid credentials.
+             * - **402**: Account balance too low.
+             * - **403**: Template management is not enabled for your account.
+             * - **404**: Fragment not found.
+             * - **429**: Rate limit exceeded.
+             * - **500**: Internal server error.
+             *
+             * @since 1.1.0
+             */
+            fun delete(): Unit = client.deleteTemplateFragment(templateId, fragmentId)
         }
     }
 }

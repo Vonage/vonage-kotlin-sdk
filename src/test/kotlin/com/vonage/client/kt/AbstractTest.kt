@@ -56,6 +56,7 @@ abstract class AbstractTest {
     private val basicSecretEncodedHeader = "Basic $apiKeySecretEncoded"
     private val jwtBearerPattern = "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9(\\..+){2}"
     private val accessTokenBearer = "Bearer $accessToken"
+    protected val apiBaseUrl = "https://api.nexmo.com"
     protected val testUuidStr = "aaaaaaaa-bbbb-4ccc-8ddd-0123456789ab"
     protected val testUuid: UUID = UUID.fromString(testUuidStr)
     protected val randomUuid: UUID = UUID.randomUUID()
