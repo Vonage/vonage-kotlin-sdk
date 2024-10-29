@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.0] - 2024-11-??
+
+### Added
+- Custom template management for Verify API
+- Pricing API
+
 ## [1.0.0] - 2024-10-25
 First stable GA release
 

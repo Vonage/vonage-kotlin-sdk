@@ -16,7 +16,6 @@
 package com.vonage.client.kt
 
 import com.vonage.client.HttpWrapper
-import com.vonage.client.VonageClient
 import org.apache.commons.lang3.reflect.FieldUtils
 import kotlin.test.*
 

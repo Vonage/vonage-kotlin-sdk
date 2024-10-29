@@ -89,6 +89,14 @@ class Vonage(config: VonageClient.Builder.() -> Unit) {
     val numberVerification = NumberVerification(client.numberVerificationClient)
 
     /**
+     * Access to the Vonage Pricing API.
+     *
+     * @return The [Pricing] client.
+     * @since 1.1.0
+     */
+    val pricing = Pricing(client.accountClient)
+
+    /**
      * Access to the Vonage Redact API.
      *
      * @return The [Redact] client.
