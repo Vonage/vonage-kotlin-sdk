@@ -100,6 +100,23 @@ class Voice internal constructor(private val client: VoiceClient) {
         fun sendDtmf(digits: String): DtmfResponse = client.sendDtmf(id, digits)
 
         /**
+         * Subscribe to real-time DTMF key presses on the call, where the input mode is [InputMode.ASYNCHRONOUS].
+         *
+         * @param eventUrl The publicly accessible URL to send DTMF events to,
+         * which can be deserialised using [EventWebhook.fromJson].
+         *
+         * @since 1.1.0
+         */
+        fun subscribeToDtmfEvents(eventUrl: String): Unit = client.addDtmfListener(id, eventUrl)
+
+        /**
+         * Stop asynchronous DTMF events being sent to the URL configured in [subscribeToDtmfEvents].
+         *
+         * @since 1.1.0
+         */
+        fun stopAsyncDtmfEvents(): Unit = client.removeDtmfListener(id)
+
+        /**
          * Play an audio file to the call.
          *
          * @param url The publicly accessible URL of the audio file to play.

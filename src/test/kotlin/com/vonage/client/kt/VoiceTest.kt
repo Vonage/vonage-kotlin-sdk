@@ -330,6 +330,20 @@ class VoiceTest : AbstractTest() {
     }
 
     @Test
+    fun `subscribe to real-time DTMF events`() {
+        mockPut(expectedUrl = "$callUrl/input/dtmf", status = 200,
+            expectedRequestParams = mapOf("event_url" to listOf(eventUrl))
+        )
+        existingCall.subscribeToDtmfEvents(eventUrl)
+    }
+
+    @Test
+    fun `stop receiving real-time DTMF events`() {
+        mockDelete(expectedUrl = "$callUrl/input/dtmf")
+        existingCall.stopAsyncDtmfEvents()
+    }
+
+    @Test
     fun `stream audio into call`() {
         val loop = 3
         val level = 0.45
