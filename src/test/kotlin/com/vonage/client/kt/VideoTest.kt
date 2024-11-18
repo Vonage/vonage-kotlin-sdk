@@ -160,6 +160,7 @@ class VideoTest : AbstractTest() {
         "name" to archiveName,
         "hasAudio" to archiveHasAudio,
         "hasVideo" to archiveHasVideo,
+        "maxBitrate" to maxBitrate,
         "multiArchiveTag" to multiArchiveTag,
         "resolution" to archiveResolutionStr,
         "streamMode" to archiveStreamMode.name.lowercase()
@@ -285,6 +286,7 @@ class VideoTest : AbstractTest() {
         assertEquals(createdAtInstant, archive.createdAt)
         assertEquals(Duration.ofSeconds(archiveDuration), archive.duration)
         assertEquals(archiveSize, archive.size)
+        assertEquals(maxBitrate, archive.maxBitrate)
         assertEquals(archiveStatus, archive.status)
         assertEquals(archiveStreamMode, archive.streamMode)
         assertEquals(archiveResolution, archive.resolution)
@@ -875,7 +877,7 @@ class VideoTest : AbstractTest() {
         )
         assertEqualsSampleArchive(existingSession.createArchive {
             name(archiveName); resolution(archiveResolution)
-            multiArchiveTag(multiArchiveTag)
+            multiArchiveTag(multiArchiveTag); maxBitrate(maxBitrate)
             hasVideo(archiveHasVideo); hasAudio(archiveHasAudio)
             streamMode(archiveStreamMode); outputMode(archiveOutputMode)
             standardLayout(ScreenLayoutType.HORIZONTAL)
