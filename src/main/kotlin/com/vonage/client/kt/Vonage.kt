@@ -18,7 +18,7 @@ package com.vonage.client.kt
 import com.vonage.client.HttpConfig
 import com.vonage.client.VonageClient
 
-const val VONAGE_KOTLIN_SDK_VERSION = "1.1.0"
+const val VONAGE_KOTLIN_SDK_VERSION = "1.1.1"
 private const val SDK_USER_AGENT = "vonage-kotlin-sdk/$VONAGE_KOTLIN_SDK_VERSION"
 
 /**

@@ -3,6 +3,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.vonage/server-sdk-kotlin)](https://central.sonatype.com/artifact/com.vonage/server-sdk-kotlin)
 [![Build Status](https://github.com/Vonage/vonage-kotlin-sdk/actions/workflows/build.yml/badge.svg)](https://github.com/Vonage/vonage-kotlin-sdk/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/Vonage/vonage-kotlin-sdk/graph/badge.svg?token=YNBJUD8OUT)](https://codecov.io/gh/Vonage/vonage-kotlin-sdk)
+[![KDoc](https://javadoc.io/badge2/com.vonage/server-sdk-kotlin/javadoc.svg)](https://javadoc.io/doc/com.vonage/server-sdk-kotlin)
 ![SLOC](https://sloc.xyz/github/Vonage/vonage-kotlin-sdk)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.txt)
@@ -115,8 +116,29 @@ val vonageClient = Vonage {
 ```
 
 ## Usage
+
+As with our other SDKs, the architecture is based around the `Vonage` class, which defines the authentication
+credentials and optional advanced settings for the HTTP client. The class has a field for each supported API,
+which returns an object containing methods available on that API. Where the SDK differs from other SDKs is that
+it uses a resource-based approach for CRUD operations, rather than a flat list of methods.
+These are inner classes defined for each API resources and are always prefixed with `Existing` - for example,
+`ExistingCall`, `ExistingSession`, `ExistingApplication` etc. As a general rule, resources with unique identifiers
+have a corresponding `Existing[Resource]` class which is used to perform operations on that resource, rather
+than repeatedly passing the ID of that resource to methods on the parent class, as is the case in the Java SDK.
+
+### Examples
 You can find complete runnable code samples in the [Code Snippets repository](https://github.com/Vonage/vonage-kotlin-code-snippets),
 including [a searchable list of snippets](https://github.com/Vonage/vonage-kotlin-code-snippets/blob/main/SNIPPETS.md).
+
+### Documentation
+The SDK is fully documented with KDocs, so you should have complete documentation from your IDE. You may need to
+click "Download Sources" in IntelliJ to get the full documentation. Alternatively, you can browse the documentation
+using a service such as [Javadoc.io](https://javadoc.io/doc/com.vonage/server-sdk-kotlin/latest/index.html), which
+renders the documentation for you from [the artifacts on Maven Central](https://repo.maven.apache.org/maven2/com/vonage/server-sdk-kotlin/).
+
+For help with any specific APIs, refer to the relevant documentation on our [developer portal](https://developer.vonage.com/en/documentation),
+using the links provided in the [Supported APIs](#supported-apis) section. For completeness, you can also consult the
+[API specifications](https://developer.vonage.com/api) if you believe there are any discrepancies.
 
 ## Frequently Asked Questions
 
@@ -126,13 +148,19 @@ including [a searchable list of snippets](https://github.com/Vonage/vonage-kotli
 syntactic sugar, so you can avoid the cumbersome builder pattern in favour of a more idiomatic DSL-like
 syntax, optional and named parameters with default values etc. whilst still reataining the strong typing
 offered by the Java SDK. Furthermore, you are more partially shielded from "platform types" (the `!`)
-so you have a better idea of what is and isn't nullable when creating requests.
+so you have a better idea of what is and isn't nullable when creating requests. You can read more about the
+differences in [the v1.0.0 announcement blog post](https://developer.vonage.com/en/blog/announcing-the-vonage-kotlin-server-sdk).
 
 **Q: What is your policy on thread safety?**
 
 **A:** As with the Java Server SDK, only one thread should use the client at a time.
 If you would like to use the SDK in a multithreaded environment, create a separate instance of
 `Vonage` for each thread, or use a ThreadLocal instance.
+
+**Q: I'm having issues with my project when including the SDK as a dependency. How can I troubleshoot this?**
+
+**A:** Please see [this blog post](https://developer.vonage.com/en/blog/one-simple-trick-for-resolving-java-runtime-dependency-issues).
+In short, you may have conflicting dependency versions in your project which clash with this SDK's transitive dependencies.
 
 ## Contribute!
 
