@@ -7,7 +7,6 @@
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.txt)
 
-
 This Kotlin SDK allows you to use [Vonage APIs](https://developer.vonage.com/api) in any JVM-based application.
 You'll need to have [created a Vonage account](https://dashboard.nexmo.com/sign-up?utm_source=DEV_REL&utm_medium=github&utm_campaign=java-client-library).
 
@@ -15,6 +14,7 @@ You'll need to have [created a Vonage account](https://dashboard.nexmo.com/sign-
 * [Other SDKs](#other-sdks)
 * [Installation](#installation)
 * [Configuration](#configuration)
+* [Usage](#usage)
 * [FAQ](#frequently-asked-questions)
 * [Contribute!](#contribute)
 
@@ -115,7 +115,8 @@ val vonageClient = Vonage {
 ```
 
 ## Usage
-You can find complete runnable code samples in the [vonage-kotlin-code-snippets repository](https://github.com/Vonage/vonage-kotlin-code-snippets).
+You can find complete runnable code samples in the [Code Snippets repository](https://github.com/Vonage/vonage-kotlin-code-snippets),
+including [a searchable list of snippets](https://github.com/Vonage/vonage-kotlin-code-snippets/blob/main/SNIPPETS.md).
 
 ## Frequently Asked Questions
 
@@ -140,8 +141,9 @@ _We :heart: contributions to this library!_
 It is a good idea to talk to us first if you plan to add any new functionality.
 Otherwise, [bug reports](https://github.com/Vonage/vonage-kotlin-sdk/issues),
 [bug fixes](https://github.com/Vonage/vonage-kotlin-sdk/pulls) and feedback on the
-library are always appreciated.
+library are always appreciated. You can also contact us through the following channels:
 
-### Contact
-[![Slack](https://img.shields.io/badge/Slack-4A154B?style=flat&logo=slack&logoColor=white)](https://developer.vonage.com/community/slack)
+[![Email](https://img.shields.io/badge/Email-green?style=flat-square&logo=gmail&logoColor=FFFFFF&labelColor=3A3B3C&color=62F1CD)](mailto:community@vonage.com)
+[![Community Slack](https://img.shields.io/badge/Slack-4A154B?style=flat&logo=slack&logoColor=white)](https://developer.vonage.com/community/slack)
 [![Twitter](https://img.shields.io/badge/Twitter-000000?style=flat&logo=x&logoColor=white)](https://twitter.com/VonageDev)
+
