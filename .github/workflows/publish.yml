@@ -4,17 +4,8 @@ on:
     types: [published]
 
 permissions:
-  actions: write
-  checks: write
   contents: read
-  deployments: read
-  issues: write
-  discussions: none
   packages: write
-  pages: write
-  pull-requests: read
-  security-events: read
-  statuses: write
 
 jobs:
   publish:

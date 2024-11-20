@@ -6,16 +6,8 @@ on:
   pull_request:
 
 permissions:
-  actions: write
-  checks: write
   contents: read
-  deployments: none
-  issues: read
-  discussions: none
-  packages: none
-  pages: read
-  pull-requests: write
-  security-events: write
+  checks: write
   statuses: write
 
 jobs:
