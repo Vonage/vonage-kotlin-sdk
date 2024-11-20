@@ -3,12 +3,13 @@ on:
   release:
     types: [published]
 
-permissions:
-  contents: read
-  packages: write
+permissions: read-all
 
 jobs:
   publish:
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo

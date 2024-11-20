@@ -5,13 +5,14 @@ on:
       - main
   pull_request:
 
-permissions:
-  contents: read
-  checks: write
-  statuses: write
+permissions: read-all
 
 jobs:
   compile:
+    permissions:
+      contents: read
+      checks: write
+      statuses: write
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -31,6 +32,10 @@ jobs:
         run: mvn -e --batch-mode compile -T 1C
 
   verify:
+    permissions:
+      contents: read
+      checks: write
+      statuses: write
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -56,6 +61,6 @@ jobs:
           VONAGE_PRIVATE_KEY_PATH: src/test/resources/com/vonage/client/kt/application_key
         run: mvn -e --batch-mode clean verify -T 1C
       - name: Run Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@288befbd1044bd1756afb0bdae077549e0ddb31f
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
