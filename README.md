@@ -1,14 +1,13 @@
 # Vonage Server SDK for Kotlin (JVM)
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.vonage/server-sdk-kotlin)](https://central.sonatype.com/artifact/com.vonage/server-sdk-kotlin)
-[![KDoc](https://javadoc.io/badge2/com.vonage/server-sdk-kotlin/javadoc.svg)](https://javadoc.io/doc/com.vonage/server-sdk-kotlin)
 [![Build Status](https://github.com/Vonage/vonage-kotlin-sdk/actions/workflows/build.yml/badge.svg)](https://github.com/Vonage/vonage-kotlin-sdk/actions/workflows/build.yml)
 ![CodeQL](https://github.com/Vonage/vonage-kotlin-sdk/actions/workflows/codeql.yml/badge.svg)
 [![codecov](https://codecov.io/gh/Vonage/vonage-kotlin-sdk/graph/badge.svg?token=YNBJUD8OUT)](https://codecov.io/gh/Vonage/vonage-kotlin-sdk)
 ![SLOC](https://sloc.xyz/github/Vonage/vonage-kotlin-sdk)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Vonage/vonage-kotlin-sdk/badge)](https://scorecard.dev/viewer/?uri=github.com/Vonage/vonage-kotlin-sdk)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.txt)
+<!--[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE.txt)-->
 
 This Kotlin SDK allows you to use [Vonage APIs](https://developer.vonage.com/api) in any JVM-based application.
 You'll need to have [created a Vonage account](https://dashboard.nexmo.com/sign-up?utm_source=DEV_REL&utm_medium=github&utm_campaign=java-client-library).
@@ -45,17 +44,49 @@ We also provide server SDKs in other languages:
 - [.NET](https://github.com/Vonage/vonage-dotnet-sdk)
 - [PHP](https://github.com/Vonage/vonage-php-sdk)
 - [Python](https://github.com/Vonage/vonage-python-sdk)
-- [Ruby](https://github.com/Vonage/vonage-ruby-sdk)
 - [NodeJS](https://github.com/Vonage/vonage-node-sdk)
+- [Ruby](https://github.com/Vonage/vonage-ruby-sdk)
 
-We also offer [client-side SDKs](https://developer.vonage.com/en/vonage-client-sdk/overview) for iOS, Android and JavaScript.
+We also offer [client-side SDKs](https://developer.vonage.com/en/vonage-client-sdk/overview) for Android, iOS and JavaScript.
 See all of our SDKs and integrations on the [Vonage Developer portal](https://developer.vonage.com/en/tools).
 
 ## Installation
 Releases are published to [Maven Central](https://central.sonatype.com/artifact/com.vonage/server-sdk-kotlin).
 Instructions for your build system can be found in the snippets section.
-They're also available from [here](https://mvnrepository.com/artifact/com.vonage/server-sdk-kotlin/latest).
-Release notes can be found in the [changelog](CHANGELOG.md).
+They're also available from [here](https://search.maven.org/artifact/com.vonage/server-sdk-kotlin/1.1.0/jar).
+Release notes for each version can be found in the [changelog](CHANGELOG.md).
+
+Here are the instructions for including the SDK in your project:
+
+### Gradle
+#### Groovy DSL
+Add the following to your `build.gradle` file:
+
+```groovy
+dependencies {
+    implementation "com.vonage:server-sdk-kotlin:1.1.0"
+}
+```
+
+#### Kotlin DSL
+Add the following to your `build.gradle.kts` file:
+
+```kotlin
+dependencies {
+    implementation("com.vonage:server-sdk-kotlin:1.1.0")
+}
+```
+
+### Maven
+Add the following to the `<dependencies>` section of your `pom.xml` file:
+
+```xml
+<dependency>
+    <groupId>com.vonage</groupId>
+    <artifactId>server-sdk-kotlin</artifactId>
+    <version>1.1.0</version>
+</dependency>
+```
 
 ### Build It Yourself
 
@@ -73,6 +104,7 @@ The `uberjar` profile will create a JAR file with all dependencies included in t
 directory at the root of the repo. You can then include this in your project's classpath.
 
 ## Configuration
+The SDK requires very little configuration to get started.
 
 ## Typical Instantiation
 For default configuration, you just need to specify your Vonage account credentials using API key and secret,
@@ -125,16 +157,21 @@ These are inner classes defined for each API resources and are always prefixed w
 `ExistingCall`, `ExistingSession`, `ExistingApplication` etc. As a general rule, resources with unique identifiers
 have a corresponding `Existing[Resource]` class which is used to perform operations on that resource, rather
 than repeatedly passing the ID of that resource to methods on the parent class, as is the case in the Java SDK.
+These resource classes are constructed from a method call in the top-level API class. So, for example, to work with
+an `ExistingSession`, you would do: `client.video.session(SESSION_ID)`, where `client` is an instance of `Vonage` and
+`SESSION_ID` is the unique identifier of the video session you want to work with.
 
 ### Examples
 You can find complete runnable code samples in the [Code Snippets repository](https://github.com/Vonage/vonage-kotlin-code-snippets),
 including [a searchable list of snippets](https://github.com/Vonage/vonage-kotlin-code-snippets/blob/main/SNIPPETS.md).
 
 ### Documentation
-The SDK is fully documented with KDocs, so you should have complete documentation from your IDE. You may need to
-click "Download Sources" in IntelliJ to get the full documentation. Alternatively, you can browse the documentation
-using a service such as [Javadoc.io](https://javadoc.io/doc/com.vonage/server-sdk-kotlin/latest/server-sdk-kotlin/com.vonage.client.kt/index.html),
-which  renders the documentation for you from [the artifacts on Maven Central](https://repo.maven.apache.org/maven2/com/vonage/server-sdk-kotlin/).
+[![javadoc](https://javadoc.io/badge2/com.vonage/server-sdk-kotlin/javadoc.svg)](https://javadoc.io/doc/com.vonage/server-sdk-kotlin)
+
+The SDK is fully documented with [KDocs](https://kotlinlang.org/docs/kotlin-doc.html), so you should have complete
+documentation from your IDE. You may need to click "Download Sources" in IntelliJ to get the full documentation.
+Alternatively, you can browse the documentation  using a service like [Javadoc.io](https://javadoc.io/doc/com.vonage/server-sdk-kotlin/1.1.0/index.html),
+which renders the documentation for you from [the artifacts on Maven Central](https://repo.maven.apache.org/maven2/com/vonage/server-sdk-kotlin/1.1.0/).
 
 For help with any specific APIs, refer to the relevant documentation on our [developer portal](https://developer.vonage.com/en/documentation),
 using the links provided in the [Supported APIs](#supported-apis) section. For completeness, you can also consult the

@@ -5,7 +5,7 @@
 
   <groupId>com.vonage</groupId>
   <artifactId>server-sdk-kotlin</artifactId>
-  <version>1.1.1</version>
+  <version>1.1.0</version>
 
   <name>Vonage Kotlin Server SDK</name>
   <description>Kotlin client for Vonage APIs</description>
@@ -108,6 +108,24 @@
                         file="src/main/kotlin/com/vonage/client/kt/Vonage.kt"
                         match="VONAGE_KOTLIN_SDK_VERSION = &quot;.+&quot;"
                         replace="VONAGE_KOTLIN_SDK_VERSION = &quot;${project.version}&quot;"
+                />
+                <replaceregexp
+                        file="README.md"
+                        match="\/server-sdk-kotlin\/([0-9\.]+)\/"
+                        replace="\/server-sdk-kotlin\/${project.version}\/"
+                        flags="g"
+                />
+                <replaceregexp
+                        file="README.md"
+                        match="vonage:server-sdk-kotlin:.+&quot;"
+                        replace="vonage:server-sdk-kotlin:${project.version}&quot;"
+                        flags="g"
+                />
+                <replaceregexp
+                        file="README.md"
+                        match="&lt;version&gt;.+&lt;/version&gt;"
+                        replace="&lt;version&gt;${project.version}&lt;\/version&gt;"
+                        flags="g"
                 />
               </target>
             </configuration>
