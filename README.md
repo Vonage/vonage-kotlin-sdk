@@ -50,7 +50,6 @@ We also offer [client-side SDKs](https://developer.vonage.com/en/vonage-client-s
 See all of our SDKs and integrations on the [Vonage Developer portal](https://developer.vonage.com/en/tools).
 
 ## Installation
-
 Releases are published to [Maven Central](https://central.sonatype.com/artifact/com.vonage/server-sdk-kotlin).
 Instructions for your build system can be found in the snippets section.
 They're also available from [here](https://mvnrepository.com/artifact/com.vonage/server-sdk-kotlin/latest).
@@ -116,7 +115,6 @@ val vonageClient = Vonage {
 ```
 
 ## Usage
-
 As with our other SDKs, the architecture is based around the `Vonage` class, which defines the authentication
 credentials and optional advanced settings for the HTTP client. The class has a field for each supported API,
 which returns an object containing methods available on that API. Where the SDK differs from other SDKs is that
@@ -133,8 +131,8 @@ including [a searchable list of snippets](https://github.com/Vonage/vonage-kotli
 ### Documentation
 The SDK is fully documented with KDocs, so you should have complete documentation from your IDE. You may need to
 click "Download Sources" in IntelliJ to get the full documentation. Alternatively, you can browse the documentation
-using a service such as [Javadoc.io](https://javadoc.io/doc/com.vonage/server-sdk-kotlin/latest/index.html), which
-renders the documentation for you from [the artifacts on Maven Central](https://repo.maven.apache.org/maven2/com/vonage/server-sdk-kotlin/).
+using a service such as [Javadoc.io](https://javadoc.io/doc/com.vonage/server-sdk-kotlin/latest/server-sdk-kotlin/com.vonage.client.kt/index.html),
+which  renders the documentation for you from [the artifacts on Maven Central](https://repo.maven.apache.org/maven2/com/vonage/server-sdk-kotlin/).
 
 For help with any specific APIs, refer to the relevant documentation on our [developer portal](https://developer.vonage.com/en/documentation),
 using the links provided in the [Supported APIs](#supported-apis) section. For completeness, you can also consult the

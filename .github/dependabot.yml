@@ -2,7 +2,7 @@
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 version: 2
 updates:
-  - package-ecosystem: "Maven"
+  - package-ecosystem: "maven"
     directory: "/"
     schedule:
       interval: "weekly"
