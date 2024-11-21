@@ -189,6 +189,19 @@ If you would like to use the SDK in a multithreaded environment, create a separa
 **A:** Please see [this blog post](https://developer.vonage.com/en/blog/one-simple-trick-for-resolving-java-runtime-dependency-issues).
 In short, you may have conflicting dependency versions in your project which clash with this SDK's transitive dependencies.
 
+**Q: I'm encountering HTTP request issues, such as timeouts. How can I remedy or report this?**
+
+**A:** Since this library uses the Java SDK underneath, which in turn uses
+[Apache HTTP Client 4](https://hc.apache.org/httpcomponents-client-4.5.x/index.html), you may be able
+to use system properties to configure the client, or use this SDK's `httpConfig` method on the `Vonage` class
+for more fine-grained control. If you believe there is an issue with the underlying client, please raise an issue
+with a minimal reproducible example, including details of your environment (JVM runtime version, SDK version,
+operating system etc.) on the [Vonage Java SDK repository](https://github.com/Vonage/vonage-java-sdk/issues/new/choose).
+
+**Q: I'm not sure if my issue is with the SDK. How can I get help?**
+
+**A:** Please see our [support page](https://api.support.vonage.com/), including contact information.
+
 ## Contribute!
 
 _We :heart: contributions to this library!_
