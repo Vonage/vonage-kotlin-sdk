@@ -59,19 +59,9 @@ Release notes for each version can be found in the [changelog](CHANGELOG.md).
 Here are the instructions for including the SDK in your project:
 
 ### Gradle
-#### Groovy DSL
-Add the following to your `build.gradle` file:
+Add the following to your `build.gradle` or `build.gradle.kts` file:
 
 ```groovy
-dependencies {
-    implementation "com.vonage:server-sdk-kotlin:1.1.0"
-}
-```
-
-#### Kotlin DSL
-Add the following to your `build.gradle.kts` file:
-
-```kotlin
 dependencies {
     implementation("com.vonage:server-sdk-kotlin:1.1.0")
 }
@@ -163,7 +153,7 @@ an `ExistingSession`, you would do: `client.video.session(SESSION_ID)`, where `c
 
 ### Examples
 You can find complete runnable code samples in the [Code Snippets repository](https://github.com/Vonage/vonage-kotlin-code-snippets),
-including [a searchable list of snippets](https://github.com/Vonage/vonage-kotlin-code-snippets/blob/main/SNIPPETS.md).
+including [**a searchable list of snippets**](https://github.com/Vonage/vonage-kotlin-code-snippets/blob/main/SNIPPETS.md).
 
 ### Documentation
 [![javadoc](https://javadoc.io/badge2/com.vonage/server-sdk-kotlin/javadoc.svg)](https://javadoc.io/doc/com.vonage/server-sdk-kotlin)
