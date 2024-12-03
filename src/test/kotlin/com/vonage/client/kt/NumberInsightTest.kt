@@ -160,7 +160,9 @@ class NumberInsightTest : AbstractTest() {
         mockPostQueryParams(
             expectedUrl = "/ni/${type.name.lowercase().replace('_', '/')}/json",
             expectedRequestParams = expectedRequestParams,
-            expectedResponseParams = expectedResponseParams
+            expectedResponseParams = expectedResponseParams,
+            authType = if (type == InsightType.BASIC)
+                AuthType.API_KEY_SECRET_HEADER else AuthType.API_KEY_SECRET_QUERY_PARAMS
         )
     }
 

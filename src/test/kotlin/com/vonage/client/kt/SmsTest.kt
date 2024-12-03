@@ -40,7 +40,11 @@ class SmsTest : AbstractTest() {
         val messagePrice = "0.03330000"
         val network = "23410"
 
-        mockPostQueryParams(sendUrl, requestParams, expectedResponseParams = mapOf(
+        mockPostQueryParams(
+            expectedUrl = sendUrl,
+            authType = AuthType.API_KEY_SECRET_HEADER,
+            expectedRequestParams = requestParams,
+            expectedResponseParams = mapOf(
                 "message-count" to "1",
                 "messages" to listOf(
                     mapOf(
@@ -156,7 +160,9 @@ class SmsTest : AbstractTest() {
         )
         val successMap = mapOf("status" to "0")
 
-        mockPostQueryParams(sendUrl, expectedRequestParams, expectedResponseParams = mapOf(
+        mockPostQueryParams(sendUrl, expectedRequestParams,
+            authType = AuthType.API_KEY_SECRET_HEADER,
+            expectedResponseParams = mapOf(
                 "message-count" to "2147483647",
                 "messages" to listOf(
                     successMap, successMap, successMap, successMap,
