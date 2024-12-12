@@ -210,21 +210,6 @@ fun Messages.Builder.status(properties: Webhook.Builder.() -> Unit): Messages.Bu
     addWebhook(Webhook.Type.STATUS, webhookBuilder(properties))
 
 /**
- * Removes one or more capabilities from the application, used in conjunction with
- * [com.vonage.client.kt.Application.ExistingApplication#update].
- *
- * @param capabilities The capability types to remove.
- *
- * @return The application builder.
- */
-fun Application.Builder.removeCapabilities(vararg capabilities: Capability.Type): Application.Builder {
-    for (capability in capabilities) {
-        removeCapability(capability)
-    }
-    return this
-}
-
-/**
  * Adds the [Voice] capability to the application.
  *
  * @param capability A lambda function for setting additional properties on the capability.

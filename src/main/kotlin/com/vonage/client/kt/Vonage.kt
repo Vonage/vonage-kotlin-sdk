@@ -18,7 +18,7 @@ package com.vonage.client.kt
 import com.vonage.client.HttpConfig
 import com.vonage.client.VonageClient
 
-const val VONAGE_KOTLIN_SDK_VERSION = "1.1.1"
+const val VONAGE_KOTLIN_SDK_VERSION = "1.1.2"
 private const val SDK_USER_AGENT = "vonage-kotlin-sdk/$VONAGE_KOTLIN_SDK_VERSION"
 
 /**
@@ -37,6 +37,7 @@ private const val SDK_USER_AGENT = "vonage-kotlin-sdk/$VONAGE_KOTLIN_SDK_VERSION
  * @param config The configuration lambda, where you provide your Vonage account credentials.
  */
 class Vonage(config: VonageClient.Builder.() -> Unit) {
+    // This ensures the user agent is always applied on top of the underlying Java SDK's user agent
     private val client : VonageClient = VonageClient.builder().httpConfig{}.apply(config).build()
 
     /**
@@ -191,5 +192,10 @@ fun VonageClient.Builder.authFromEnv(): VonageClient.Builder {
  * @param init The config options lambda.
  * @return The builder.
  */
-fun VonageClient.Builder.httpConfig(init: HttpConfig.Builder.() -> Unit): VonageClient.Builder =
-    httpConfig(HttpConfig.builder().apply(init).appendUserAgent(SDK_USER_AGENT).build())
+fun VonageClient.Builder.httpConfig(init: HttpConfig.Builder.() -> Unit): VonageClient.Builder {
+    // Workaround to prevent the default prefix being overriden
+    val applied = HttpConfig.builder().apply(init)
+    val customUa = applied.build().customUserAgent
+    val adjustedUa = if (customUa.isNullOrBlank()) SDK_USER_AGENT else "$SDK_USER_AGENT $customUa"
+    return httpConfig(applied.appendUserAgent(adjustedUa).build())
+}

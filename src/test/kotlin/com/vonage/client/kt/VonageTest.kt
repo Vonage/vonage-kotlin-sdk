@@ -28,19 +28,22 @@ class VonageTest {
     }
 
     @Test
-    fun `test user agent is not overriden`() {
+    fun `Ensure that custom user agent does not override SDK's default prefix`() {
+        val expectedDefaultUa = "vonage-kotlin-sdk/$VONAGE_KOTLIN_SDK_VERSION"
+        var client = Vonage { }
+        assertEquals(expectedDefaultUa, client.getWrapper().httpConfig.customUserAgent)
+
         val timeout = 36000
-        val customUa = "MyCustomUserAgent"
-        val client = Vonage { httpConfig { timeoutMillis(timeout); appendUserAgent(customUa) } }
-        val wrapper = FieldUtils.readField(
-            client::class.java.getDeclaredField("client").apply { isAccessible = true }.get(client),
+        val customUa = "My_Custom User-Agent"
+        client = Vonage { httpConfig { timeoutMillis(timeout); appendUserAgent(customUa) } }
+        assertEquals(timeout, client.getWrapper().httpConfig.timeoutMillis)
+        assertEquals("$expectedDefaultUa $customUa", client.getWrapper().httpConfig.customUserAgent)
+    }
+
+    private fun Vonage.getWrapper(): HttpWrapper {
+        return FieldUtils.readField(
+            this::class.java.getDeclaredField("client").apply { isAccessible = true }.get(this),
             "httpWrapper", true
         ) as HttpWrapper
-
-        assertEquals(
-            "vonage-kotlin-sdk/$VONAGE_KOTLIN_SDK_VERSION",
-            wrapper.httpConfig.customUserAgent
-        )
-        assertEquals(timeout, wrapper.httpConfig.timeoutMillis)
     }
 }
