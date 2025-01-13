@@ -54,8 +54,8 @@ class Messages internal constructor(private val client: MessagesClient) {
      * - **500**: Internal server error.
      */
     fun send(message: MessageRequest, sandbox: Boolean = false): UUID =
-        (if (sandbox) client.useSandboxEndpoint()
-            else client.useRegularEndpoint()).sendMessage(message).messageUuid
+        (if (sandbox) client.useSandboxEndpoint() else client.useRegularEndpoint())
+            .sendMessage(message).messageUuid
 
     /**
      * Call this method to update an existing message.

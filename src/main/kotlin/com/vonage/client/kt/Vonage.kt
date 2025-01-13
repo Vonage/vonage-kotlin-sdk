@@ -18,7 +18,14 @@ package com.vonage.client.kt
 import com.vonage.client.HttpConfig
 import com.vonage.client.VonageClient
 
+/**
+ * Denotes the version of the Vonage Kotlin SDK being used, in SemVer format.
+ */
 const val VONAGE_KOTLIN_SDK_VERSION = "1.1.2"
+
+/**
+ * The non-overridable user agent string used by the SDK.
+ */
 private const val SDK_USER_AGENT = "vonage-kotlin-sdk/$VONAGE_KOTLIN_SDK_VERSION"
 
 /**
@@ -173,17 +180,24 @@ class Vonage(config: VonageClient.Builder.() -> Unit) {
  * - **VONAGE_PRIVATE_KEY_PATH**: Path to the private key file of the application.
  */
 fun VonageClient.Builder.authFromEnv(): VonageClient.Builder {
-    val apiKey = System.getenv("VONAGE_API_KEY")
-    val apiSecret = System.getenv("VONAGE_API_SECRET")
-    val signatureSecret = System.getenv("VONAGE_SIGNATURE_SECRET")
-    val applicationId = System.getenv("VONAGE_APPLICATION_ID")
-    val privateKeyPath = System.getenv("VONAGE_PRIVATE_KEY_PATH")
-    if (apiKey != null) apiKey(apiKey)
-    if (apiSecret != null) apiSecret(apiSecret)
-    if (signatureSecret != null) signatureSecret(signatureSecret)
-    if (applicationId != null) applicationId(applicationId)
-    if (privateKeyPath != null) privateKeyPath(privateKeyPath)
+    setFromEnvIfNotNull("VONAGE_API_KEY") { apiKey(it) }
+    setFromEnvIfNotNull("VONAGE_API_SECRET") { apiSecret(it) }
+    setFromEnvIfNotNull("VONAGE_SIGNATURE_SECRET") { signatureSecret(it) }
+    setFromEnvIfNotNull("VONAGE_APPLICATION_ID") { applicationId(it) }
+    setFromEnvIfNotNull("VONAGE_PRIVATE_KEY_PATH") { privateKeyPath(it) }
+    setFromEnvIfNotNull("VONAGE_PRIVATE_KEY_CONTENTS") { privateKeyContents(it) }
     return this
+}
+
+/**
+ * Calls the setter function with the value of the environment variable if it is not null.
+ *
+ * @param envVar The name of the environment variable.
+ * @param setter The setter function to call with the value of the environment variable.
+ */
+private fun setFromEnvIfNotNull(envVar: String, setter: (String) -> Unit) {
+    val value = System.getenv(envVar)
+    if (value != null) setter(value)
 }
 
 /**
@@ -193,7 +207,7 @@ fun VonageClient.Builder.authFromEnv(): VonageClient.Builder {
  * @return The builder.
  */
 fun VonageClient.Builder.httpConfig(init: HttpConfig.Builder.() -> Unit): VonageClient.Builder {
-    // Workaround to prevent the default prefix being overriden
+    // Workaround to prevent the default prefix being overridden
     val applied = HttpConfig.builder().apply(init)
     val customUa = applied.build().customUserAgent
     val adjustedUa = if (customUa.isNullOrBlank()) SDK_USER_AGENT else "$SDK_USER_AGENT $customUa"

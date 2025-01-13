@@ -222,4 +222,22 @@ class SmsTest : AbstractTest() {
         assertEquals("Number De-activated.", response[offset].errorText)
         assertEquals(OK, response[++offset].status)
     }
+
+    @Test
+    fun `wasSuccessfullySent with empty response returns false`() {
+        mockPostQueryParams(sendUrl,
+            expectedRequestParams = mapOf(
+                "from" to from, "to" to toNumber,
+                "text" to text, "type" to "text",
+            ),
+            authType = AuthType.API_KEY_SECRET_HEADER,
+            expectedResponseParams = mapOf(
+                "message-count" to "-1",
+                "messages" to emptyList<SmsSubmissionResponseMessage>()
+            )
+        )
+        val response = client.sendText(from, toNumber, text)
+        assertNotNull(response)
+        assertFalse(response.wasSuccessfullySent())
+    }
 }

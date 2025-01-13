@@ -42,7 +42,6 @@ class MessagesTest : AbstractTest() {
     private val caption = "Additional text to accompany the media"
     private val captionMap = mapOf("caption" to caption)
 
-
     private fun testSend(expectedBodyParams: Map<String, Any>, req: MessageRequest) {
         mockPost(expectedUrl = sendUrl, status = 202, authType = authType,
             expectedRequestParams = expectedBodyParams,
@@ -660,5 +659,21 @@ class MessagesTest : AbstractTest() {
         assertEquals(channel, parsed.channel)
         assertEquals(networkCode, parsed.destinationNetworkCode)
         assertEquals(smsCount, parsed.smsTotalCount)
+    }
+
+    @Test
+    fun `send sandbox real request fails with 401`() {
+        try {
+            client.send(
+                smsText { from(altNumber); to(toNumber); text(text) },
+                sandbox = true
+            )
+        }
+        catch (ex: MessageResponseException) {
+            assertEquals(401, ex.statusCode)
+            assertNotNull(ex.title)
+            assertNotNull(ex.detail)
+            assertNotNull(ex.instance)
+        }
     }
 }
