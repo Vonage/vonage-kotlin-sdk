@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.3] - 2025-01-31
+
+### Added
+- `NumberInsight.advanced` overload without `realTimeData` parameter
+
+### Changed
+- Bumped Java SDK version to 8.16.0
+
+### Deprecated
+- `realTimeData` in `NumberInsight.advanced`
+
 ## [1.1.2] - 2024-12-12
 
 ### Fixed
