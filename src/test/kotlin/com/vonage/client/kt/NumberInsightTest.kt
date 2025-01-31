@@ -62,14 +62,14 @@ class NumberInsightTest : AbstractTest() {
         BASIC, STANDARD, ADVANCED, ADVANCED_ASYNC
     }
 
-    private fun mockInsight(type: InsightType, optionalParams: Boolean = false) {
+    private fun mockInsight(type: InsightType, optionalParams: Boolean = false, includeRtd: Boolean = false) {
         val expectedRequestParams = mutableMapOf<String, Any>("number" to toNumber)
         if (optionalParams) {
             expectedRequestParams["country"] = countryCode
             if (type != InsightType.BASIC) {
                 expectedRequestParams["cnam"] = cnam
             }
-            if (type == InsightType.ADVANCED) {
+            if (includeRtd) {
                 expectedRequestParams["real_time_data"] = realTimeData
             }
         }
@@ -262,7 +262,19 @@ class NumberInsightTest : AbstractTest() {
     @Test
     fun `advanced insight all params`() {
         mockInsight(InsightType.ADVANCED, true)
+        assertAdvancedResponse(client.advanced(toNumber, countryCode, cnam))
+    }
+
+    @Test
+    fun `advanced insight real time data all params`() {
+        mockInsight(InsightType.ADVANCED, true, true)
         assertAdvancedResponse(client.advanced(toNumber, countryCode, cnam, realTimeData))
+    }
+
+    @Test
+    fun `advanced insight real time data required params`() {
+        mockInsight(InsightType.ADVANCED, false, true)
+        assertAdvancedResponse(client.advanced(toNumber, realTimeData = realTimeData))
     }
 
     @Test
