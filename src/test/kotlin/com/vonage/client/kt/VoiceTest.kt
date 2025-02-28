@@ -723,6 +723,11 @@ class VoiceTest : AbstractTest() {
         )
 
         testSingleNccoConnect(
+            mapOf("domain" to sipDomainName),
+            connectToSip(sipDomainName, user = null)
+        )
+
+        testSingleNccoConnect(
             mapOf("domain" to sipDomainName, "user" to userName),
             connectToSip(sipDomainName, userName)
         )

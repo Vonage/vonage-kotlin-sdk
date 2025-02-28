@@ -455,7 +455,7 @@ fun connectToSip(uri: String, customHeaders: Map<String, Any>? = null, userToUse
  *
  * @since 1.1.4
  */
-fun connectToSip(domain: String, user: String,
+fun connectToSip(domain: String, user: String?,
                  customHeaders: Map<String, Any>? = null, userToUserHeader: String? = null,
                  properties: ConnectAction.Builder.() -> Unit = {}) : ConnectAction =
     connectToSip(customHeaders, userToUserHeader, properties) { domain(domain).user(user) }
