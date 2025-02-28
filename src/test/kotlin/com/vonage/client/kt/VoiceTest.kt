@@ -40,6 +40,7 @@ class VoiceTest : AbstractTest() {
     private val count = 89
     private val pageSize = 25
     private val recordIndex = 14
+    private val sipDomainName = "my_example-domain"
     private val fromPstn = "14155550100"
     private val streamUrl = "$exampleUrlBase/waiting.mp3"
     private val onAnswerUrl = "$exampleUrlBase/ncco.json"
@@ -722,10 +723,27 @@ class VoiceTest : AbstractTest() {
         )
 
         testSingleNccoConnect(
+            mapOf("domain" to sipDomainName),
+            connectToSip(sipDomainName, user = null)
+        )
+
+        testSingleNccoConnect(
+            mapOf("domain" to sipDomainName, "user" to userName),
+            connectToSip(sipDomainName, userName)
+        )
+
+        testSingleNccoConnect(
             mapOf("uri" to sipUri, "headers" to customHeaders,
                 "standardHeaders" to mapOf("User-to-User" to userToUserHeader)
             ),
             connectToSip(sipUri, customHeaders, userToUserHeader)
+        )
+
+        testSingleNccoConnect(
+            mapOf("domain" to sipDomainName, "user" to userName, "headers" to customHeaders,
+                "standardHeaders" to mapOf("User-to-User" to userToUserHeader)
+            ),
+            connectToSip(sipDomainName, userName, customHeaders, userToUserHeader)
         )
     }
 

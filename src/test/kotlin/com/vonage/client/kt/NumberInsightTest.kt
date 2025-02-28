@@ -161,8 +161,7 @@ class NumberInsightTest : AbstractTest() {
             expectedUrl = "/ni/${type.name.lowercase().replace('_', '/')}/json",
             expectedRequestParams = expectedRequestParams,
             expectedResponseParams = expectedResponseParams,
-            authType = if (type == InsightType.BASIC)
-                AuthType.API_KEY_SECRET_HEADER else AuthType.API_KEY_SECRET_QUERY_PARAMS
+            authType = AuthType.API_KEY_SECRET_HEADER
         )
     }
 
