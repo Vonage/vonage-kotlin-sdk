@@ -190,7 +190,8 @@ class Voice internal constructor(private val client: VoiceClient) {
  *
  * @return The updated [CallsFilter.Builder].
  */
-fun CallsFilter.Builder.dateStart(dateStart: Instant): CallsFilter.Builder = dateStart(Date.from(dateStart))
+@Deprecated("Use CallsFilter.Builder.startDate instead.", replaceWith = ReplaceWith("startDate(dateStart)"))
+fun CallsFilter.Builder.dateStart(dateStart: Instant): CallsFilter.Builder = startDate(dateStart)
 
 /**
  * Sets the end date for the [Voice.listCalls] filter.
@@ -199,7 +200,8 @@ fun CallsFilter.Builder.dateStart(dateStart: Instant): CallsFilter.Builder = dat
  *
  * @return The updated [CallsFilter.Builder].
  */
-fun CallsFilter.Builder.dateEnd(dateEnd: Instant): CallsFilter.Builder = dateEnd(Date.from(dateEnd))
+@Deprecated("Use CallsFilter.Builder.endDate instead.", replaceWith = ReplaceWith("endDate(dateEnd)"))
+fun CallsFilter.Builder.dateEnd(dateEnd: Instant): CallsFilter.Builder = endDate(dateEnd)
 
 /**
  * Configure the behavior of Advanced Machine Detection. This overrides [Call.Builder#machineDetection] setting
@@ -410,6 +412,22 @@ fun connectToWebsocket(uri: String, contentType: Websocket.ContentType, headers:
         .headers(headers).build(), properties
     )
 
+private fun connectToSip(
+    customHeaders: Map<String, Any>?,
+    userToUserHeader: String?,
+    connectProperties: ConnectAction.Builder.() -> Unit,
+    sipProperties: com.vonage.client.voice.ncco.SipEndpoint.Builder.() -> Unit
+) : ConnectAction {
+    val builder = com.vonage.client.voice.ncco.SipEndpoint.builder().apply(sipProperties)
+    if (customHeaders != null) {
+        builder.headers(customHeaders)
+    }
+    if (userToUserHeader != null) {
+        builder.userToUserHeader(userToUserHeader)
+    }
+    return connectAction(builder.build(), connectProperties)
+}
+
 /**
  * Builds an NCCO action to connect the call to a SIP endpoint.
  *
@@ -421,16 +439,26 @@ fun connectToWebsocket(uri: String, contentType: Websocket.ContentType, headers:
  * @return A new [ConnectAction] with the [com.vonage.client.voice.ncco.SipEndpoint] and specified properties.
  */
 fun connectToSip(uri: String, customHeaders: Map<String, Any>? = null, userToUserHeader: String? = null,
-                 properties: ConnectAction.Builder.() -> Unit = {}) : ConnectAction {
-    val builder = com.vonage.client.voice.ncco.SipEndpoint.builder(uri)
-    if (customHeaders != null) {
-        builder.headers(customHeaders)
-    }
-    if (userToUserHeader != null) {
-        builder.userToUserHeader(userToUserHeader)
-    }
-    return connectAction(builder.build(), properties)
-}
+                 properties: ConnectAction.Builder.() -> Unit = {}) : ConnectAction =
+    connectToSip(customHeaders, userToUserHeader, properties) { uri(uri) }
+
+/**
+ * Builds an NCCO action to connect the call to a SIP endpoint.
+ *
+ * @param domain Identifier of the SIP domain provisioned using the Programmable SIP API or SIP trunking dashboard.
+ * @param user (OPTIONAL) The SIP domain user, which will be used in conjunction with the domain to create the SIP URI.
+ * @param customHeaders (OPTIONAL) A map of custom metadata to send with the SIP connection.
+ * @param userToUserHeader (OPTIONAL) A string to send as the User-to-User header, as per RFC 7433.
+ * @param properties (OPTIONAL) A lambda function for additional configuration of the connect action parameters.
+ *
+ * @return A new [ConnectAction] with the [com.vonage.client.voice.ncco.SipEndpoint] and specified properties.
+ *
+ * @since 1.1.4
+ */
+fun connectToSip(domain: String, user: String,
+                 customHeaders: Map<String, Any>? = null, userToUserHeader: String? = null,
+                 properties: ConnectAction.Builder.() -> Unit = {}) : ConnectAction =
+    connectToSip(customHeaders, userToUserHeader, properties) { domain(domain).user(user) }
 
 /**
  * Sets the call destination to a Public Switched Telephone Network (PSTN) or mobile number.

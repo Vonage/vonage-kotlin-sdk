@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.4] - 2025-02-28
+
+### Added
+- `Voice.connectToSip` overload with `domain` and `user` parameters
+
+### Changed
+- Bumped Java SDK version to 8.17.0
+
+### Deprecated
+- `Voice.dateStart` and `Voice.dateEnd` methods (redundant since Java SDK v8.17)
+
 ## [1.1.3] - 2025-01-31
 
 ### Added
