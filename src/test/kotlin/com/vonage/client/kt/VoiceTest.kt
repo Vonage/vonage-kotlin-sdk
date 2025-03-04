@@ -16,6 +16,7 @@
 package com.vonage.client.kt
 
 import com.vonage.client.common.HttpMethod
+import com.vonage.client.common.SortOrder
 import com.vonage.client.voice.*
 import com.vonage.client.voice.ncco.*
 import org.junit.jupiter.api.Assertions.assertArrayEquals
@@ -244,7 +245,7 @@ class VoiceTest : AbstractTest() {
         )
 
         testCreateCall(requestParams) {
-            ncco(ncco); fromRandomNumber(true);
+            ncco(ncco); fromRandomNumber(true)
             to(com.vonage.client.voice.WebSocketEndpoint(websocketUri, null, null))
         }
     }
@@ -415,7 +416,7 @@ class VoiceTest : AbstractTest() {
             status(CallStatus.UNANSWERED)
             dateStart(startTime); dateEnd(endTime)
             pageSize(pageSize); recordIndex(recordIndex)
-            order(CallOrder.DESCENDING); conversationUuid(conversationId)
+            order(SortOrder.DESCENDING); conversationUuid(conversationId)
         }
 
         assertEqualsSampleCallsPage(callsPage)
@@ -579,7 +580,7 @@ class VoiceTest : AbstractTest() {
             "ringing_timer" to ringingTimer
         )) {
             answerUrl(answerUrl); answerMethod(answerMethod)
-            from(fromPstn); fromRandomNumber(false);
+            from(fromPstn); fromRandomNumber(false)
             eventUrl(eventUrl); eventMethod(eventMethod)
             lengthTimer(lengthTimer); ringingTimer(ringingTimer)
             advancedMachineDetection {
@@ -824,7 +825,7 @@ class VoiceTest : AbstractTest() {
         val premium = true
         val loop = 2
         val style = 1
-        val level = -0.5f
+        val level = -0.5
         val canHearId = UUID.randomUUID().toString()
         val canSpeakId = UUID.randomUUID().toString()
         val conversationEventMethod = EventMethod.POST
@@ -839,7 +840,7 @@ class VoiceTest : AbstractTest() {
         val record = true
         val endOnExit = true
         val startOnEnter = true
-        val inputActionTypes = listOf("dtmf", "speech")
+        val inputActionTypes = listOf("speech", "dtmf")
         val dtmfTimeout = 7
         val maxDigits = 16
         val submitOnHash = true
@@ -994,17 +995,17 @@ class VoiceTest : AbstractTest() {
                     addCanHear(canHearId); addCanSpeak(canSpeakId)
                     addCanHear(testUuidStr); addCanSpeak(testUuidStr)
                     eventMethod(conversationEventMethod); eventUrl(eventUrl)
-                    musicOnHoldUrl(musicOnHoldUrl); record(record); mute(mute);
+                    musicOnHoldUrl(musicOnHoldUrl); record(record); mute(mute)
                     startOnEnter(startOnEnter); endOnExit(endOnExit)
                     transcription {
                         eventMethod(transcriptionEventMethod); eventUrl(transcriptionEventUrl)
-                        language(SpeechSettings.Language.SPANISH_DOMINICAN_REPUBLIC);
+                        language(SpeechSettings.Language.SPANISH_DOMINICAN_REPUBLIC)
                         sentimentAnalysis(true)
                     }
                 },
                 inputAction {
                     eventUrl(eventUrl); eventMethod(inputEventMethod)
-                    type(inputActionTypes); speech {
+                    speech {
                         uuid(speechUuid); context(speechContext); saveAudio(saveAudio)
                         language(SpeechSettings.Language.UKRAINIAN)
                         endOnSilence(endOnSilenceSpeech); maxDuration(maxDuration)
@@ -1019,7 +1020,7 @@ class VoiceTest : AbstractTest() {
                     timeOut(recordingTimeout); channels(recordingChannels)
                     endOnKey(endOnKey); endOnSilence(endOnSilenceRecording)
                     eventUrl(recordEventUrl); eventMethod(recordEventMethod)
-                    split(splitRecording); beepStart(beepStart); transcription {
+                    beepStart(beepStart); transcription {
                         language(SpeechSettings.Language.ENGLISH_SOUTH_AFRICA)
                         eventUrl(eventUrl); eventMethod(transcriptionEventMethod)
                         sentimentAnalysis(false)
@@ -1027,7 +1028,7 @@ class VoiceTest : AbstractTest() {
                 },
                 connectAction(com.vonage.client.voice.ncco.PhoneEndpoint.builder(altNumber).dtmfAnswer(dtmf).build()) {
                     eventUrl(eventUrl); eventMethod(connectEventMethod); limit(limit)
-                    eventType(eventType); timeOut(connectTimeout); ringbackTone(ringbackTone);
+                    eventType(eventType); timeOut(connectTimeout); ringbackTone(ringbackTone)
                     randomFromNumber(true); advancedMachineDetection {
                         beepTimeout(beepTimeout)
                     }

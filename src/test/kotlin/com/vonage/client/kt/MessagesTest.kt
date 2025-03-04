@@ -27,6 +27,7 @@ import java.net.URI
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class MessagesTest : AbstractTest() {
     private val client = vonage.messages
@@ -118,6 +119,14 @@ class MessagesTest : AbstractTest() {
     }
 
     @Test
+    fun `send MMS text with TTL`() {
+        val ttl = 600
+        testSend(textBody(mmsChannel) + mapOf("ttl" to ttl), mmsText {
+            from(altNumber); to(toNumber); text(text); ttl(ttl)
+        })
+    }
+
+    @Test
     fun `send RCS text`() {
         testSend(textBody(rcsChannel), rcsText {
             from(altNumber); to(toNumber); text(text)
@@ -147,7 +156,6 @@ class MessagesTest : AbstractTest() {
 
     @Test
     fun `send MMS vCard`() {
-        val vcardUrl = "https://example.com/conatact.vcf"
         testSend(mediaBody(mmsChannel, "vcard", vcardUrl, captionMap), mmsVcard {
             from(altNumber); to(toNumber); url(vcardUrl); caption(caption)
         })
@@ -258,6 +266,13 @@ class MessagesTest : AbstractTest() {
     }
 
     @Test
+    fun `send MMS file`() {
+        testSend(fileBody(mmsChannel, captionMap), mmsFile {
+            from(altNumber); to(toNumber); url(fileUrl); caption(caption)
+        })
+    }
+
+    @Test
     fun `send RCS file`() {
         testSend(fileBody(rcsChannel), rcsFile {
             from(altNumber); to(toNumber); url(fileUrl)
@@ -285,6 +300,28 @@ class MessagesTest : AbstractTest() {
         testSend(fileBody(messengerChannel), messengerFile {
             from(altNumber); to(toNumber); url(fileUrl)
         })
+    }
+
+    @Test
+    fun `send MMS content`() {
+        testSend(baseBody("content", mmsChannel) + mapOf(
+            "content" to listOf(
+                mapOf("type" to "file", "url" to fileUrl, "caption" to caption),
+                mapOf("type" to "image", "url" to imageUrl, "caption" to caption),
+                mapOf("type" to "audio", "url" to audioUrl, "caption" to caption),
+                mapOf("type" to "video", "url" to videoUrl, "caption" to caption),
+                mapOf("type" to "vcard", "url" to vcardUrl, "caption" to caption)
+            )
+        ),
+            mmsContent {
+                from(altNumber); to(toNumber)
+                addFile(fileUrl, caption)
+                addImage(imageUrl, caption)
+                addAudio(audioUrl, caption)
+                addVideo(videoUrl, caption)
+                addVcard(vcardUrl, caption)
+            }
+        )
     }
 
     @Test
@@ -591,7 +628,14 @@ class MessagesTest : AbstractTest() {
                       "url": "$imageUrl",
                       "name": "image.jpg",
                       "caption": "$caption"
-                   }
+                   },
+                   "content": [
+                      {
+                         "type": "image",
+                         "url": "$imageUrl",
+                         "caption": "$caption"
+                      }
+                   ]
                 }
             """
         )
@@ -605,6 +649,13 @@ class MessagesTest : AbstractTest() {
         assertEquals(MessageType.IMAGE, parsed.messageType)
         assertEquals(URI.create(imageUrl), parsed.imageUrl)
         assertEquals(caption, parsed.imageCaption)
+        val content = parsed.content
+        assertNotNull(content)
+        assertEquals(1, content.size)
+        val contentImage = content[0]
+        assertEquals(MessageType.IMAGE, contentImage.type)
+        assertEquals(URI.create(imageUrl), contentImage.url)
+        assertEquals(caption, contentImage.caption)
     }
 
     @Test

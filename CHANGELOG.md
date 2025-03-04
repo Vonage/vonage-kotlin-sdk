@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.0] - 2025-03-05
+
+### Added
+- Support for MMS text, file and multimedia content types in `Messages`
+
+### Changed
+- Bumped Java SDK version to 8.18.0
+
 ## [1.1.4] - 2025-02-28
 
 ### Added

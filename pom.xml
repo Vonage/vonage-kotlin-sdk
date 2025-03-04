@@ -5,7 +5,7 @@
 
   <groupId>com.vonage</groupId>
   <artifactId>server-sdk-kotlin</artifactId>
-  <version>1.1.4</version>
+  <version>1.2.0</version>
 
   <name>Vonage Kotlin Server SDK</name>
   <description>Kotlin client for Vonage APIs</description>
@@ -55,7 +55,7 @@
     <dependency>
       <groupId>com.vonage</groupId>
       <artifactId>server-sdk</artifactId>
-      <version>8.17.0</version>
+      <version>8.18.0</version>
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
@@ -77,7 +77,7 @@
     <dependency>
       <groupId>org.wiremock</groupId>
       <artifactId>wiremock-standalone</artifactId>
-      <version>3.12.0</version>
+      <version>3.12.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
