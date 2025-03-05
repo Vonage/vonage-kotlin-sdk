@@ -105,6 +105,7 @@ abstract class AbstractTest {
     protected val audioUrl = "$exampleUrlBase/audio.mp3"
     protected val videoUrl = "$exampleUrlBase/video.mp4"
     protected val fileUrl = "$exampleUrlBase/file.pdf"
+    protected val vcardUrl = "$exampleUrlBase/contact.vcf"
 
     private val port = 8081
     protected val wmBaseUrl = "http://localhost:$port"

@@ -114,6 +114,18 @@ fun smsText(properties: SmsTextRequest.Builder.() -> Unit): SmsTextRequest =
     SmsTextRequest.builder().apply(properties).build()
 
 /**
+ * Create an MMS text message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return An [MmsTextRequest] object with the specified properties.
+ *
+ * @since 1.2.0
+ */
+fun mmsText(properties: MmsTextRequest.Builder.() -> Unit): MmsTextRequest =
+    MmsTextRequest.builder().apply(properties).build()
+
+/**
  * Creates an MMS vCard message.
  *
  * @param properties A lambda function for setting the message's parameters.
@@ -152,6 +164,30 @@ fun mmsAudio(properties: MmsAudioRequest.Builder.() -> Unit): MmsAudioRequest =
  */
 fun mmsVideo(properties: MmsVideoRequest.Builder.() -> Unit): MmsVideoRequest =
     MmsVideoRequest.builder().apply(properties).build()
+
+/**
+ * Creates an MMS file message.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return An [MmsFileRequest] object with the specified properties.
+ *
+ * @since 1.2.0
+ */
+fun mmsFile(properties: MmsFileRequest.Builder.() -> Unit): MmsFileRequest =
+    MmsFileRequest.builder().apply(properties).build()
+
+/**
+ * Creates an MMS content message for sending multiple media files.
+ *
+ * @param properties A lambda function for setting the message's parameters.
+ *
+ * @return An [MmsContentRequest] object with the specified properties.
+ *
+ * @since 1.2.0
+ */
+fun mmsContent(properties: MmsContentRequest.Builder.() -> Unit): MmsContentRequest =
+    MmsContentRequest.builder().apply(properties).build()
 
 /**
  * Creates a WhatsApp text message.
