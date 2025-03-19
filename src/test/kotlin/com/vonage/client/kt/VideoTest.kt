@@ -887,6 +887,22 @@ class VideoTest : AbstractTest() {
     }
 
     @Test
+    fun `create archive quantizationParameter`() {
+        val qp = 25
+        val qpMap = sessionIdMap + mapOf("quantizationParameter" to qp)
+        mockPost(expectedUrl = archiveBaseUrl, authType = authType,
+            expectedRequestParams = qpMap,
+            expectedResponseParams = qpMap
+        )
+        val response = existingSession.createArchive {
+            quantizationParameter(qp)
+        }
+        assertNotNull(response)
+        assertEquals(sessionId, response.sessionId)
+        assertEquals(qp, response.quantizationParameter)
+    }
+
+    @Test
     fun `create broadcast required parameters`() {
         mockPost(expectedUrl = broadcastBaseUrl, authType = authType,
             expectedRequestParams = sessionIdMap + mapOf(
