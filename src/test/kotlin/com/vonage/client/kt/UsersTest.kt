@@ -16,6 +16,7 @@
 package com.vonage.client.kt
 
 import com.vonage.client.common.HttpMethod
+import com.vonage.client.common.SortOrder
 import com.vonage.client.users.*
 import com.vonage.client.users.channels.*
 import java.net.URI
@@ -295,7 +296,7 @@ class UsersTest : AbstractTest() {
             "name" to userName
         )) {
             list {
-                order(ListUsersRequest.SortOrder.DESC); name(userName)
+                order(SortOrder.DESCENDING); name(userName)
                 pageSize(pageSize); cursor(URI.create(navUrl))
             }
         }

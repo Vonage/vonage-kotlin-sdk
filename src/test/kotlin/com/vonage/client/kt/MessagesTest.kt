@@ -17,6 +17,7 @@ package com.vonage.client.kt
 
 import com.vonage.client.ApiRegion
 import com.vonage.client.common.HttpMethod
+import com.vonage.client.common.MessageType
 import com.vonage.client.messages.*
 import com.vonage.client.messages.viber.Category
 import com.vonage.client.messages.whatsapp.Locale
@@ -27,7 +28,6 @@ import java.net.URI
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
 class MessagesTest : AbstractTest() {
     private val client = vonage.messages
@@ -105,7 +105,7 @@ class MessagesTest : AbstractTest() {
                 "entity_id" to entityId
             )
         )), smsText {
-            from(altNumber); to(toNumber); text(text); ttl(ttl);
+            from(altNumber); to(toNumber); text(text); ttl(ttl)
             clientRef(clientRef); contentId(contentId); entityId(entityId)
             webhookUrl(webhookUrl); webhookVersion(MessagesVersion.V0_1)
         })

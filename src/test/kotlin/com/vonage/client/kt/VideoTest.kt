@@ -326,8 +326,8 @@ class VideoTest : AbstractTest() {
         assertNull(emptyRtmp.streamName)
         val hls = broadcast.hlsSettings
         assertNotNull(hls)
-        assertEquals(dvr, hls.dvr())
-        assertEquals(lowLatency, hls.lowLatency())
+        assertEquals(dvr, hls.dvr)
+        assertEquals(lowLatency, hls.lowLatency)
         assertEquals(broadcastResolution, broadcast.resolution)
         assertEquals(broadcastAudio, broadcast.hasAudio())
         assertEquals(broadcastVideo, broadcast.hasVideo())
@@ -585,9 +585,9 @@ class VideoTest : AbstractTest() {
             username(userName); password(password)
         }
         assertNotNull(response)
-        assertEquals(sipCallId, response.id)
-        assertEquals(connectionId, response.connectionId)
-        assertEquals(streamId, response.streamId)
+        assertEquals(UUID.fromString(sipCallId), response.id)
+        assertEquals(UUID.fromString(connectionId), response.connectionId)
+        assertEquals(UUID.fromString(streamId), response.streamId)
     }
 
     @Test
@@ -604,7 +604,7 @@ class VideoTest : AbstractTest() {
         } }
         val response = invocation()
         assertNotNull(response)
-        assertEquals(sipCallId, response.id)
+        assertEquals(UUID.fromString(sipCallId), response.id)
         assertNull(response.connectionId)
         assertNull(response.streamId)
         assertApiResponseException<VideoResponseException>(sipDialUrl, HttpMethod.POST, invocation)
@@ -1008,7 +1008,9 @@ class VideoTest : AbstractTest() {
         mockPut(expectedUrl = archiveLayoutUrl, authType = authType,
             expectedRequestParams = mapOf("type" to "verticalPresentation")
         )
-        val invocation = { existingArchive.setLayout(ScreenLayoutType.VERTICAL) }
+        val invocation = {
+            existingArchive.setLayout(StreamCompositionLayout.standardLayout(ScreenLayoutType.VERTICAL))
+        }
         invocation()
         assertApiResponseException<VideoResponseException>(archiveLayoutUrl, HttpMethod.PUT, invocation)
     }
@@ -1021,7 +1023,7 @@ class VideoTest : AbstractTest() {
     @Test
     fun `change archive layout stylesheet`() {
         mockPut(expectedUrl = archiveLayoutUrl, expectedRequestParams = customLayoutMap)
-        existingArchive.setLayout(ScreenLayoutType.CUSTOM, stylesheet = stylesheet)
+        existingArchive.setLayout(StreamCompositionLayout.customLayout(stylesheet))
     }
 
     @Test
@@ -1081,7 +1083,9 @@ class VideoTest : AbstractTest() {
         mockPut(expectedUrl = broadcastLayoutUrl, authType = authType,
             expectedRequestParams = mapOf("type" to "horizontalPresentation")
         )
-        val invocation = { existingBroadcast.setLayout(ScreenLayoutType.HORIZONTAL) }
+        val invocation = {
+            existingBroadcast.setLayout(StreamCompositionLayout.standardLayout(ScreenLayoutType.HORIZONTAL))
+        }
         invocation()
         assertApiResponseException<VideoResponseException>(broadcastLayoutUrl, HttpMethod.PUT, invocation)
     }
@@ -1089,13 +1093,13 @@ class VideoTest : AbstractTest() {
     @Test
     fun `change broadcast layout pip`() {
         mockPut(expectedUrl = broadcastLayoutUrl, expectedRequestParams = pipLayoutMap)
-        existingBroadcast.setLayout(ScreenLayoutType.BEST_FIT, ScreenLayoutType.PIP)
+        existingBroadcast.setLayout(StreamCompositionLayout.screenshareLayout(ScreenLayoutType.PIP))
     }
 
     @Test
     fun `change broadcast layout stylesheet`() {
         mockPut(expectedUrl = broadcastLayoutUrl, expectedRequestParams = customLayoutMap)
-        existingBroadcast.setLayout(ScreenLayoutType.CUSTOM, stylesheet = stylesheet)
+        existingBroadcast.setLayout(StreamCompositionLayout.customLayout(stylesheet))
     }
 
     @Test

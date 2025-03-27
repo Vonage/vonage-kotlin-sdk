@@ -159,7 +159,6 @@ abstract class AbstractTest {
         HttpMethod.PUT -> WireMock::put
         HttpMethod.PATCH -> WireMock::patch
         HttpMethod.DELETE -> WireMock::delete
-        else -> throw IllegalArgumentException("Unhandled HTTP method: $this")
     }
 
     private fun Map<String, Any>.toFormEncodedString(): String {

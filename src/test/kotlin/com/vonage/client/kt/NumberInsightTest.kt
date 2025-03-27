@@ -16,8 +16,8 @@
 package com.vonage.client.kt
 
 import com.vonage.client.insight.*
-import com.vonage.client.insight.CarrierDetails.NetworkType
-import com.vonage.client.insight.RoamingDetails.RoamingStatus
+import com.vonage.client.insight.NetworkType
+import com.vonage.client.insight.RoamingStatus
 import java.math.BigDecimal
 import kotlin.test.*
 
@@ -216,10 +216,6 @@ class NumberInsightTest : AbstractTest() {
         assertEquals(LookupOutcome.PARTIAL_SUCCESS, response.lookupOutcome)
         assertEquals(lookupOutcomeMessage, response.lookupOutcomeMessage)
         assertEquals(validNumber, response.validNumber)
-        val rtd = response.realTimeData
-        assertNotNull(rtd)
-        assertEquals(active, rtd.activeStatus)
-        assertEquals(handsetStatus, rtd.handsetStatus)
         val roaming = response.roaming
         assertNotNull(roaming)
         assertEquals(roamingStatus, roaming.status)
@@ -262,18 +258,6 @@ class NumberInsightTest : AbstractTest() {
     fun `advanced insight all params`() {
         mockInsight(InsightType.ADVANCED, true)
         assertAdvancedResponse(client.advanced(toNumber, countryCode, cnam))
-    }
-
-    @Test
-    fun `advanced insight real time data all params`() {
-        mockInsight(InsightType.ADVANCED, true, true)
-        assertAdvancedResponse(client.advanced(toNumber, countryCode, cnam, realTimeData))
-    }
-
-    @Test
-    fun `advanced insight real time data required params`() {
-        mockInsight(InsightType.ADVANCED, false, true)
-        assertAdvancedResponse(client.advanced(toNumber, realTimeData = realTimeData))
     }
 
     @Test

@@ -85,7 +85,7 @@ class Numbers internal constructor(private val client: NumbersClient) {
      * @throws [NumbersResponseException] If the list could not be retrieved.
      */
     fun listOwned(filter: ListNumbersFilter.Builder.() -> Unit = {}): List<OwnedNumber> =
-        client.listNumbers(ListNumbersFilter.builder().apply(filter).build()).numbers.asList()
+        client.listNumbers(ListNumbersFilter.builder().apply(filter).build())
 
     /**
      * Search for numbers that are available to purchase.

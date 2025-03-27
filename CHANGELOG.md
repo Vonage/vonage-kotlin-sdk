@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.0] - 2025-04-08
+
+### Changed
+- Bumped Java SDK version to 9.0.0 (see Java SDK changelog for details of breaking changes)
+  - Moved most enums from inner classes
+  - Stronger typing for response fields
+  - Removed deprecated methods, constructors, classes, fields, packages etc.
+  - Internal refactoring
+- Refactored `Archive.setLayout` and `Broadcast.setLayout` parameters to take `StreamCompositionLayout` directly
+
+### Removed
+- `Verify.whatsappCodeless` workflow
+- Pricing API
+- `dateStart` and `dateEnd` methods in `CallsFilter` (as previously deprecated)
+- `realTimeData` in `NumberInsight.advanced` (as previously deprecated)
+
 ## [1.2.1] - 2025-03-19
 
 ### Changed
