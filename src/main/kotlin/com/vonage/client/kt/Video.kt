@@ -405,27 +405,13 @@ class Video(private val client: VideoClient) {
         /**
          * Set the layout for the archive. This only applies if it is composed.
          *
-         * @param initialLayout The layout type to use for the archive as an enum. If set to
-         * [ScreenLayoutType.CUSTOM], then you must also set the `stylesheet` property.
-         *
-         * @param screenshareType (OPTIONAL) The layout type to use when there is a screen-sharing stream in the
-         * session. Note if you set this property, then `initialLayout` must be set to [ScreenLayoutType.BEST_FIT]
-         * and you must leave the `stylesheet` property unset (null).
-         *
-         * @param stylesheet (OPTIONAL) The CSS stylesheet to use for the archive. If you set this property,
-         * then `initialLayout` must be set to [ScreenLayoutType.CUSTOM].
+         * @param layout The layout to use for the archive. Use the static presets in [StreamCompositionLayout].
          *
          * @throws [VideoResponseException] If the layout could not be set.
+         * @since 2.0.0 Refactored to use [StreamCompositionLayout] instead of component parameters.
          */
-        fun setLayout(initialLayout: ScreenLayoutType,
-                      screenshareType: ScreenLayoutType? = null,
-                      stylesheet: String? = null): Unit =
-            client.updateArchiveLayout(id,
-                StreamCompositionLayout.builder(initialLayout)
-                    .screenshareType(screenshareType)
-                    .stylesheet(stylesheet)
-                    .build()
-            )
+        fun setLayout(layout: StreamCompositionLayout): Unit =
+            client.updateArchiveLayout(id, layout)
 
         /**
          * Add a stream to the archive. This only applies if it's a composed archive that was started with
@@ -501,27 +487,13 @@ class Video(private val client: VideoClient) {
         /**
          * Set the layout for the broadcast.
          *
-         * @param initialLayout The layout type to use for the broadcast as an enum. If set to
-         * [ScreenLayoutType.CUSTOM], then you must also set the `stylesheet` property.
-         *
-         * @param screenshareType (OPTIONAL) The layout type to use when there is a screen-sharing stream in the
-         * session. Note if you set this property, then `initialLayout` must be set to [ScreenLayoutType.BEST_FIT]
-         * and you must leave the `stylesheet` property unset (null).
-         *
-         * @param stylesheet (OPTIONAL) The CSS stylesheet to use for the broadcast. If you set this property,
-         * then `initialLayout` must be set to [ScreenLayoutType.CUSTOM].
+         * @param layout The layout to use for the broadcast. Use the static presets in [StreamCompositionLayout].
          *
          * @throws [VideoResponseException] If the layout could not be set.
+         * @since 2.0.0 Refactored to use [StreamCompositionLayout] instead of component parameters.
          */
-        fun setLayout(initialLayout: ScreenLayoutType,
-                      screenshareType: ScreenLayoutType? = null,
-                      stylesheet: String? = null): Unit =
-            client.updateBroadcastLayout(id,
-                StreamCompositionLayout.builder(initialLayout)
-                    .screenshareType(screenshareType)
-                    .stylesheet(stylesheet)
-                    .build()
-            )
+        fun setLayout(layout: StreamCompositionLayout): Unit =
+            client.updateBroadcastLayout(id, layout)
 
         /**
          * Add a stream to the broadcast.
@@ -599,12 +571,6 @@ private fun listCompositionsFilter(count: Int, offset: Int, sessionId: String? =
 private fun signalRequest(type: String, data: String): SignalRequest =
     SignalRequest.builder().type(type).data(data).build()
 
-private fun streamCompositionLayout(initialLayout: ScreenLayoutType,
-                                    screenshareType: ScreenLayoutType?,
-                                    stylesheet: String?): StreamCompositionLayout =
-    StreamCompositionLayout.builder(initialLayout)
-        .screenshareType(screenshareType).stylesheet(stylesheet).build()
-
 /**
  * Adds an RTMP stream to the broadcast builder.
  *
@@ -634,7 +600,7 @@ fun Broadcast.Builder.hls(properties: Hls.Builder.() -> Unit = {}): Broadcast.Bu
  * @return The updated archive builder.
  */
 fun Archive.Builder.standardLayout(initialLayout: ScreenLayoutType): Archive.Builder =
-    layout(streamCompositionLayout(initialLayout, null, null))
+    layout(StreamCompositionLayout.standardLayout(initialLayout))
 
 /**
  * Sets the layout for a composed archive to [ScreenLayoutType.BEST_FIT].
@@ -644,7 +610,7 @@ fun Archive.Builder.standardLayout(initialLayout: ScreenLayoutType): Archive.Bui
  * @return The updated archive builder.
  */
 fun Archive.Builder.screenshareLayout(screenshareType: ScreenLayoutType): Archive.Builder =
-    layout(streamCompositionLayout(ScreenLayoutType.BEST_FIT, screenshareType, null))
+    layout(StreamCompositionLayout.screenshareLayout(screenshareType))
 
 /**
  * Sets the layout for a composed archive to [ScreenLayoutType.CUSTOM].
@@ -654,7 +620,7 @@ fun Archive.Builder.screenshareLayout(screenshareType: ScreenLayoutType): Archiv
  * @return The updated archive builder.
  */
 fun Archive.Builder.customLayout(stylesheet: String): Archive.Builder =
-    layout(streamCompositionLayout(ScreenLayoutType.CUSTOM, null, stylesheet))
+    layout(StreamCompositionLayout.customLayout(stylesheet))
 
 /**
  * Specify this to assign the initial layout type for the broadcast.
@@ -664,7 +630,7 @@ fun Archive.Builder.customLayout(stylesheet: String): Archive.Builder =
  * @return The updated broadcast builder.
  */
 fun Broadcast.Builder.standardLayout(initialLayout: ScreenLayoutType): Broadcast.Builder =
-    layout(streamCompositionLayout(initialLayout, null, null))
+    layout(StreamCompositionLayout.standardLayout(initialLayout))
 
 /**
  * Sets the layout for the broadcast to [ScreenLayoutType.BEST_FIT].
@@ -674,7 +640,7 @@ fun Broadcast.Builder.standardLayout(initialLayout: ScreenLayoutType): Broadcast
  * @return The updated broadcast builder.
  */
 fun Broadcast.Builder.screenshareLayout(screenshareType: ScreenLayoutType): Broadcast.Builder =
-    layout(streamCompositionLayout(ScreenLayoutType.BEST_FIT, screenshareType, null))
+    layout(StreamCompositionLayout.screenshareLayout(screenshareType))
 
 /**
  * Sets the layout for the broadcast to [ScreenLayoutType.CUSTOM].
@@ -684,4 +650,4 @@ fun Broadcast.Builder.screenshareLayout(screenshareType: ScreenLayoutType): Broa
  * @return The updated broadcast builder.
  */
 fun Broadcast.Builder.customLayout(stylesheet: String): Broadcast.Builder =
-    layout(streamCompositionLayout(ScreenLayoutType.CUSTOM, null, stylesheet))
+    layout(StreamCompositionLayout.customLayout(stylesheet))

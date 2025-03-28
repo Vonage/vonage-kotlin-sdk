@@ -16,7 +16,7 @@
 package com.vonage.client.kt
 
 import com.vonage.client.numbers.*
-import com.vonage.client.numbers.UpdateNumberRequest.CallbackType
+import com.vonage.client.numbers.CallbackType
 import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.*
@@ -29,7 +29,6 @@ class NumbersTest : AbstractTest() {
     private val buyEndpoint = "buy"
     private val cancelEndpoint = "cancel"
     private val updateEndpoint = "update"
-    private val featureNames = Feature.entries.map(Feature::name)
     private val pattern = "1337*"
     private val count = 1247
     private val size = 25
@@ -90,7 +89,7 @@ class NumbersTest : AbstractTest() {
                     baseRequestParams + mapOf(
                         "moHttpUrl" to moCallbackUrl,
                         "type" to type.name.lowercase().replace('_', '-'),
-                        "features" to featureNames,
+                        "features" to Feature.entries.map(Feature::name),
                         "messagesCallbackType" to "app",
                         "messagesCallbackValue" to messagesCallbackValue,
                         "voiceCallbackType" to voiceCallbackType.name.lowercase(),
@@ -121,10 +120,10 @@ class NumbersTest : AbstractTest() {
         assertEquals(country, main.country)
         assertEquals(toNumber, main.msisdn)
         assertEquals(moCallbackUrl, main.moHttpUrl)
-        assertEquals(type, Type.fromString(main.type))
-        assertEquals(featureNames, main.features.toList())
+        assertEquals(type, main.type)
+        assertEquals(Feature.entries, main.features.toList())
         assertEquals(UUID.fromString(messagesCallbackValue), main.messagesCallbackValue)
-        assertEquals(voiceCallbackType, CallbackType.fromString(main.voiceCallbackType))
+        assertEquals(voiceCallbackType, main.voiceCallbackType)
         assertEquals(sipUri, main.voiceCallbackValue)
 
         assertThrowsGet(url, invocation)
@@ -170,24 +169,24 @@ class NumbersTest : AbstractTest() {
 
         val main = response[1]
         assertNotNull(main)
-        assertEquals(Type.LANDLINE_TOLL_FREE, Type.fromString(main.type))
+        assertEquals(Type.LANDLINE_TOLL_FREE, main.type)
         assertEquals(3.80, main.cost.toDouble())
         assertEquals(landline, main.msisdn)
         assertEquals(country, main.country)
         val mainFeatures = main.features
         assertNotNull(mainFeatures)
         assertEquals(1, mainFeatures.size)
-        assertEquals(Feature.VOICE, Feature.fromString(mainFeatures[0]))
+        assertEquals(Feature.VOICE, mainFeatures[0])
 
         val mobile = response[2]
         assertEquals(country, mobile.country)
         assertEquals(toNumber, mobile.msisdn)
-        assertEquals(Type.MOBILE_LVN, Type.fromString(mobile.type))
+        assertEquals(Type.MOBILE_LVN, mobile.type)
         val mobileFeatures = mobile.features
         assertNotNull(mobileFeatures)
         assertEquals(2, mobileFeatures.size)
-        assertEquals(Feature.SMS, Feature.fromString(mobileFeatures[0]))
-        assertEquals(Feature.MMS, Feature.fromString(mobileFeatures[1]))
+        assertEquals(Feature.SMS, mobileFeatures[0])
+        assertEquals(Feature.MMS, mobileFeatures[1])
         assertNull(mobile.cost)
 
         assertThrowsGet(url, invocation)
@@ -286,7 +285,7 @@ class NumbersTest : AbstractTest() {
             "country" to country,
             "pattern" to pattern,
             "search_pattern" to 0,
-            "features" to featureNames.joinToString(","),
+            "features" to Feature.entries.joinToString(",", transform = Feature::name),
             "size" to size,
             "index" to index
         )) {

@@ -21,7 +21,6 @@ import com.vonage.client.application.capabilities.*
 import com.vonage.client.application.capabilities.Messages
 import com.vonage.client.application.capabilities.Verify
 import com.vonage.client.application.capabilities.Voice
-import com.vonage.client.common.Webhook
 import java.util.*
 
 /**
@@ -108,8 +107,8 @@ class Application internal constructor(private val client: ApplicationClient) {
      */
     fun list(page: Int? = null, pageSize: Int? = null): List<Application> {
         val filter = ListApplicationRequest.builder()
-        if (page != null) filter.page(page.toLong())
-        if (pageSize != null) filter.pageSize(pageSize.toLong())
+        if (page != null) filter.page(page)
+        if (pageSize != null) filter.pageSize(pageSize)
         return client.listApplications(filter.build()).applications
     }
 
@@ -147,7 +146,7 @@ fun Webhook.Builder.url(url: String): Webhook.Builder = address(url)
  * @return The Voice capability builder.
  */
 fun Voice.Builder.answer(properties: Webhook.Builder.() -> Unit): Voice.Builder =
-    addWebhook(Webhook.Type.ANSWER, webhookBuilder(properties))
+    answer(webhookBuilder(properties))
 
 /**
  * Adds an `fallback_answer_url` webhook to the [Voice] capability.
@@ -157,7 +156,7 @@ fun Voice.Builder.answer(properties: Webhook.Builder.() -> Unit): Voice.Builder 
  * @return The Voice capability builder.
  */
 fun Voice.Builder.fallbackAnswer(properties: Webhook.Builder.() -> Unit): Voice.Builder =
-    addWebhook(Webhook.Type.FALLBACK_ANSWER, webhookBuilder(properties))
+    fallbackAnswer(webhookBuilder(properties))
 
 /**
  * Adds an `event_url` webhook to the [Voice] capability.
@@ -167,7 +166,7 @@ fun Voice.Builder.fallbackAnswer(properties: Webhook.Builder.() -> Unit): Voice.
  * @return The Voice capability builder.
  */
 fun Voice.Builder.event(properties: Webhook.Builder.() -> Unit): Voice.Builder =
-    addWebhook(Webhook.Type.EVENT, webhookBuilder(properties))
+    event(webhookBuilder(properties))
 
 /**
  * Adds an `event_url` webhook to the [Rtc] capability.
@@ -177,7 +176,7 @@ fun Voice.Builder.event(properties: Webhook.Builder.() -> Unit): Voice.Builder =
  * @return The RTC capability builder.
  */
 fun Rtc.Builder.event(properties: Webhook.Builder.() -> Unit): Rtc.Builder =
-    addWebhook(Webhook.Type.EVENT, webhookBuilder(properties))
+    event(webhookBuilder(properties))
 
 /**
  * Adds a `status_url` webhook to the [Verify] capability.
@@ -187,7 +186,7 @@ fun Rtc.Builder.event(properties: Webhook.Builder.() -> Unit): Rtc.Builder =
  * @return The Verify capability builder.
  */
 fun Verify.Builder.status(properties: Webhook.Builder.() -> Unit): Verify.Builder =
-    addWebhook(Webhook.Type.STATUS, webhookBuilder(properties))
+    status(webhookBuilder(properties))
 
 /**
  * Adds an `inbound_url` webhook to the [Messages] capability.
@@ -197,7 +196,7 @@ fun Verify.Builder.status(properties: Webhook.Builder.() -> Unit): Verify.Builde
  * @return The Messages capability builder.
  */
 fun Messages.Builder.inbound(properties: Webhook.Builder.() -> Unit): Messages.Builder =
-    addWebhook(Webhook.Type.INBOUND, webhookBuilder(properties))
+    inbound(webhookBuilder(properties))
 
 /**
  * Adds an `status_url` webhook to the [Messages] capability.
@@ -207,7 +206,7 @@ fun Messages.Builder.inbound(properties: Webhook.Builder.() -> Unit): Messages.B
  * @return The Messages capability builder.
  */
 fun Messages.Builder.status(properties: Webhook.Builder.() -> Unit): Messages.Builder =
-    addWebhook(Webhook.Type.STATUS, webhookBuilder(properties))
+    status(webhookBuilder(properties))
 
 /**
  * Adds the [Voice] capability to the application.

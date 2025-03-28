@@ -65,34 +65,12 @@ class NumberInsight internal constructor(private val client: InsightClient) {
      * and returned in the response. Set to true to receive phone number owner name in the response. This
      * feature is available for US numbers only and incurs an additional charge.
      *
-     * @param realTimeData (OPTIONAL) Whether to receive real-time data back in the response.
-     *
-     * @return Advanced details about the number and insight metadata.
-     */
-    @Deprecated("`realTimeData` is deprecated and will be removed in a future release.")
-    fun advanced(number: String, countryCode: String? = null, cnam: Boolean = false,
-                 realTimeData: Boolean): AdvancedInsightResponse =
-        client.getAdvancedNumberInsight(AdvancedInsightRequest.builder().async(false)
-            .number(number).country(countryCode).cnam(cnam).realTimeData(realTimeData).build()
-        )
-
-    /**
-     * Obtain advanced insight about a number synchronously. This is not recommended due to potential timeouts.
-     *
-     * @param number The phone number to look up in E.164 format.
-     *
-     * @param countryCode (OPTIONAL) The two-character country code in ISO 3166-1 alpha-2 format.
-     *
-     * @param cnam (OPTIONAL) Whether the name of the person who owns the phone number should be looked up
-     * and returned in the response. Set to true to receive phone number owner name in the response. This
-     * feature is available for US numbers only and incurs an additional charge.
-     *
      * @return Advanced details about the number and insight metadata.
      *
      * @since 1.1.3
      */
     fun advanced(number: String, countryCode: String? = null, cnam: Boolean = false): AdvancedInsightResponse =
-        client.getAdvancedNumberInsight(AdvancedInsightRequest.builder().async(false)
+        client.getAdvancedNumberInsight(AdvancedInsightRequest.builder()
             .number(number).country(countryCode).cnam(cnam).build()
         )
 
@@ -109,10 +87,9 @@ class NumberInsight internal constructor(private val client: InsightClient) {
      * and returned in the response. Set to true to receive phone number owner name in the response. This
      * feature is available for US numbers only and incurs an additional charge.
      */
-    fun advancedAsync(number: String, callbackUrl: String, countryCode: String? = null, cnam: Boolean = false) {
-        client.getAdvancedNumberInsight(
-            AdvancedInsightRequest.builder().async(true)
+    fun advancedAsync(number: String, callbackUrl: String,
+                      countryCode: String? = null, cnam: Boolean = false) : AdvancedAsyncInsightResponse =
+        client.getAdvancedAsyncNumberInsight(AdvancedInsightAsyncRequest.builder()
                 .number(number).country(countryCode).cnam(cnam).callback(callbackUrl).build()
         )
-    }
 }

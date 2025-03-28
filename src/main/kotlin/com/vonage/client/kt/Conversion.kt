@@ -26,8 +26,7 @@ import java.util.*
  */
 class Conversion internal constructor(private val client: ConversionClient) {
 
-    private fun convert(type: ConversionRequest.Type,
-                        messageId: String, delivered: Boolean, timestamp: Instant?): Unit =
+    private fun convert(type: Type, messageId: String, delivered: Boolean, timestamp: Instant?): Unit =
         client.submitConversion(type, messageId, delivered,
             if (timestamp != null) Date.from(timestamp) else null
         )
@@ -40,7 +39,7 @@ class Conversion internal constructor(private val client: ConversionClient) {
      * @param timestamp (OPTIONAL) Timestamp of the conversion.
      */
     fun convertSms(messageId: String, delivered: Boolean, timestamp: Instant? = null): Unit =
-        convert(ConversionRequest.Type.SMS, messageId, delivered, timestamp)
+        convert(Type.SMS, messageId, delivered, timestamp)
 
     /**
      * Submit conversion for a voice call.
@@ -50,5 +49,5 @@ class Conversion internal constructor(private val client: ConversionClient) {
      * @param timestamp (OPTIONAL) Timestamp of the conversion.
      */
     fun convertVoice(callId: String, delivered: Boolean, timestamp: Instant? = null): Unit =
-        convert(ConversionRequest.Type.VOICE, callId, delivered, timestamp)
+        convert(Type.VOICE, callId, delivered, timestamp)
 }

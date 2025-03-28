@@ -134,7 +134,7 @@ class VerifyTest : AbstractTest() {
                             "channel" to channel.toString(),
                             "to" to if (channel == Channel.EMAIL) toEmail else toNumber
                         ) + when (channel) {
-                            Channel.WHATSAPP, Channel.WHATSAPP_INTERACTIVE -> mapOf("from" to whatsappNumber)
+                            Channel.WHATSAPP -> mapOf("from" to whatsappNumber)
                             else -> mapOf()
                         }
                     )
@@ -150,7 +150,6 @@ class VerifyTest : AbstractTest() {
                     Channel.SILENT_AUTH -> silentAuth(toNumber)
                     Channel.EMAIL -> email(toEmail)
                     Channel.WHATSAPP -> whatsapp(toNumber, whatsappNumber)
-                    Channel.WHATSAPP_INTERACTIVE -> whatsappCodeless(toNumber, whatsappNumber)
                 }
             }
             assertNotNull(response)
@@ -202,11 +201,6 @@ class VerifyTest : AbstractTest() {
                         "channel" to "whatsapp",
                         "to" to altNumber,
                         "from" to whatsappNumber
-                    ),
-                    mapOf(
-                        "channel" to "whatsapp_interactive",
-                        "to" to toNumber,
-                        "from" to whatsappNumber
                     )
                 )
             ),
@@ -220,10 +214,12 @@ class VerifyTest : AbstractTest() {
         val response = client.sendVerification {
             brand(brand); clientRef(clientRef); channelTimeout(timeout)
             fraudCheck(fraudCheck); codeLength(codeLength); locale(locale)
-            silentAuth(toNumber, sandbox, redirectUrl); voice(altNumber); sms(toNumber) {
-            entityId(entityId); contentId(contentId); appHash(appHash); from(altNumber)
-        }; email(toEmail, fromEmail)
-            whatsapp(altNumber, whatsappNumber); whatsappCodeless(toNumber, whatsappNumber)
+            silentAuth(toNumber, sandbox, redirectUrl); voice(altNumber)
+            sms(toNumber) {
+                entityId(entityId); contentId(contentId); appHash(appHash); from(altNumber)
+            }
+            email(toEmail, fromEmail)
+            whatsapp(altNumber, whatsappNumber)
         }
 
         assertNotNull(response)

@@ -15,14 +15,14 @@
  */
 package com.vonage.client.kt
 
-import com.vonage.client.redact.RedactRequest
-import com.vonage.client.redact.RedactRequest.Type.*
+import com.vonage.client.redact.Type
+import com.vonage.client.redact.Type.*
 import kotlin.test.*
 
 class RedactTest : AbstractTest() {
     private val transactionId = "209ab3c7536542b91e8b5aef032f6861"
 
-    private fun testSuccess(product: String, type: RedactRequest.Type? = null, invocation: Redact.() -> Unit) {
+    private fun testSuccess(product: String, type: Type? = null, invocation: Redact.() -> Unit) {
         mockPost(
             expectedUrl = "/v1/redact/transaction", status = 204,
             authType = AuthType.API_KEY_SECRET_HEADER, expectedRequestParams = mapOf(

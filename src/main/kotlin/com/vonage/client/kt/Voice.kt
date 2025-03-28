@@ -19,8 +19,6 @@ import com.vonage.client.users.channels.Websocket
 import com.vonage.client.voice.*
 import com.vonage.client.voice.ncco.*
 import java.nio.file.Path
-import java.time.Instant
-import java.util.*
 
 /**
  * Implementation of the [Voice API](https://developer.vonage.com/en/api/voice).
@@ -184,26 +182,6 @@ class Voice internal constructor(private val client: VoiceClient) {
 }
 
 /**
- * Sets the start date for the [Voice.listCalls] filter.
- *
- * @param dateStart ISO-8601 timestamp start retrieving calls from.
- *
- * @return The updated [CallsFilter.Builder].
- */
-@Deprecated("Use CallsFilter.Builder.startDate instead.", replaceWith = ReplaceWith("startDate(dateStart)"))
-fun CallsFilter.Builder.dateStart(dateStart: Instant): CallsFilter.Builder = startDate(dateStart)
-
-/**
- * Sets the end date for the [Voice.listCalls] filter.
- *
- * @param dateStart ISO-8601 timestamp to stop retrieving calls from.
- *
- * @return The updated [CallsFilter.Builder].
- */
-@Deprecated("Use CallsFilter.Builder.endDate instead.", replaceWith = ReplaceWith("endDate(dateEnd)"))
-fun CallsFilter.Builder.dateEnd(dateEnd: Instant): CallsFilter.Builder = endDate(dateEnd)
-
-/**
  * Configure the behavior of Advanced Machine Detection. This overrides [Call.Builder#machineDetection] setting
  * and is a premium feature, so you cannot set both.
  *
@@ -351,7 +329,7 @@ fun conversationAction(name: String, properties: ConversationAction.Builder.() -
  *
  * @return A new [ConnectAction] with the specified properties.
  */
-fun connectAction(endpoint: com.vonage.client.voice.ncco.Endpoint,
+fun connectAction(endpoint: ConnectEndpoint,
                   properties: ConnectAction.Builder.() -> Unit = {}): ConnectAction =
     ConnectAction.builder(endpoint).apply(properties).build()
 

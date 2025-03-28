@@ -26,7 +26,7 @@ import com.vonage.client.sms.messages.*
 class Sms internal constructor(private val client: SmsClient) {
 
     private fun send(msgObj: Message, statusReport: Boolean?, ttl: Int?,
-                     messageClass: Message.MessageClass?, clientRef: String?,
+                     messageClass: MessageClass?, clientRef: String?,
                      contentId: String?, entityId: String?,
                      callbackUrl: String?): List<SmsSubmissionResponseMessage> {
         if (statusReport != null) msgObj.statusReportRequired = statusReport
@@ -72,7 +72,7 @@ class Sms internal constructor(private val client: SmsClient) {
      */
     fun sendText(from: String, to: String, message: String, unicode: Boolean = false,
                  statusReport: Boolean? = null, ttl: Int? = null,
-                 messageClass: Message.MessageClass? = null, clientRef: String? = null,
+                 messageClass: MessageClass? = null, clientRef: String? = null,
                  contentId: String? = null, entityId: String? = null,
                  callbackUrl: String? = null): List<SmsSubmissionResponseMessage> =
         send(
@@ -115,7 +115,7 @@ class Sms internal constructor(private val client: SmsClient) {
      */
     fun sendBinary(from: String, to: String, body: ByteArray, udh: ByteArray,
                    protocolId: Int? = null, statusReport: Boolean? = null, ttl: Int? = null,
-                   messageClass: Message.MessageClass? = null, clientRef: String? = null,
+                   messageClass: MessageClass? = null, clientRef: String? = null,
                    contentId: String? = null, entityId: String? = null, callbackUrl: String? = null
                    ): List<SmsSubmissionResponseMessage> {
         val msgObj = BinaryMessage(from, to, body, udh)

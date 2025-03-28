@@ -53,7 +53,7 @@ See all of our SDKs and integrations on the [Vonage Developer portal](https://de
 ## Installation
 Releases are published to [Maven Central](https://central.sonatype.com/artifact/com.vonage/server-sdk-kotlin).
 Instructions for your build system can be found in the snippets section.
-They're also available from [here](https://search.maven.org/artifact/com.vonage/server-sdk-kotlin/1.2.1/jar).
+They're also available from [here](https://search.maven.org/artifact/com.vonage/server-sdk-kotlin/2.0.0/jar).
 Release notes for each version can be found in the [changelog](CHANGELOG.md).
 
 Here are the instructions for including the SDK in your project:
@@ -63,7 +63,7 @@ Add the following to your `build.gradle` or `build.gradle.kts` file:
 
 ```groovy
 dependencies {
-    implementation("com.vonage:server-sdk-kotlin:1.2.1")
+    implementation("com.vonage:server-sdk-kotlin:2.0.0")
 }
 ```
 
@@ -74,7 +74,7 @@ Add the following to the `<dependencies>` section of your `pom.xml` file:
 <dependency>
     <groupId>com.vonage</groupId>
     <artifactId>server-sdk-kotlin</artifactId>
-    <version>1.2.1</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
@@ -160,8 +160,8 @@ including [**a searchable list of snippets**](https://github.com/Vonage/vonage-k
 
 The SDK is fully documented with [KDocs](https://kotlinlang.org/docs/kotlin-doc.html), so you should have complete
 documentation from your IDE. You may need to click "Download Sources" in IntelliJ to get the full documentation.
-Alternatively, you can browse the documentation  using a service like [Javadoc.io](https://javadoc.io/doc/com.vonage/server-sdk-kotlin/1.2.1/index.html),
-which renders the documentation for you from [the artifacts on Maven Central](https://repo.maven.apache.org/maven2/com/vonage/server-sdk-kotlin/1.2.1/).
+Alternatively, you can browse the documentation  using a service like [Javadoc.io](https://javadoc.io/doc/com.vonage/server-sdk-kotlin/2.0.0/index.html),
+which renders the documentation for you from [the artifacts on Maven Central](https://repo.maven.apache.org/maven2/com/vonage/server-sdk-kotlin/2.0.0/).
 
 For help with any specific APIs, refer to the relevant documentation on our [developer portal](https://developer.vonage.com/en/documentation),
 using the links provided in the [Supported APIs](#supported-apis) section. For completeness, you can also consult the

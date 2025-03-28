@@ -135,21 +135,8 @@ class Verify(private val client: Verify2Client) {
          * - **409**: The current workflow does not support a code.
          * - **429**: Rate limit exceeded.
          * - **500**: Internal server error.
-         *
-         * @see checkVerificationCode For the original implementation which this method delegates to.
          */
-        fun isValidVerificationCode(code: String): Boolean {
-            try {
-                checkVerificationCode(code)
-                return true
-            } catch (ex: VerifyResponseException) {
-                if (ex.statusCode == 400 || ex.statusCode == 410) {
-                    return false
-                } else {
-                    throw ex
-                }
-            }
-        }
+        fun isValidVerificationCode(code: String): Boolean  = client.isValidVerificationCode(uuid, code)
     }
 
     /**
@@ -320,7 +307,7 @@ class Verify(private val client: Verify2Client) {
         /**
          * Class for working with an existing template fragment.
          *
-         * @param fragmentId UUID of the fragment to work with, as obtained from [TemplateFragment.getId].
+         * @param fragmentId UUID of the fragment to work with, as obtained from [TemplateFragment.getFragmentId].
          *
          * @since 1.1.0
          */
@@ -449,16 +436,3 @@ fun VerificationRequest.Builder.email(to: String, from: String? = null): Verific
  */
 fun VerificationRequest.Builder.whatsapp(to: String, from: String): VerificationRequest.Builder =
     addWorkflow(WhatsappWorkflow(to, from))
-
-/**
- * Adds a WhatsApp Interactive (codeless) workflow to the verification request.
- * The user will receive a Yes / No prompt instead of a PIN code.
- *
- * @param to The recipient's phone number in E.164 format.
- *
- * @param from A WhatsApp Business Account connected sender number in E.164 format.
- *
- * @return The verification request builder.
- */
-fun VerificationRequest.Builder.whatsappCodeless(to: String, from: String): VerificationRequest.Builder =
-    addWorkflow(WhatsappCodelessWorkflow(to, from))

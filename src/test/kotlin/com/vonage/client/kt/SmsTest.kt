@@ -15,9 +15,9 @@
  */
 package com.vonage.client.kt
 
-import com.vonage.client.sms.*
 import com.vonage.client.sms.MessageStatus.*
-import com.vonage.client.sms.messages.Message
+import com.vonage.client.sms.SmsSubmissionResponseMessage
+import com.vonage.client.sms.messages.MessageClass
 import java.math.BigDecimal
 import kotlin.test.*
 
@@ -110,7 +110,7 @@ class SmsTest : AbstractTest() {
         )) {
             client.sendText(from, toNumber, text,
                 unicode = false, statusReport = statusReport,
-                ttl = ttl, messageClass = Message.MessageClass.CLASS_1,
+                ttl = ttl, messageClass = MessageClass.CLASS_1,
                 clientRef = clientRef, contentId = contentId, entityId = entityId,
                 callbackUrl = moCallbackUrl
             )
@@ -146,7 +146,7 @@ class SmsTest : AbstractTest() {
         )) {
             client.sendBinary(from, toNumber, text.encodeToByteArray(), udh = udhBinary,
                 protocolId = protocolId, statusReport = statusReport, ttl = ttl,
-                messageClass = Message.MessageClass.CLASS_2, clientRef = clientRef,
+                messageClass = MessageClass.CLASS_2, clientRef = clientRef,
                 contentId = contentId, entityId = entityId, callbackUrl = moCallbackUrl
             )
         }

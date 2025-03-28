@@ -86,7 +86,7 @@ class Account internal constructor(private val client: AccountClient) {
         fun list(): List<SecretResponse> = (
                 if (apiKey == null) client.listSecrets()
                 else client.listSecrets(apiKey)
-            ).secrets
+        )
 
         /**
          * Creates a new secret for the account.
