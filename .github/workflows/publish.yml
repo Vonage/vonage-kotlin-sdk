@@ -1,4 +1,4 @@
-name: Publish to Central
+name: Publish to Maven Central
 on:
   release:
     types: [published]
@@ -33,3 +33,32 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.OSS_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.SIGNING_PASSWORD }}
         run: mvn -e --no-transfer-progress --batch-mode deploy -P release-sign-artifacts
+  notify-release:
+    runs-on: ubuntu-latest
+    name: Notify Release
+    strategy:
+      matrix:
+        url: [SLACK_WEBHOOK_ASK_DEVREL_URL, SLACK_WEBHOOK_DEVREL_TOOLING_URL, SLACK_WEBHOOK_DEVREL_PRIVATE_URL]
+    steps:
+      - name: Send to Slack channels
+        uses: slackapi/slack-github-action@485a9d42d3a73031f12ec201c457e2162c45d02d
+        with:
+          webhook: ${{ secrets[matrix.url]}}
+          webhook-type: incoming-webhook
+          errors: true
+          payload: |
+            blocks:
+              - type: "header"
+                text:
+                  type: "plain_text"
+                  text: ":initial_external_notification_sent: Kotlin Server SDK ${{ github.event.release.name }} has been released."
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "${{ github.event.release.body }}"
+                  emoji: true
+              - type: "divider"
+              - type: "section"
+                text:
+                  type: "mrkdwn"
+                  text: "View the full change log <${{ github.event.release.html_url }}|here>."
