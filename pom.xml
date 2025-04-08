@@ -5,7 +5,7 @@
 
   <groupId>com.vonage</groupId>
   <artifactId>server-sdk-kotlin</artifactId>
-  <version>1.2.1</version>
+  <version>2.0.0</version>
 
   <name>Vonage Kotlin Server SDK</name>
   <description>Kotlin client for Vonage APIs</description>
@@ -55,7 +55,7 @@
     <dependency>
       <groupId>com.vonage</groupId>
       <artifactId>server-sdk</artifactId>
-      <version>8.20.1</version>
+      <version>9.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
@@ -156,12 +156,12 @@
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.5.2</version>
+        <version>3.5.3</version>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.12</version>
+        <version>0.8.13</version>
         <executions>
           <execution>
             <id>jacoco-init</id>

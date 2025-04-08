@@ -19,8 +19,8 @@ import com.vonage.client.application.Application
 import com.vonage.client.application.ApplicationResponseException
 import com.vonage.client.application.capabilities.Capability
 import com.vonage.client.application.capabilities.Region
+import com.vonage.client.application.capabilities.Webhook
 import com.vonage.client.common.HttpMethod
-import com.vonage.client.common.Webhook
 import kotlin.test.*
 
 class ApplicationTest : AbstractTest() {
@@ -126,7 +126,7 @@ class ApplicationTest : AbstractTest() {
 
     private fun assertEqualsIdOnlyApplication(parsed: Application) {
         assertNotNull(parsed)
-        assertEquals(testUuidStr, parsed.id)
+        assertEquals(testUuid, parsed.id)
     }
 
     private fun assertEqualsBasicApplication(parsed: Application, name: String = this.name) {

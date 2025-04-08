@@ -21,7 +21,7 @@ import com.vonage.client.VonageClient
 /**
  * Denotes the version of the Vonage Kotlin SDK being used, in SemVer format.
  */
-const val VONAGE_KOTLIN_SDK_VERSION = "1.2.1"
+const val VONAGE_KOTLIN_SDK_VERSION = "2.0.0"
 
 /**
  * The non-overridable user agent string used by the SDK.
@@ -95,14 +95,6 @@ class Vonage(config: VonageClient.Builder.() -> Unit) {
      * @return The [NumberVerification] client.
      */
     val numberVerification = NumberVerification(client.numberVerificationClient)
-
-    /**
-     * Access to the Vonage Pricing API.
-     *
-     * @return The [Pricing] client.
-     * @since 1.1.0
-     */
-    val pricing = Pricing(client.accountClient)
 
     /**
      * Access to the Vonage Redact API.

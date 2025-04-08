@@ -34,9 +34,9 @@ class VoiceTest : AbstractTest() {
     private val callUrl = "$callsBaseUrl/$callIdStr"
     private val existingCall = client.call(callIdStr)
     private val conversationId = "CON-f972836a-550f-45fa-956c-12a2ab5b7d22"
-    private val price = "23.40"
+    private val price = 23.40
     private val duration = 60
-    private val rate = "0.39"
+    private val rate = 0.39
     private val phoneType = "phone"
     private val count = 89
     private val pageSize = 25
@@ -45,7 +45,7 @@ class VoiceTest : AbstractTest() {
     private val fromPstn = "14155550100"
     private val streamUrl = "$exampleUrlBase/waiting.mp3"
     private val onAnswerUrl = "$exampleUrlBase/ncco.json"
-    private val ringbackTone = "http://example.org/ringbackTone.wav"
+    private val ringbackTone = "https://example.org/ringbackTone.wav"
     private val userToUserHeader = "56a390f3d2b7310023a"
     private val conversationName = "selective-audio Demo"
     private val customHeaders = mapOf(
@@ -99,19 +99,19 @@ class VoiceTest : AbstractTest() {
         assertEquals(conversationId, callInfo.conversationUuid)
         val to = callInfo.to
         assertNotNull(to)
-        assertEquals(phoneType, to.type)
+        assertEquals(EndpointType.PHONE, to.type)
         assertEquals(toNumber, (to as com.vonage.client.voice.PhoneEndpoint).number)
         val from = callInfo.from
         assertNotNull(from)
-        assertEquals(phoneType, from.type)
+        assertEquals(EndpointType.PHONE, from.type)
         assertEquals(altNumber, (from as com.vonage.client.voice.PhoneEndpoint).number)
         assertEquals(CallStatus.COMPLETED, callInfo.status)
         assertEquals(CallDirection.INBOUND, callInfo.direction)
         assertEquals(rate, callInfo.rate)
         assertEquals(price, callInfo.price)
         assertEquals(duration, callInfo.duration)
-        assertEquals(startTime, callInfo.startTime.toInstant())
-        assertEquals(endTime, callInfo.endTime.toInstant())
+        assertEquals(startTime, callInfo.startTime)
+        assertEquals(endTime, callInfo.endTime)
         assertEquals(networkCode, callInfo.network)
     }
 
@@ -119,9 +119,8 @@ class VoiceTest : AbstractTest() {
         assertNotNull(callsPage)
         assertEquals(pageSize, callsPage.pageSize)
         assertEquals(recordIndex, callsPage.recordIndex)
-        assertNotNull(callsPage.links?.self?.href)
         assertEquals(count, callsPage.count)
-        val infos = callsPage.embedded?.callInfos
+        val infos = callsPage.callInfos
         assertNotNull(infos)
         assertEquals(2, infos.size)
         assertNotNull(infos[0])
@@ -414,7 +413,7 @@ class VoiceTest : AbstractTest() {
 
         val callsPage = client.listCalls {
             status(CallStatus.UNANSWERED)
-            dateStart(startTime); dateEnd(endTime)
+            startDate(startTime); endDate(endTime)
             pageSize(pageSize); recordIndex(recordIndex)
             order(SortOrder.DESCENDING); conversationUuid(conversationId)
         }
@@ -529,8 +528,8 @@ class VoiceTest : AbstractTest() {
         val lengthTimer = 5600
         val ringingTimer = 42
         val beepTimeout = 78
-        val answerMethod = HttpMethod.GET
-        val eventMethod = HttpMethod.POST
+        val answerMethod = EventMethod.GET
+        val eventMethod = EventMethod.POST
         val amdBehaviour = MachineDetection.HANGUP
         val amdMode = AdvancedMachineDetection.Mode.DETECT_BEEP
 
@@ -999,7 +998,7 @@ class VoiceTest : AbstractTest() {
                     startOnEnter(startOnEnter); endOnExit(endOnExit)
                     transcription {
                         eventMethod(transcriptionEventMethod); eventUrl(transcriptionEventUrl)
-                        language(SpeechSettings.Language.SPANISH_DOMINICAN_REPUBLIC)
+                        language(Language.SPANISH_DOMINICAN_REPUBLIC)
                         sentimentAnalysis(true)
                     }
                 },
@@ -1007,7 +1006,7 @@ class VoiceTest : AbstractTest() {
                     eventUrl(eventUrl); eventMethod(inputEventMethod)
                     speech {
                         uuid(speechUuid); context(speechContext); saveAudio(saveAudio)
-                        language(SpeechSettings.Language.UKRAINIAN)
+                        language(Language.UKRAINIAN)
                         endOnSilence(endOnSilenceSpeech); maxDuration(maxDuration)
                         sensitivity(sensitivity); startTimeout(startTimeout)
                     }
@@ -1021,7 +1020,7 @@ class VoiceTest : AbstractTest() {
                     endOnKey(endOnKey); endOnSilence(endOnSilenceRecording)
                     eventUrl(recordEventUrl); eventMethod(recordEventMethod)
                     beepStart(beepStart); transcription {
-                        language(SpeechSettings.Language.ENGLISH_SOUTH_AFRICA)
+                        language(Language.ENGLISH_SOUTH_AFRICA)
                         eventUrl(eventUrl); eventMethod(transcriptionEventMethod)
                         sentimentAnalysis(false)
                     }

@@ -40,7 +40,6 @@ class VerifyLegacyTest : AbstractTest() {
 
     private fun assertVerify(params: Map<String, Any>, invocation: VerifyLegacy.() -> VerifyResponse) {
         val expectedUrl = getBaseUri(if (params.containsKey("payee")) "psd2" else "")
-        val successResponse =
         mockPostQueryParams(expectedUrl, params, expectedResponseParams = mapOf(
             "request_id" to requestId,
             "status" to "0"
@@ -87,7 +86,7 @@ class VerifyLegacyTest : AbstractTest() {
         val parsedSuccess = invokeControl(command)
         assertNotNull(parsedSuccess)
         assertEquals(command, parsedSuccess.command)
-        assertEquals(VerifyStatus.OK, VerifyStatus.fromInt(parsedSuccess.status.toInt()))
+        assertEquals(VerifyStatus.OK, parsedSuccess.status)
         assertNull(parsedSuccess.errorText)
 
         val errorText = "Your account does not have sufficient credit to process this request."
@@ -103,7 +102,7 @@ class VerifyLegacyTest : AbstractTest() {
             fail("Expected VerifyException but got $parsedFailure")
         }
         catch (ex: VerifyException) {
-            assertEquals(VerifyStatus.PARTNER_QUOTA_EXCEEDED, VerifyStatus.fromInt(ex.status.toInt()))
+            assertEquals(VerifyStatus.PARTNER_QUOTA_EXCEEDED, ex.status)
             assertEquals(errorText, ex.errorText)
         }
     }
@@ -190,7 +189,7 @@ class VerifyLegacyTest : AbstractTest() {
                 senderId(altNumber); pinCode(pinCode)
                 pinExpiry(pinExpiry); nextEventWait(nextEventWait)
                 locale(Locale.UK); country("GB")
-                workflow(VerifyRequest.Workflow.SMS_SMS_TTS)
+                workflow(Workflow.SMS_SMS_TTS)
             }
         }
     }
@@ -223,7 +222,7 @@ class VerifyLegacyTest : AbstractTest() {
                 length(codeLength); pinExpiry(pinExpiry)
                 nextEventWait(nextEventWait); country(country)
                 locale(Locale.GERMANY)
-                workflow(Psd2Request.Workflow.SMS_TTS)
+                workflow(Workflow.SMS_TTS)
             }
         }
     }
