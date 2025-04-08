@@ -43,7 +43,7 @@ jobs:
       - name: Send to Slack channels
         uses: slackapi/slack-github-action@485a9d42d3a73031f12ec201c457e2162c45d02d
         with:
-          webhook: ${{ secrets[matrix.url]}}
+          webhook: ${{ secrets[matrix.url] }}
           webhook-type: incoming-webhook
           errors: true
           payload: |
