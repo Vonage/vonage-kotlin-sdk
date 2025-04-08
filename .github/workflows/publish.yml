@@ -56,7 +56,6 @@ jobs:
                 text:
                   type: "mrkdwn"
                   text: "${{ github.event.release.body }}"
-                  emoji: true
               - type: "divider"
               - type: "section"
                 text:
