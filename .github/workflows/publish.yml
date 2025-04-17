@@ -38,7 +38,7 @@ jobs:
     name: Notify Release
     strategy:
       matrix:
-        url: [SLACK_WEBHOOK_ASK_DEVREL_URL, SLACK_WEBHOOK_DEVREL_TOOLING_URL, SLACK_WEBHOOK_DEVREL_PRIVATE_URL]
+        url: [SLACK_WEBHOOK_ASK_DEVREL_URL, SLACK_WEBHOOK_DEVREL_TOOLING_URL, SLACK_WEBHOOK_DEVREL_PRIVATE_URL, SLACK_WEBHOOK_COMMUNITY]
     steps:
       - name: Send to Slack channels
         uses: slackapi/slack-github-action@485a9d42d3a73031f12ec201c457e2162c45d02d
