@@ -55,7 +55,7 @@
     <dependency>
       <groupId>com.vonage</groupId>
       <artifactId>server-sdk</artifactId>
-      <version>9.0.0</version>
+      <version>9.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
