@@ -28,7 +28,6 @@ You'll need to have [created a Vonage account](https://dashboard.nexmo.com/sign-
 - [Number Insight](https://developer.vonage.com/en/number-insight/overview)
 - [Number Management](https://developer.vonage.com/en/numbers/overview)
 - [Number Verification](https://developer.vonage.com/en/number-verification/overview)
-- [Pricing](https://developer.vonage.com/en/api/pricing)
 - [Redact](https://developer.vonage.com/en/redact/overview)
 - [SIM Swap](https://developer.vonage.com/en/sim-swap/overview)
 - [SMS](https://developer.vonage.com/en/messaging/sms/overview)
@@ -53,7 +52,7 @@ See all of our SDKs and integrations on the [Vonage Developer portal](https://de
 ## Installation
 Releases are published to [Maven Central](https://central.sonatype.com/artifact/com.vonage/server-sdk-kotlin).
 Instructions for your build system can be found in the snippets section.
-They're also available from [here](https://search.maven.org/artifact/com.vonage/server-sdk-kotlin/2.0.0/jar).
+They're also available from [here](https://search.maven.org/artifact/com.vonage/server-sdk-kotlin/2.1.0/jar).
 Release notes for each version can be found in the [changelog](CHANGELOG.md).
 
 Here are the instructions for including the SDK in your project:
@@ -63,7 +62,7 @@ Add the following to your `build.gradle` or `build.gradle.kts` file:
 
 ```groovy
 dependencies {
-    implementation("com.vonage:server-sdk-kotlin:2.0.0")
+    implementation("com.vonage:server-sdk-kotlin:2.1.0")
 }
 ```
 
@@ -74,7 +73,7 @@ Add the following to the `<dependencies>` section of your `pom.xml` file:
 <dependency>
     <groupId>com.vonage</groupId>
     <artifactId>server-sdk-kotlin</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
 </dependency>
 ```
 
@@ -160,12 +159,65 @@ including [**a searchable list of snippets**](https://github.com/Vonage/vonage-k
 
 The SDK is fully documented with [KDocs](https://kotlinlang.org/docs/kotlin-doc.html), so you should have complete
 documentation from your IDE. You may need to click "Download Sources" in IntelliJ to get the full documentation.
-Alternatively, you can browse the documentation  using a service like [Javadoc.io](https://javadoc.io/doc/com.vonage/server-sdk-kotlin/2.0.0/index.html),
-which renders the documentation for you from [the artifacts on Maven Central](https://repo.maven.apache.org/maven2/com/vonage/server-sdk-kotlin/2.0.0/).
+Alternatively, you can browse the documentation  using a service like [Javadoc.io](https://javadoc.io/doc/com.vonage/server-sdk-kotlin/2.1.0/index.html),
+which renders the documentation for you from [the artifacts on Maven Central](https://repo.maven.apache.org/maven2/com/vonage/server-sdk-kotlin/2.1.0/).
 
 For help with any specific APIs, refer to the relevant documentation on our [developer portal](https://developer.vonage.com/en/documentation),
 using the links provided in the [Supported APIs](#supported-apis) section. For completeness, you can also consult the
 [API specifications](https://developer.vonage.com/api) if you believe there are any discrepancies.
+
+### Custom Requests
+The [Java SDK supports custom HTTP requests](https://github.com/Vonage/vonage-java-sdk?tab=readme-ov-file#custom-requests),
+which this SDK builds upon. This allows you to use unsupported APIs with your own data models so long as they implement
+the `com.vonage.client.Jsonable` interface. Alternatively you can use `Map<String, *>` to represents the JSON structure.
+See [Custom.kt](src/main/kotlin/com/vonage/client/kt/Custom.kt) documentation for more details.
+Here are some examples for creating an application, all of which are equivalent.
+
+#### Map request, Map response
+```kotlin
+val response: Map<String, *> = client.custom.post(
+        "https://api.nexmo.com/v2/applications",
+        mapOf("name" to "Demo Application")
+)
+```
+
+#### Map request, Jsonable response
+```kotlin
+val response: Application = client.custom.post(
+        "https://api.nexmo.com/v2/applications",
+        mapOf("name" to "Demo Application")
+)
+```
+
+#### Jsonable request, Map response
+```kotlin
+val response: Map<String, *> = client.custom.post(
+        "https://api.nexmo.com/v2/applications",
+        com.vonage.client.application.Application.builder()
+            .name("Demo Application").build()
+)
+```
+
+#### Jsonable request, Jsonable response
+```kotlin
+val response: Application = client.custom.post(
+        "https://api.nexmo.com/v2/applications",
+        com.vonage.client.application.Application.builder()
+            .name("Demo Application").build()
+)
+```
+
+#### Caveats
+The same principle applies for all other supported HTTP methods. You can also use the `makeRequest` method for greater
+flexibility on the request and response types. In any case, you should **ALWAYS** use strong typing when assigning
+the result of the call, otherwise the compiler will not be able to infer the correct type and you will get a runtime
+exception. If you'd like to ignore the result, use `Void` rather than `Unit` or `Any`. For example in `DELETE` requests:
+
+```kotlin
+client.custom.delete<Void>("https://api.nexmo.com/accounts/:api_key/secrets/:secret_id")
+```
+
+You can see valid usage examples in [CustomTest.kt](src/test/kotlin/com/vonage/client/kt/CustomTest.kt).
 
 ## Frequently Asked Questions
 

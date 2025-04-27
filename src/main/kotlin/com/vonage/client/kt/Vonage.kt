@@ -21,7 +21,7 @@ import com.vonage.client.VonageClient
 /**
  * Denotes the version of the Vonage Kotlin SDK being used, in SemVer format.
  */
-const val VONAGE_KOTLIN_SDK_VERSION = "2.0.0"
+const val VONAGE_KOTLIN_SDK_VERSION = "2.1.0"
 
 /**
  * The non-overridable user agent string used by the SDK.
@@ -67,6 +67,15 @@ class Vonage(config: VonageClient.Builder.() -> Unit) {
      * @return The [Conversion] client.
      */
     val conversion = Conversion(client.conversionClient)
+
+    /**
+     * Access to a client for making custom HTTP requests.
+     *
+     * @return The [Custom] client.
+     *
+     * @since 2.1.0
+     */
+    val custom = Custom(client.customClient)
 
     /**
      * Access to the Vonage Messages API.
