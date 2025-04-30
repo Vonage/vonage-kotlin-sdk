@@ -218,15 +218,19 @@ abstract class AbstractTest {
         contentType: ContentType? = null,
         accept: ContentType? = null,
         authType: AuthType? = null,
-        expectedParams: Map<String, Any>? = null): BuildingStep =
+        expectedParams: Map<String, Any>? = null,
+        includeMimeHeaders: Boolean = true
+    ): BuildingStep =
             wiremock.requestServerBuilderStep({
                 urlPath equalTo expectedUrl
                 headers contains "User-Agent" equalTo userAgent
-                if (contentType != null) {
-                    headers contains contentTypeHeaderName equalTo contentType.mime
-                }
-                if (accept != null) {
-                    headers contains "Accept" equalTo accept.mime
+                if (includeMimeHeaders) {
+                    if (contentType != null) {
+                        headers contains contentTypeHeaderName equalTo contentType.mime
+                    }
+                    if (accept != null) {
+                        headers contains "Accept" equalTo accept.mime
+                    }
                 }
 
                 if (authType != null) {

@@ -21,10 +21,12 @@ import kotlin.test.*
 
 class VonageTest {
 
+    @Ignore
     @Test
     fun `live testing placeholder`() {
         val client = Vonage { authFromEnv(); signatureSecret(null) }
-        println("Finished") // Place debug breakpoint here
+        val response : String = client.custom.get("https://www.example.com")
+        println(response) // Place debug breakpoint here
     }
 
     @Test
