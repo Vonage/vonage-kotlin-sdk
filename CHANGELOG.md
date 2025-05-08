@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.1] - 2025-05-08
+Adds support for failovers in Messages API
+
+### Changed
+- Bumped Java SDK version to 9.3.1
+
+### Fixed
+- Type inference behaviour of `Custom` client
+
+### Deprecated
+- SIM Swap API
+- Number Verification API
+- Verify legacy (v1) API
+
 ## [2.1.0] - 2025-04-30
 
 ### Added

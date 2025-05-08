@@ -20,7 +20,7 @@ import com.vonage.client.redact.*
 /**
  * Implementation of the [Redact API](https://developer.vonage.com/en/api/redact).
  *
- * *Authentication method:* API key & secret.
+ * *Authentication method:* API key and secret.
  */
 class Redact internal constructor(private val client: RedactClient) {
 

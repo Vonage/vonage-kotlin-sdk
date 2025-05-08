@@ -21,7 +21,7 @@ import com.vonage.client.VonageClient
 /**
  * Denotes the version of the Vonage Kotlin SDK being used, in SemVer format.
  */
-const val VONAGE_KOTLIN_SDK_VERSION = "2.1.0"
+const val VONAGE_KOTLIN_SDK_VERSION = "2.1.1"
 
 /**
  * The non-overridable user agent string used by the SDK.
@@ -102,7 +102,10 @@ class Vonage(config: VonageClient.Builder.() -> Unit) {
      * Access to the CAMARA Number Verification API.
      *
      * @return The [NumberVerification] client.
+     *
+     * @deprecated This API will be moved in a future major release.
      */
+    @Deprecated("This API will be removed in a future release.")
     val numberVerification = NumberVerification(client.numberVerificationClient)
 
     /**
@@ -116,7 +119,10 @@ class Vonage(config: VonageClient.Builder.() -> Unit) {
      * Access to the CAMARA SIM Swap API.
      *
      * @return The [SimSwap] client.
+     *
+     * @deprecated This API will be moved in a future major release.
      */
+    @Deprecated("This API will be removed in a future release.")
     val simSwap = SimSwap(client.simSwapClient)
 
     /**
@@ -152,7 +158,10 @@ class Vonage(config: VonageClient.Builder.() -> Unit) {
      * Access to the Vonage Verify v1 API.
      *
      * @return The [VerifyLegacy] client.
+     *
+     * @deprecated Please migrate to [verify].
      */
+    @Deprecated("Please migrate to Verify v2.")
     val verifyLegacy = VerifyLegacy(client.verifyClient)
 
     /**

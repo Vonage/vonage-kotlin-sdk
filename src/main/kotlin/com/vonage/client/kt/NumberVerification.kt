@@ -24,7 +24,10 @@ import java.net.URI
  * Implementation of the [Number Verification API](https://developer.vonage.com/en/api/camara/number-verification).
  *
  * *Authentication method:* JWT.
+ *
+ * @deprecated This API will be moved in a future major release.
  */
+@Deprecated("This API will be moved in a future release.")
 class NumberVerification internal constructor(private val client: NumberVerificationClient) {
     private var redirectUri: URI? = null
 
