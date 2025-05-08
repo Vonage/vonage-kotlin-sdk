@@ -100,14 +100,32 @@ class MessagesTest : AbstractTest() {
             "ttl" to ttl,
             "webhook_url" to webhookUrl,
             "webhook_version" to "v0.1",
+            "failover" to listOf(
+                textBody("rcs", mapOf(
+                    "client_ref" to clientRef,
+                    "webhook_url" to webhookUrl,
+                    "webhook_version" to "v1"
+                )),
+                textBody("whatsapp")
+            ),
             "sms" to mapOf(
                 "content_id" to contentId,
                 "entity_id" to entityId
-            )
+            ),
         )), smsText {
             from(altNumber); to(toNumber); text(text); ttl(ttl)
             clientRef(clientRef); contentId(contentId); entityId(entityId)
             webhookUrl(webhookUrl); webhookVersion(MessagesVersion.V0_1)
+            failover(
+                rcsText {
+                    from(altNumber); to(toNumber); text(text)
+                    clientRef(clientRef); webhookUrl(webhookUrl);
+                    webhookVersion(MessagesVersion.V1)
+                },
+                whatsappText {
+                    from(altNumber); to(toNumber); text(text)
+                }
+            )
         })
     }
 
@@ -665,6 +683,9 @@ class MessagesTest : AbstractTest() {
         val amount = 0.0333
         val channel = Channel.SMS
         val smsCount = 2
+        val workflowId = "3TcNjgZZVM5SwCSSuqHNNDR1cSLnqA2Uik3gAonxNiLgAsUggBEzw2n"
+        val workflowItemNumber = 3
+        val workflowItemsTotal = 5
         val parsed = MessageStatus.fromJson(
             """
                 {
@@ -680,6 +701,11 @@ class MessagesTest : AbstractTest() {
                          "detail": "Throttled - You have exceeded the submission capacity allowed on this account. Please wait and retry",
                          "instance": "bf0ca0bf927b3b52e3cb03217e1a1ddf"
                       }
+                   },
+                   "workflow": {
+                       "id": "$workflowId",
+                       "item_number": "$workflowItemNumber",
+                       "items_total": "$workflowItemsTotal"
                    },
                    "client_ref": "$clientRef",
                    "usage": {
@@ -710,6 +736,11 @@ class MessagesTest : AbstractTest() {
         assertEquals(channel, parsed.channel)
         assertEquals(networkCode, parsed.destinationNetworkCode)
         assertEquals(smsCount, parsed.smsTotalCount)
+        val workflow = parsed.workflow
+        assertNotNull(workflow)
+        assertEquals(workflowId, workflow.id)
+        assertEquals(workflowItemNumber, workflow.itemNumber)
+        assertEquals(workflowItemsTotal, workflow.totalItems)
     }
 
     @Test

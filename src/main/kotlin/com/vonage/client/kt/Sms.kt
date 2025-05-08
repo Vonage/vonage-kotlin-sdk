@@ -21,7 +21,7 @@ import com.vonage.client.sms.messages.*
 /**
  * Implementation of the [SMS API](https://developer.vonage.com/en/api/sms).
  *
- * *Authentication method:* API key & secret or signature secret.
+ * *Authentication method:* API key and secret or signature secret.
  */
 class Sms internal constructor(private val client: SmsClient) {
 

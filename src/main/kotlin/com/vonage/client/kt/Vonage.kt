@@ -21,7 +21,7 @@ import com.vonage.client.VonageClient
 /**
  * Denotes the version of the Vonage Kotlin SDK being used, in SemVer format.
  */
-const val VONAGE_KOTLIN_SDK_VERSION = "2.1.0"
+const val VONAGE_KOTLIN_SDK_VERSION = "2.1.1"
 
 /**
  * The non-overridable user agent string used by the SDK.

@@ -26,7 +26,7 @@ import java.util.*
 /**
  * Implementation of the [Application API](https://developer.vonage.com/en/api/application.v2).
  *
- * *Authentication method:* API key & secret.
+ * *Authentication method:* API key and secret.
  */
 class Application internal constructor(private val client: ApplicationClient) {
 
