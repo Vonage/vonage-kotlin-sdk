@@ -24,7 +24,10 @@ import java.time.Instant
  * Implementation of the [Sim Swap API](https://developer.vonage.com/en/api/camara/sim-swap).
  *
  * *Authentication method:* JWT.
+ *
+ * @deprecated This API will be moved in a future major release.
  */
+@Deprecated("This API will be moved in a future release.")
 class SimSwap internal constructor(private val client: SimSwapClient) {
 
     /**
